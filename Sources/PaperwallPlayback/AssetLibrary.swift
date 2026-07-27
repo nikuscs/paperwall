@@ -31,7 +31,20 @@ public enum AssetLibrary {
     }
 
     public static func paperwallLibraryVideos() -> [URL] {
-        videos(in: paperwallLibraryDirectory)
+        let directories = [
+            paperwallLibraryDirectory,
+            PaperwallConfiguration.sharedGenerationDirectory
+                .appendingPathComponent("Outputs", isDirectory: true),
+            PaperwallConfiguration.sharedGenerationDirectory
+                .appendingPathComponent("Upscaled", isDirectory: true),
+        ]
+        let allVideos = directories
+            .flatMap { videos(in: $0) }
+            .filter { !$0.lastPathComponent.lowercased().hasPrefix("pruna-") }
+        return Array(Dictionary(grouping: allVideos, by: \.standardizedFileURL).keys)
+            .sorted { $0.deletingPathExtension().lastPathComponent.localizedStandardCompare(
+                $1.deletingPathExtension().lastPathComponent
+            ) == .orderedAscending }
     }
 
     public static func synchronizeWallspaceCache() async throws -> [URL] {
