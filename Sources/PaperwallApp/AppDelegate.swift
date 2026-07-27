@@ -113,7 +113,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             generateImage: { [weak self] prompt, completion in
                 self?.submitImageGeneration(prompt: prompt, completion: completion)
             },
-            generate: { [weak self] request in self?.submitGeneration(request) },
+            generate: { [weak self] request, completion in
+                self?.submitGeneration(request, completion: completion)
+            },
+            upscaleVideo: { [weak self] url, completion in
+                self?.upscaleAndInstall(videoURL: url, completion: completion)
+            },
             chooseVideo: { [weak self] in self?.selectVideo() },
             selectDiscovery: { [weak self] url in self?.selectAsset(url) },
             setPlaybackSpeed: { [weak self] speed in self?.setPlaybackSpeed(speed) },
@@ -289,9 +294,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
-    private func submitGeneration(_ request: GenerationRequest) {
+    private func submitGeneration(
+        _ request: GenerationRequest,
+        completion: ((Result<GenerationResult, Error>) -> Void)? = nil
+    ) {
         guard !generationInProgress else {
-            presentError("A wallpaper generation is already running.")
+            let error = GenerationError.generationAlreadyRunning
+            presentError(error.localizedDescription)
+            completion?(.failure(error))
             return
         }
         let quote: GenerationQuote
@@ -299,6 +309,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             quote = try PaperwallGenerationService.quote(for: request)
         } catch {
             presentError(error.localizedDescription)
+            completion?(.failure(error))
             return
         }
 
@@ -308,16 +319,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         approval.informativeText = "Paperwall will submit exactly one paid \(request.provider.displayName) request. Failed or canceled generations are never retried automatically."
         approval.addButton(withTitle: "Generate for \(quote.formattedCost)")
         approval.addButton(withTitle: "Cancel")
-        guard approval.runModal() == .alertFirstButtonReturn else { return }
+        guard approval.runModal() == .alertFirstButtonReturn else {
+            completion?(.failure(GenerationError.approvalDeclined))
+            return
+        }
 
         let token: String
         do {
             token = try ReplicateCredentialStore.resolvedToken()
         } catch GenerationError.missingToken {
-            guard let entered = promptForReplicateToken() else { return }
+            guard let entered = promptForReplicateToken() else {
+                completion?(.failure(GenerationError.missingToken))
+                return
+            }
             token = entered
         } catch {
             presentError(error.localizedDescription)
+            completion?(.failure(error))
             return
         }
 
@@ -332,12 +350,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 )
                 wallpaperController.stop()
                 await wallpaperController.start()
-                let complete = NSAlert()
-                complete.messageText = "Wallpaper Generated"
-                complete.informativeText = "Installed \(result.provider.displayName) output \(result.predictionID)."
-                complete.runModal()
+                if let completion {
+                    completion(.success(result))
+                } else {
+                    let complete = NSAlert()
+                    complete.messageText = "Wallpaper Generated"
+                    complete.informativeText = "Installed \(result.provider.displayName) output \(result.predictionID)."
+                    complete.runModal()
+                }
             } catch {
                 presentError(error.localizedDescription)
+                completion?(.failure(error))
+            }
+        }
+    }
+
+    private func upscaleAndInstall(
+        videoURL: URL,
+        completion: @escaping (Result<URL, Error>) -> Void
+    ) {
+        Task {
+            do {
+                let result = try await PaperwallUpscaleService.upscaleTo4K(videoURL: videoURL)
+                _ = try await PaperwallService.selectWallpaper(from: result.upscaledVideoURL)
+                wallpaperController.stop()
+                await wallpaperController.start()
+                completion(.success(result.upscaledVideoURL))
+            } catch {
+                presentError(error.localizedDescription)
+                completion(.failure(error))
             }
         }
     }

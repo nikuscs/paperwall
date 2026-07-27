@@ -9,7 +9,8 @@ final class PaperwallWindowController: NSWindowController, NSWindowDelegate {
     init(
         discoveryLibrary: DiscoveryLibraryModel,
         generateImage: @escaping (String, @escaping (Result<URL, Error>) -> Void) -> Void,
-        generate: @escaping (GenerationRequest) -> Void,
+        generate: @escaping (GenerationRequest, @escaping (Result<GenerationResult, Error>) -> Void) -> Void,
+        upscaleVideo: @escaping (URL, @escaping (Result<URL, Error>) -> Void) -> Void,
         chooseVideo: @escaping () -> Void,
         selectDiscovery: @escaping (URL) -> Void,
         setPlaybackSpeed: @escaping (PlaybackSpeed) -> Void,
@@ -22,6 +23,7 @@ final class PaperwallWindowController: NSWindowController, NSWindowDelegate {
             discoveryLibrary: discoveryLibrary,
             generateImage: generateImage,
             generate: generate,
+            upscaleVideo: upscaleVideo,
             chooseVideo: chooseVideo,
             selectDiscovery: selectDiscovery,
             setPlaybackSpeed: setPlaybackSpeed,

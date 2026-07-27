@@ -14,7 +14,7 @@ If your shell does not include `~/.local/bin`, add it to `PATH`.
 
 ## Generate
 
-In the app, describe a scene and generate a still image first. Review it, then choose **Animate** to submit a separately approved video request. Image and video spending are confirmed independently.
+In the app, describe a scene and generate a still image first. Review it, then choose **Animate** to submit a separately approved video request. Paperwall automatically upscales the finished video to 4K using the free `venhance` Real-ESRGAN pipeline. Image and video spending are confirmed independently; interrupted predictions resume safely and failed upscaling can be retried.
 
 Set `REPLICATE_API_TOKEN` in your shell, or choose **Configure Replicate Token…** in the menu-bar app.
 
