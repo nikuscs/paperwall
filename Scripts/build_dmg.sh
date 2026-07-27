@@ -29,18 +29,26 @@ xcodebuild build \
 [[ -x "$APP/Contents/Resources/Installer/paperwall" ]] || { echo "error: embedded CLI missing" >&2; exit 1; }
 [[ -d "$APP/Contents/Resources/Installer/Paperwall.saver" ]] || { echo "error: embedded screen saver missing" >&2; exit 1; }
 [[ -x "$APP/Contents/Resources/Tools/uv" ]] || { echo "error: embedded uv bootstrap missing" >&2; exit 1; }
+[[ -d "$APP/Contents/Extensions/PaperwallWallpaperExtension.appex" ]] || { echo "error: native wallpaper extension missing" >&2; exit 1; }
 
 if [[ "$IDENTITY" == "-" ]]; then
+  codesign --force --deep --sign - --entitlements "$ROOT/Config/PaperwallWallpaperExtension.entitlements" \
+    "$APP/Contents/Extensions/PaperwallWallpaperExtension.appex"
   codesign --force --sign - "$APP/Contents/Resources/Tools/uv"
   codesign --force --sign - "$APP/Contents/Resources/Installer/paperwall"
   codesign --force --deep --sign - "$APP/Contents/Resources/Installer/Paperwall.saver"
-  codesign --force --deep --sign - --entitlements "$ROOT/Config/PaperwallApp.entitlements" "$APP"
+  codesign --force --deep --sign - "$APP/Contents/Frameworks/PaperwallPlayback.framework"
+  codesign --force --sign - --entitlements "$ROOT/Config/PaperwallApp.entitlements" "$APP"
   echo "warning: created an ad-hoc signed development DMG; public distribution requires Developer ID and notarization" >&2
 else
+  codesign --force --deep --timestamp --options runtime --sign "$IDENTITY" \
+    --entitlements "$ROOT/Config/PaperwallWallpaperExtension.entitlements" \
+    "$APP/Contents/Extensions/PaperwallWallpaperExtension.appex"
   codesign --force --timestamp --options runtime --sign "$IDENTITY" "$APP/Contents/Resources/Tools/uv"
   codesign --force --timestamp --options runtime --sign "$IDENTITY" "$APP/Contents/Resources/Installer/paperwall"
   codesign --force --deep --timestamp --options runtime --sign "$IDENTITY" "$APP/Contents/Resources/Installer/Paperwall.saver"
-  codesign --force --deep --timestamp --options runtime --sign "$IDENTITY" \
+  codesign --force --deep --timestamp --options runtime --sign "$IDENTITY" "$APP/Contents/Frameworks/PaperwallPlayback.framework"
+  codesign --force --timestamp --options runtime --sign "$IDENTITY" \
     --entitlements "$ROOT/Config/PaperwallApp.entitlements" "$APP"
 fi
 codesign --verify --deep --strict "$APP"

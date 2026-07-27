@@ -5,6 +5,9 @@ public enum PaperwallService {
     @discardableResult
     public static func selectWallpaper(from sourceURL: URL) async throws -> VideoAssetInfo {
         let info = try await AssetLibrary.select(sourceURL)
+        try await NativeWallpaperExtensionBridge.deployActiveWallpaper(
+            from: PaperwallConfiguration.defaultAssetURL
+        )
         try await StaticWallpaperManager.refreshAndApply(
             videoURL: PaperwallConfiguration.defaultAssetURL
         )
@@ -15,6 +18,7 @@ public enum PaperwallService {
     public static func synchronizeActiveWallpaper() async throws -> VideoAssetInfo {
         let assetURL = PaperwallConfiguration.defaultAssetURL
         let info = try await VideoAssetValidator.validate(url: assetURL)
+        try await NativeWallpaperExtensionBridge.deployActiveWallpaper(from: assetURL)
         try await StaticWallpaperManager.refreshAndApply(videoURL: assetURL)
         return info
     }
