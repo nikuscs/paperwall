@@ -1,0 +1,1014 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		131E45B3488D75B613069952 /* PlaybackPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDAC27A8FA36F6158E04707 /* PlaybackPreferences.swift */; };
+		16A95858DB4DC5EB63C134B0 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA146E3254EB214361106E52 /* Security.framework */; };
+		182D635A4E1F1BD6B63273CF /* PaperwallWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEB6ECB880AE750D63A6D475 /* PaperwallWindowController.swift */; };
+		229554F4B6CA46CC8803BABD /* LoopingPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F58335E601A53032C32C42F3 /* LoopingPlayer.swift */; };
+		237393A1B1A15D5599C79493 /* PaperwallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86AAD7159FFB84DAB9F45DAA /* PaperwallService.swift */; };
+		25F2873A51E2B1BC670683AD /* PaperwallScreenSaver.bundle in Resources */ = {isa = PBXBuildFile; fileRef = D6128687229856AE8C697300 /* PaperwallScreenSaver.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		27BE6F297890EFA9B4428678 /* PaperwallConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28488992ACC9260FE4AED1A /* PaperwallConfiguration.swift */; };
+		28F2751FF60441166F0F472E /* PaperwallLogo.svg in Resources */ = {isa = PBXBuildFile; fileRef = B4BDAA8280907B1C3F1F0A7F /* PaperwallLogo.svg */; };
+		2AF99255DDA9647972698E82 /* GenerationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00D13D1CD68491C70EA0EB2 /* GenerationModels.swift */; };
+		2E7F621B6E98C349E87699CD /* ReplicateClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68517334A8A49B4436313D06 /* ReplicateClient.swift */; };
+		3B92DE86E02115B5B7B0670F /* DiscoveryLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97DA8304520972D8ADF9F662 /* DiscoveryLibraryView.swift */; };
+		4495F014E044599A04FDEB13 /* ReplicateClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68517334A8A49B4436313D06 /* ReplicateClient.swift */; };
+		49CC3EE12BF9038FA3121535 /* PaperwallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86AAD7159FFB84DAB9F45DAA /* PaperwallService.swift */; };
+		56656AE70FE90002A31A1523 /* DiscoveryLibraryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33E431DC75D784C9C9CDB301 /* DiscoveryLibraryModel.swift */; };
+		596001926F7E1789ECCDAD57 /* tiny-video.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = FE584C7EA260CCC7DFB848F3 /* tiny-video.mp4 */; };
+		5FB7669FF29F130E24496750 /* GenerationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00D13D1CD68491C70EA0EB2 /* GenerationModels.swift */; };
+		6717B812D95CCFF359BB96D6 /* PaperwallConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28488992ACC9260FE4AED1A /* PaperwallConfiguration.swift */; };
+		681DD9DAB07E667412DCB6D4 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFBE4227F068CCC3F69DD35 /* PlayerView.swift */; };
+		7769D39F2463ACD82584D1A2 /* AssetLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA3211578C9CF71A2C74D39 /* AssetLibrary.swift */; };
+		78EB8F8747D88F43446E6C89 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 311A60DD763979D19C7D0478 /* AppIcon.icon */; };
+		78F7735CE4E7A4950CD40F65 /* PaperwallPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A284945522D04165D00A0A41 /* PaperwallPlayback.framework */; };
+		7B37CAA1944C34058C7060FF /* PaperwallScreenSaverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F984B12829C68BD53A8E378 /* PaperwallScreenSaverView.swift */; };
+		7B6879FFFB31DF31ED6EA1FC /* WallpaperController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BADAE08FCD05A41BB7993C3C /* WallpaperController.swift */; };
+		7EA4ECE242E149247CC92E4A /* LaunchAtLoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A7779D1A28756855D8CAA1 /* LaunchAtLoginManager.swift */; };
+		7ECCA2A6A37F0D4ED566B4B6 /* VideoAssetValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C4AA1179C7FB712667FF954 /* VideoAssetValidator.swift */; };
+		8090329C6077CF5A114760FA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 716A6D4D9E745E1AA01F0042 /* AppDelegate.swift */; };
+		84EFD6B5FEEA0B3DB0F2D465 /* Main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA0749CC3542B868AB12A37 /* Main.swift */; };
+		86EE3750FB6CA5206D3C953E /* PaperwallPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A284945522D04165D00A0A41 /* PaperwallPlayback.framework */; };
+		87468E420D61FEBAE8581EEE /* PaperwallPlayback.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A284945522D04165D00A0A41 /* PaperwallPlayback.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		87B5431B22F7D863EC4DFF9A /* PaperwallGenerationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A1ABEFA5A3A6E3ED22C525 /* PaperwallGenerationService.swift */; };
+		8807F600E76D09C3E7390F12 /* PaperwallCLI in Resources */ = {isa = PBXBuildFile; fileRef = BD8931CDC4DA78E8505924AA /* PaperwallCLI */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		901F225EB1A019952F793951 /* PaperwallPlaybackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99D754AAA228E05D834532E /* PaperwallPlaybackTests.swift */; };
+		9574202D50F8446D7012F93D /* PaperwallPlayback.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A284945522D04165D00A0A41 /* PaperwallPlayback.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		9C0F33FE4F5CF0DC510A8D93 /* invalid-video.mov in Resources */ = {isa = PBXBuildFile; fileRef = F5AE20752A5B9D56C7B913D7 /* invalid-video.mov */; };
+		9F6748A1A63483D4378EF44A /* PaperwallPlayback.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C88BC29E2AF6FB109DF306 /* PaperwallPlayback.swift */; };
+		A607E496323C3C8F17A9D4AF /* StaticWallpaperManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B5ED5EC5552A5C82E3D658 /* StaticWallpaperManager.swift */; };
+		AA59AE795B068F75FB513DC4 /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B2B6CD2428FB284147828A /* ScreenSaver.framework */; };
+		AE64EF2FEC786DBCEF079D6E /* PaperwallPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A284945522D04165D00A0A41 /* PaperwallPlayback.framework */; };
+		BCCDEFBA4662717EB52A9BCD /* BundledComponentInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74C5FDAB15754E56A253D67F /* BundledComponentInstaller.swift */; };
+		C8DC3FECE0853EA1FE625D1B /* PaperwallGenerationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A1ABEFA5A3A6E3ED22C525 /* PaperwallGenerationService.swift */; };
+		C977AF3F420552D70816B758 /* LaunchAtLoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A7779D1A28756855D8CAA1 /* LaunchAtLoginManager.swift */; };
+		CCB701A9E680C0597CB8BBE5 /* VideoAssetValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C4AA1179C7FB712667FF954 /* VideoAssetValidator.swift */; };
+		CDBD4DC7CBD85E6611E4F196 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA146E3254EB214361106E52 /* Security.framework */; };
+		D167B73CB257AA83DD3D186A /* AssetLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA3211578C9CF71A2C74D39 /* AssetLibrary.swift */; };
+		D3FEAFCF9CD49223FC53B605 /* StaticWallpaperManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B5ED5EC5552A5C82E3D658 /* StaticWallpaperManager.swift */; };
+		D4EAD951D4D6B453DE182572 /* PaperwallPlayback.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A284945522D04165D00A0A41 /* PaperwallPlayback.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D67027C90630FBFF5A8E3D79 /* ReplicateCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 496BB5D74C84FEA1D78842F4 /* ReplicateCredentialStore.swift */; };
+		DAF4B351FAB9A35E296CBE07 /* PaperwallShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 023DEB2E9A9E37CD40868593 /* PaperwallShellView.swift */; };
+		DB5F663DAED92276A82E7ABB /* PaperwallCLI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20725334C0B15078C5E22B0E /* PaperwallCLI.swift */; };
+		F2D8C20EC994F2E0E1A69BC3 /* ReplicateCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 496BB5D74C84FEA1D78842F4 /* ReplicateCredentialStore.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		22231ACC8FF20FE9EF0C35B6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FF45AA54CEB9497D17F214CD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1EE29E8C9DD46C777893860D;
+			remoteInfo = PaperwallPlayback;
+		};
+		3AF4CC3A614B7A3887AA6ED7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FF45AA54CEB9497D17F214CD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DC199AC454A3457AEF56A223;
+			remoteInfo = PaperwallCLI;
+		};
+		59EBA454CD2F0C73A04DBC13 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FF45AA54CEB9497D17F214CD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CBD264530C3B25A75EBA5A65;
+			remoteInfo = PaperwallScreenSaver;
+		};
+		6767E2BA932DD78F70E0DADF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FF45AA54CEB9497D17F214CD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1EE29E8C9DD46C777893860D;
+			remoteInfo = PaperwallPlayback;
+		};
+		C3D8FD24D2A8B31D560388E8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FF45AA54CEB9497D17F214CD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1EE29E8C9DD46C777893860D;
+			remoteInfo = PaperwallPlayback;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		35AD3610CA1B7D2302257F25 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				87468E420D61FEBAE8581EEE /* PaperwallPlayback.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4CC8164DE1B8D37FAF9ABA6D /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				9574202D50F8446D7012F93D /* PaperwallPlayback.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B233509AB1BE983272EE5F02 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				D4EAD951D4D6B453DE182572 /* PaperwallPlayback.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		023DEB2E9A9E37CD40868593 /* PaperwallShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallShellView.swift; sourceTree = "<group>"; };
+		19ACE0FCDB4270B2E96E31E1 /* PaperwallPlaybackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PaperwallPlaybackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		20725334C0B15078C5E22B0E /* PaperwallCLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallCLI.swift; sourceTree = "<group>"; };
+		311A60DD763979D19C7D0478 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		33E431DC75D784C9C9CDB301 /* DiscoveryLibraryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryLibraryModel.swift; sourceTree = "<group>"; };
+		496BB5D74C84FEA1D78842F4 /* ReplicateCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplicateCredentialStore.swift; sourceTree = "<group>"; };
+		4CDAC27A8FA36F6158E04707 /* PlaybackPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackPreferences.swift; sourceTree = "<group>"; };
+		5CA0749CC3542B868AB12A37 /* Main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Main.swift; sourceTree = "<group>"; };
+		68517334A8A49B4436313D06 /* ReplicateClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplicateClient.swift; sourceTree = "<group>"; };
+		716A6D4D9E745E1AA01F0042 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		74C5FDAB15754E56A253D67F /* BundledComponentInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundledComponentInstaller.swift; sourceTree = "<group>"; };
+		75A1ABEFA5A3A6E3ED22C525 /* PaperwallGenerationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallGenerationService.swift; sourceTree = "<group>"; };
+		86AAD7159FFB84DAB9F45DAA /* PaperwallService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallService.swift; sourceTree = "<group>"; };
+		8FA3211578C9CF71A2C74D39 /* AssetLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetLibrary.swift; sourceTree = "<group>"; };
+		94A7779D1A28756855D8CAA1 /* LaunchAtLoginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginManager.swift; sourceTree = "<group>"; };
+		97DA8304520972D8ADF9F662 /* DiscoveryLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryLibraryView.swift; sourceTree = "<group>"; };
+		9B08C6E0AFDF51703097A28B /* PaperwallApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PaperwallApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9C4AA1179C7FB712667FF954 /* VideoAssetValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoAssetValidator.swift; sourceTree = "<group>"; };
+		9F984B12829C68BD53A8E378 /* PaperwallScreenSaverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallScreenSaverView.swift; sourceTree = "<group>"; };
+		A284945522D04165D00A0A41 /* PaperwallPlayback.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PaperwallPlayback.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A99D754AAA228E05D834532E /* PaperwallPlaybackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallPlaybackTests.swift; sourceTree = "<group>"; };
+		B4BDAA8280907B1C3F1F0A7F /* PaperwallLogo.svg */ = {isa = PBXFileReference; path = PaperwallLogo.svg; sourceTree = "<group>"; };
+		B7B2B6CD2428FB284147828A /* ScreenSaver.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScreenSaver.framework; path = System/Library/Frameworks/ScreenSaver.framework; sourceTree = SDKROOT; };
+		BA146E3254EB214361106E52 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		BADAE08FCD05A41BB7993C3C /* WallpaperController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperController.swift; sourceTree = "<group>"; };
+		BD8931CDC4DA78E8505924AA /* PaperwallCLI */ = {isa = PBXFileReference; includeInIndex = 0; path = PaperwallCLI; sourceTree = BUILT_PRODUCTS_DIR; };
+		BEB6ECB880AE750D63A6D475 /* PaperwallWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallWindowController.swift; sourceTree = "<group>"; };
+		CDFBE4227F068CCC3F69DD35 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
+		D6128687229856AE8C697300 /* PaperwallScreenSaver.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PaperwallScreenSaver.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		D9C88BC29E2AF6FB109DF306 /* PaperwallPlayback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallPlayback.swift; sourceTree = "<group>"; };
+		E5B5ED5EC5552A5C82E3D658 /* StaticWallpaperManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaticWallpaperManager.swift; sourceTree = "<group>"; };
+		F00D13D1CD68491C70EA0EB2 /* GenerationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerationModels.swift; sourceTree = "<group>"; };
+		F28488992ACC9260FE4AED1A /* PaperwallConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallConfiguration.swift; sourceTree = "<group>"; };
+		F58335E601A53032C32C42F3 /* LoopingPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopingPlayer.swift; sourceTree = "<group>"; };
+		F5AE20752A5B9D56C7B913D7 /* invalid-video.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = "invalid-video.mov"; sourceTree = "<group>"; };
+		FE584C7EA260CCC7DFB848F3 /* tiny-video.mp4 */ = {isa = PBXFileReference; path = "tiny-video.mp4"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		40B168C284A8F719C41AE00A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				78F7735CE4E7A4950CD40F65 /* PaperwallPlayback.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4AE3C00C69C22752A7110AA7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86EE3750FB6CA5206D3C953E /* PaperwallPlayback.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		994FA844EF165C366180623D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				16A95858DB4DC5EB63C134B0 /* Security.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA17829AFB83141B7A8506A5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CDBD4DC7CBD85E6611E4F196 /* Security.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ABFC7D3D49F06EC495AC2928 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA59AE795B068F75FB513DC4 /* ScreenSaver.framework in Frameworks */,
+				AE64EF2FEC786DBCEF079D6E /* PaperwallPlayback.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1C389BFA526D03BE47974CCC = {
+			isa = PBXGroup;
+			children = (
+				B972CE61DEE1252B3E010996 /* Assets */,
+				9E73AF86F262C9C64FFBF0F9 /* Sources */,
+				97EE829F262EAD0710DFF54D /* Tests */,
+				3EB67BDA2A07FD48EB79BEC3 /* Frameworks */,
+				751CDEDBE4C3DC5930D27B20 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		20625FBD9F203CBE2C8DFAD5 /* PaperwallApp */ = {
+			isa = PBXGroup;
+			children = (
+				716A6D4D9E745E1AA01F0042 /* AppDelegate.swift */,
+				74C5FDAB15754E56A253D67F /* BundledComponentInstaller.swift */,
+				5CA0749CC3542B868AB12A37 /* Main.swift */,
+				023DEB2E9A9E37CD40868593 /* PaperwallShellView.swift */,
+				BEB6ECB880AE750D63A6D475 /* PaperwallWindowController.swift */,
+				BADAE08FCD05A41BB7993C3C /* WallpaperController.swift */,
+				33E431DC75D784C9C9CDB301 /* DiscoveryLibraryModel.swift */,
+				97DA8304520972D8ADF9F662 /* DiscoveryLibraryView.swift */,
+			);
+			path = PaperwallApp;
+			sourceTree = "<group>";
+		};
+		3EB67BDA2A07FD48EB79BEC3 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B7B2B6CD2428FB284147828A /* ScreenSaver.framework */,
+				BA146E3254EB214361106E52 /* Security.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4DBA2FC2CFEB526DBDC11721 /* Brand */ = {
+			isa = PBXGroup;
+			children = (
+				B4BDAA8280907B1C3F1F0A7F /* PaperwallLogo.svg */,
+			);
+			path = Brand;
+			sourceTree = "<group>";
+		};
+		5D46C8785C0E19A9BADE5493 /* PaperwallCLI */ = {
+			isa = PBXGroup;
+			children = (
+				20725334C0B15078C5E22B0E /* PaperwallCLI.swift */,
+			);
+			path = PaperwallCLI;
+			sourceTree = "<group>";
+		};
+		677667F356D8B3D7672BC993 /* PaperwallPlaybackTests */ = {
+			isa = PBXGroup;
+			children = (
+				A99D754AAA228E05D834532E /* PaperwallPlaybackTests.swift */,
+			);
+			path = PaperwallPlaybackTests;
+			sourceTree = "<group>";
+		};
+		751CDEDBE4C3DC5930D27B20 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9B08C6E0AFDF51703097A28B /* PaperwallApp.app */,
+				BD8931CDC4DA78E8505924AA /* PaperwallCLI */,
+				A284945522D04165D00A0A41 /* PaperwallPlayback.framework */,
+				19ACE0FCDB4270B2E96E31E1 /* PaperwallPlaybackTests.xctest */,
+				D6128687229856AE8C697300 /* PaperwallScreenSaver.bundle */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		97EE829F262EAD0710DFF54D /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				EFAF2CDF2F582715AA013E7C /* Fixtures */,
+				677667F356D8B3D7672BC993 /* PaperwallPlaybackTests */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		9E73AF86F262C9C64FFBF0F9 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				20625FBD9F203CBE2C8DFAD5 /* PaperwallApp */,
+				5D46C8785C0E19A9BADE5493 /* PaperwallCLI */,
+				E73DA381161A57B376F863E4 /* PaperwallPlayback */,
+				AF8A9248F1998F22911341C5 /* PaperwallScreenSaver */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		AF8A9248F1998F22911341C5 /* PaperwallScreenSaver */ = {
+			isa = PBXGroup;
+			children = (
+				9F984B12829C68BD53A8E378 /* PaperwallScreenSaverView.swift */,
+			);
+			path = PaperwallScreenSaver;
+			sourceTree = "<group>";
+		};
+		B972CE61DEE1252B3E010996 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				311A60DD763979D19C7D0478 /* AppIcon.icon */,
+				4DBA2FC2CFEB526DBDC11721 /* Brand */,
+			);
+			path = Assets;
+			sourceTree = "<group>";
+		};
+		E73DA381161A57B376F863E4 /* PaperwallPlayback */ = {
+			isa = PBXGroup;
+			children = (
+				8FA3211578C9CF71A2C74D39 /* AssetLibrary.swift */,
+				F00D13D1CD68491C70EA0EB2 /* GenerationModels.swift */,
+				94A7779D1A28756855D8CAA1 /* LaunchAtLoginManager.swift */,
+				F58335E601A53032C32C42F3 /* LoopingPlayer.swift */,
+				F28488992ACC9260FE4AED1A /* PaperwallConfiguration.swift */,
+				75A1ABEFA5A3A6E3ED22C525 /* PaperwallGenerationService.swift */,
+				D9C88BC29E2AF6FB109DF306 /* PaperwallPlayback.swift */,
+				86AAD7159FFB84DAB9F45DAA /* PaperwallService.swift */,
+				4CDAC27A8FA36F6158E04707 /* PlaybackPreferences.swift */,
+				CDFBE4227F068CCC3F69DD35 /* PlayerView.swift */,
+				68517334A8A49B4436313D06 /* ReplicateClient.swift */,
+				496BB5D74C84FEA1D78842F4 /* ReplicateCredentialStore.swift */,
+				E5B5ED5EC5552A5C82E3D658 /* StaticWallpaperManager.swift */,
+				9C4AA1179C7FB712667FF954 /* VideoAssetValidator.swift */,
+			);
+			path = PaperwallPlayback;
+			sourceTree = "<group>";
+		};
+		EFAF2CDF2F582715AA013E7C /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				F5AE20752A5B9D56C7B913D7 /* invalid-video.mov */,
+				FE584C7EA260CCC7DFB848F3 /* tiny-video.mp4 */,
+			);
+			path = Fixtures;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		02FDD9F87D9AC0BCF1EA1D5A /* PaperwallApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AAA228A2BDFBD79EA8B93FE3 /* Build configuration list for PBXNativeTarget "PaperwallApp" */;
+			buildPhases = (
+				657B97C4F25B9B397874134E /* Sources */,
+				5322F3EB9CD4C887C2258C63 /* Resources */,
+				4AE3C00C69C22752A7110AA7 /* Frameworks */,
+				4CC8164DE1B8D37FAF9ABA6D /* Embed Frameworks */,
+				F7DC1EBEF6221E415C9B2EB1 /* Embed CLI and Screen Saver */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A2C6FA8ADD1C1126D482F3C1 /* PBXTargetDependency */,
+				28413508F39C913302FE1632 /* PBXTargetDependency */,
+				7946E81950F650BF8A42FFD7 /* PBXTargetDependency */,
+			);
+			name = PaperwallApp;
+			packageProductDependencies = (
+			);
+			productName = PaperwallApp;
+			productReference = 9B08C6E0AFDF51703097A28B /* PaperwallApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+		1EE29E8C9DD46C777893860D /* PaperwallPlayback */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 609F382CA32D8D727D6C3122 /* Build configuration list for PBXNativeTarget "PaperwallPlayback" */;
+			buildPhases = (
+				DF37467EB54DE3E4B03415BA /* Sources */,
+				AA17829AFB83141B7A8506A5 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PaperwallPlayback;
+			packageProductDependencies = (
+			);
+			productName = PaperwallPlayback;
+			productReference = A284945522D04165D00A0A41 /* PaperwallPlayback.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		CBD264530C3B25A75EBA5A65 /* PaperwallScreenSaver */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C7DD2438F07CD853C274EFF3 /* Build configuration list for PBXNativeTarget "PaperwallScreenSaver" */;
+			buildPhases = (
+				A8F042555C7F452F4F0D505E /* Sources */,
+				ABFC7D3D49F06EC495AC2928 /* Frameworks */,
+				B233509AB1BE983272EE5F02 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1E6C1FD3256FC430C34B3F92 /* PBXTargetDependency */,
+			);
+			name = PaperwallScreenSaver;
+			packageProductDependencies = (
+			);
+			productName = PaperwallScreenSaver;
+			productReference = D6128687229856AE8C697300 /* PaperwallScreenSaver.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
+		DC199AC454A3457AEF56A223 /* PaperwallCLI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A20137985A98FAE727241C2E /* Build configuration list for PBXNativeTarget "PaperwallCLI" */;
+			buildPhases = (
+				9543A85B12CC6FE65F1F6C0C /* Sources */,
+				994FA844EF165C366180623D /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PaperwallCLI;
+			packageProductDependencies = (
+			);
+			productName = PaperwallCLI;
+			productReference = BD8931CDC4DA78E8505924AA /* PaperwallCLI */;
+			productType = "com.apple.product-type.tool";
+		};
+		F24C28E7C5F28B7C3C5546E8 /* PaperwallPlaybackTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0EE496FCD2EBE33757426F28 /* Build configuration list for PBXNativeTarget "PaperwallPlaybackTests" */;
+			buildPhases = (
+				F9DA9536FE00078B44684E5D /* Sources */,
+				1B55B69A75C3C15FD9AFE94C /* Resources */,
+				40B168C284A8F719C41AE00A /* Frameworks */,
+				35AD3610CA1B7D2302257F25 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9DCBDA6965234A00E171F009 /* PBXTargetDependency */,
+			);
+			name = PaperwallPlaybackTests;
+			packageProductDependencies = (
+			);
+			productName = PaperwallPlaybackTests;
+			productReference = 19ACE0FCDB4270B2E96E31E1 /* PaperwallPlaybackTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FF45AA54CEB9497D17F214CD /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					02FDD9F87D9AC0BCF1EA1D5A = {
+						ProvisioningStyle = Automatic;
+					};
+					1EE29E8C9DD46C777893860D = {
+						ProvisioningStyle = Automatic;
+					};
+					CBD264530C3B25A75EBA5A65 = {
+						ProvisioningStyle = Automatic;
+					};
+					DC199AC454A3457AEF56A223 = {
+						ProvisioningStyle = Automatic;
+					};
+					F24C28E7C5F28B7C3C5546E8 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 0E2634753DA6D252B2ECBF5D /* Build configuration list for PBXProject "Paperwall" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 1C389BFA526D03BE47974CCC;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 751CDEDBE4C3DC5930D27B20 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1EE29E8C9DD46C777893860D /* PaperwallPlayback */,
+				02FDD9F87D9AC0BCF1EA1D5A /* PaperwallApp */,
+				DC199AC454A3457AEF56A223 /* PaperwallCLI */,
+				CBD264530C3B25A75EBA5A65 /* PaperwallScreenSaver */,
+				F24C28E7C5F28B7C3C5546E8 /* PaperwallPlaybackTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1B55B69A75C3C15FD9AFE94C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9C0F33FE4F5CF0DC510A8D93 /* invalid-video.mov in Resources */,
+				596001926F7E1789ECCDAD57 /* tiny-video.mp4 in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5322F3EB9CD4C887C2258C63 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				78EB8F8747D88F43446E6C89 /* AppIcon.icon in Resources */,
+				28F2751FF60441166F0F472E /* PaperwallLogo.svg in Resources */,
+				8807F600E76D09C3E7390F12 /* PaperwallCLI in Resources */,
+				25F2873A51E2B1BC670683AD /* PaperwallScreenSaver.bundle in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		F7DC1EBEF6221E415C9B2EB1 /* Embed CLI and Screen Saver */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Embed CLI and Screen Saver";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -euo pipefail\nDESTINATION=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Installer\"\nrm -rf \"$DESTINATION\"\nmkdir -p \"$DESTINATION\"\ncp \"$BUILT_PRODUCTS_DIR/paperwall\" \"$DESTINATION/paperwall\"\nchmod 755 \"$DESTINATION/paperwall\"\n/usr/bin/ditto \"$BUILT_PRODUCTS_DIR/Paperwall.saver\" \"$DESTINATION/Paperwall.saver\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		657B97C4F25B9B397874134E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8090329C6077CF5A114760FA /* AppDelegate.swift in Sources */,
+				BCCDEFBA4662717EB52A9BCD /* BundledComponentInstaller.swift in Sources */,
+				84EFD6B5FEEA0B3DB0F2D465 /* Main.swift in Sources */,
+				DAF4B351FAB9A35E296CBE07 /* PaperwallShellView.swift in Sources */,
+				182D635A4E1F1BD6B63273CF /* PaperwallWindowController.swift in Sources */,
+				7B6879FFFB31DF31ED6EA1FC /* WallpaperController.swift in Sources */,
+				56656AE70FE90002A31A1523 /* DiscoveryLibraryModel.swift in Sources */,
+				3B92DE86E02115B5B7B0670F /* DiscoveryLibraryView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9543A85B12CC6FE65F1F6C0C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D167B73CB257AA83DD3D186A /* AssetLibrary.swift in Sources */,
+				5FB7669FF29F130E24496750 /* GenerationModels.swift in Sources */,
+				C977AF3F420552D70816B758 /* LaunchAtLoginManager.swift in Sources */,
+				DB5F663DAED92276A82E7ABB /* PaperwallCLI.swift in Sources */,
+				6717B812D95CCFF359BB96D6 /* PaperwallConfiguration.swift in Sources */,
+				C8DC3FECE0853EA1FE625D1B /* PaperwallGenerationService.swift in Sources */,
+				237393A1B1A15D5599C79493 /* PaperwallService.swift in Sources */,
+				4495F014E044599A04FDEB13 /* ReplicateClient.swift in Sources */,
+				F2D8C20EC994F2E0E1A69BC3 /* ReplicateCredentialStore.swift in Sources */,
+				D3FEAFCF9CD49223FC53B605 /* StaticWallpaperManager.swift in Sources */,
+				7ECCA2A6A37F0D4ED566B4B6 /* VideoAssetValidator.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A8F042555C7F452F4F0D505E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7B37CAA1944C34058C7060FF /* PaperwallScreenSaverView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DF37467EB54DE3E4B03415BA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7769D39F2463ACD82584D1A2 /* AssetLibrary.swift in Sources */,
+				2AF99255DDA9647972698E82 /* GenerationModels.swift in Sources */,
+				7EA4ECE242E149247CC92E4A /* LaunchAtLoginManager.swift in Sources */,
+				229554F4B6CA46CC8803BABD /* LoopingPlayer.swift in Sources */,
+				27BE6F297890EFA9B4428678 /* PaperwallConfiguration.swift in Sources */,
+				87B5431B22F7D863EC4DFF9A /* PaperwallGenerationService.swift in Sources */,
+				9F6748A1A63483D4378EF44A /* PaperwallPlayback.swift in Sources */,
+				49CC3EE12BF9038FA3121535 /* PaperwallService.swift in Sources */,
+				131E45B3488D75B613069952 /* PlaybackPreferences.swift in Sources */,
+				681DD9DAB07E667412DCB6D4 /* PlayerView.swift in Sources */,
+				2E7F621B6E98C349E87699CD /* ReplicateClient.swift in Sources */,
+				D67027C90630FBFF5A8E3D79 /* ReplicateCredentialStore.swift in Sources */,
+				A607E496323C3C8F17A9D4AF /* StaticWallpaperManager.swift in Sources */,
+				CCB701A9E680C0597CB8BBE5 /* VideoAssetValidator.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F9DA9536FE00078B44684E5D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				901F225EB1A019952F793951 /* PaperwallPlaybackTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1E6C1FD3256FC430C34B3F92 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1EE29E8C9DD46C777893860D /* PaperwallPlayback */;
+			targetProxy = 6767E2BA932DD78F70E0DADF /* PBXContainerItemProxy */;
+		};
+		28413508F39C913302FE1632 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DC199AC454A3457AEF56A223 /* PaperwallCLI */;
+			targetProxy = 3AF4CC3A614B7A3887AA6ED7 /* PBXContainerItemProxy */;
+		};
+		7946E81950F650BF8A42FFD7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CBD264530C3B25A75EBA5A65 /* PaperwallScreenSaver */;
+			targetProxy = 59EBA454CD2F0C73A04DBC13 /* PBXContainerItemProxy */;
+		};
+		9DCBDA6965234A00E171F009 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1EE29E8C9DD46C777893860D /* PaperwallPlayback */;
+			targetProxy = 22231ACC8FF20FE9EF0C35B6 /* PBXContainerItemProxy */;
+		};
+		A2C6FA8ADD1C1126D482F3C1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1EE29E8C9DD46C777893860D /* PaperwallPlayback */;
+			targetProxy = C3D8FD24D2A8B31D560388E8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		73A8E87DF800444D12D133FA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.paperwall.playback;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		76D5D2D1C47A90252F028F3D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Config/PaperwallApp.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				INFOPLIST_FILE = "Config/PaperwallApp-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.paperwall.app;
+				PRODUCT_NAME = Paperwall;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		7D7CA3AD2D47E61648424B90 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.paperwall.cli;
+				PRODUCT_NAME = paperwall;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		8E920E39AB48286D9519004A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Config/PaperwallScreenSaver-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/../Frameworks";
+				MACH_O_TYPE = mh_bundle;
+				PRODUCT_BUNDLE_IDENTIFIER = com.paperwall.saver;
+				PRODUCT_MODULE_NAME = PaperwallScreenSaver;
+				PRODUCT_NAME = Paperwall;
+				SDKROOT = macosx;
+				SKIP_INSTALL = NO;
+				WRAPPER_EXTENSION = saver;
+			};
+			name = Release;
+		};
+		A2BCB4C10A4CD58E397828FC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.paperwall.playback;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		B3332474B010E1009DA5BEF9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.paperwall.playback-tests";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		B35231A6694C7D85D96CE262 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		B940E401F7C4B724C5DB252F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		BE961D5F2659FADAD13EF90B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Config/PaperwallApp.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				INFOPLIST_FILE = "Config/PaperwallApp-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.paperwall.app;
+				PRODUCT_NAME = Paperwall;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		CF97A13031D1A95073BACC5C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.paperwall.playback-tests";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		EF8B2171EC14D9C24D8E64EC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.paperwall.cli;
+				PRODUCT_NAME = paperwall;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		F6B3C6BC95D574D97E45E102 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Config/PaperwallScreenSaver-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/../Frameworks";
+				MACH_O_TYPE = mh_bundle;
+				PRODUCT_BUNDLE_IDENTIFIER = com.paperwall.saver;
+				PRODUCT_MODULE_NAME = PaperwallScreenSaver;
+				PRODUCT_NAME = Paperwall;
+				SDKROOT = macosx;
+				SKIP_INSTALL = NO;
+				WRAPPER_EXTENSION = saver;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0E2634753DA6D252B2ECBF5D /* Build configuration list for PBXProject "Paperwall" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B940E401F7C4B724C5DB252F /* Debug */,
+				B35231A6694C7D85D96CE262 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		0EE496FCD2EBE33757426F28 /* Build configuration list for PBXNativeTarget "PaperwallPlaybackTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B3332474B010E1009DA5BEF9 /* Debug */,
+				CF97A13031D1A95073BACC5C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		609F382CA32D8D727D6C3122 /* Build configuration list for PBXNativeTarget "PaperwallPlayback" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				73A8E87DF800444D12D133FA /* Debug */,
+				A2BCB4C10A4CD58E397828FC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A20137985A98FAE727241C2E /* Build configuration list for PBXNativeTarget "PaperwallCLI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EF8B2171EC14D9C24D8E64EC /* Debug */,
+				7D7CA3AD2D47E61648424B90 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AAA228A2BDFBD79EA8B93FE3 /* Build configuration list for PBXNativeTarget "PaperwallApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				76D5D2D1C47A90252F028F3D /* Debug */,
+				BE961D5F2659FADAD13EF90B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C7DD2438F07CD853C274EFF3 /* Build configuration list for PBXNativeTarget "PaperwallScreenSaver" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F6B3C6BC95D574D97E45E102 /* Debug */,
+				8E920E39AB48286D9519004A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FF45AA54CEB9497D17F214CD /* Project object */;
+}
