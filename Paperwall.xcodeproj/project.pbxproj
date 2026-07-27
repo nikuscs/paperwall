@@ -17,6 +17,7 @@
 		28F2751FF60441166F0F472E /* PaperwallLogo.svg in Resources */ = {isa = PBXBuildFile; fileRef = B4BDAA8280907B1C3F1F0A7F /* PaperwallLogo.svg */; };
 		2AF99255DDA9647972698E82 /* GenerationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00D13D1CD68491C70EA0EB2 /* GenerationModels.swift */; };
 		2E7F621B6E98C349E87699CD /* ReplicateClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68517334A8A49B4436313D06 /* ReplicateClient.swift */; };
+		2F4A4BD7186F168F3B88CCEC /* ImmersiveWallpaperPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 305BE6E3CEFE13013CB180C4 /* ImmersiveWallpaperPreview.swift */; };
 		3B92DE86E02115B5B7B0670F /* WallspaceLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97DA8304520972D8ADF9F662 /* WallspaceLibraryView.swift */; };
 		4495F014E044599A04FDEB13 /* ReplicateClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68517334A8A49B4436313D06 /* ReplicateClient.swift */; };
 		49CC3EE12BF9038FA3121535 /* PaperwallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86AAD7159FFB84DAB9F45DAA /* PaperwallService.swift */; };
@@ -137,6 +138,7 @@
 		023DEB2E9A9E37CD40868593 /* PaperwallShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallShellView.swift; sourceTree = "<group>"; };
 		19ACE0FCDB4270B2E96E31E1 /* PaperwallPlaybackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PaperwallPlaybackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		20725334C0B15078C5E22B0E /* PaperwallCLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallCLI.swift; sourceTree = "<group>"; };
+		305BE6E3CEFE13013CB180C4 /* ImmersiveWallpaperPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImmersiveWallpaperPreview.swift; sourceTree = "<group>"; };
 		311A60DD763979D19C7D0478 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		33E431DC75D784C9C9CDB301 /* WallspaceLibraryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallspaceLibraryModel.swift; sourceTree = "<group>"; };
 		496BB5D74C84FEA1D78842F4 /* ReplicateCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplicateCredentialStore.swift; sourceTree = "<group>"; };
@@ -233,6 +235,7 @@
 			children = (
 				716A6D4D9E745E1AA01F0042 /* AppDelegate.swift */,
 				74C5FDAB15754E56A253D67F /* BundledComponentInstaller.swift */,
+				305BE6E3CEFE13013CB180C4 /* ImmersiveWallpaperPreview.swift */,
 				5CA0749CC3542B868AB12A37 /* Main.swift */,
 				023DEB2E9A9E37CD40868593 /* PaperwallShellView.swift */,
 				BEB6ECB880AE750D63A6D475 /* PaperwallWindowController.swift */,
@@ -559,6 +562,7 @@
 			files = (
 				8090329C6077CF5A114760FA /* AppDelegate.swift in Sources */,
 				BCCDEFBA4662717EB52A9BCD /* BundledComponentInstaller.swift in Sources */,
+				2F4A4BD7186F168F3B88CCEC /* ImmersiveWallpaperPreview.swift in Sources */,
 				84EFD6B5FEEA0B3DB0F2D465 /* Main.swift in Sources */,
 				DAF4B351FAB9A35E296CBE07 /* PaperwallShellView.swift in Sources */,
 				182D635A4E1F1BD6B63273CF /* PaperwallWindowController.swift in Sources */,
