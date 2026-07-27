@@ -23,8 +23,7 @@ public enum PaperwallImageGenerationService {
     private static let modelID = "black-forest-labs/flux-1.1-pro"
 
     private static var generationDirectory: URL {
-        PaperwallConfiguration.applicationSupportDirectory
-            .appendingPathComponent("Generation", isDirectory: true)
+        PaperwallConfiguration.generationStateDirectory
     }
 
     private static var jobsDirectory: URL {
@@ -32,7 +31,8 @@ public enum PaperwallImageGenerationService {
     }
 
     private static var imagesDirectory: URL {
-        generationDirectory.appendingPathComponent("Images", isDirectory: true)
+        PaperwallConfiguration.sharedGenerationDirectory
+            .appendingPathComponent("Images", isDirectory: true)
     }
 
     private static var intentURL: URL {
@@ -185,6 +185,7 @@ public enum PaperwallImageGenerationService {
     }
 
     private static func createDirectories() throws {
+        try PaperwallStorageMigrator.migrateSynchronouslyIfNeeded()
         for directory in [jobsDirectory, imagesDirectory] {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         }

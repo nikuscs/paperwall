@@ -48,12 +48,12 @@ public enum PaperwallUpscaleService {
     }
 
     private static var generationDirectory: URL {
-        PaperwallConfiguration.applicationSupportDirectory
-            .appendingPathComponent("Generation", isDirectory: true)
+        PaperwallConfiguration.generationStateDirectory
     }
 
     private static var outputsDirectory: URL {
-        generationDirectory.appendingPathComponent("Upscaled", isDirectory: true)
+        PaperwallConfiguration.sharedGenerationDirectory
+            .appendingPathComponent("Upscaled", isDirectory: true)
     }
 
     private static var jobsDirectory: URL {
@@ -94,6 +94,7 @@ public enum PaperwallUpscaleService {
             )
         }
         try await ensureToolInstalled()
+        try await PaperwallStorageMigrator.migrateLegacySharedAssetsIfNeeded()
         try FileManager.default.createDirectory(at: outputsDirectory, withIntermediateDirectories: true)
         try FileManager.default.createDirectory(at: jobsDirectory, withIntermediateDirectories: true)
 

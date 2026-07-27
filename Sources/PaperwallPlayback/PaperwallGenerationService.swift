@@ -17,12 +17,12 @@ public enum PaperwallGenerationService {
         "Only mist, water, clouds, light, or foliage may move gently; return silently to the first-frame composition."
 
     private static var generationDirectory: URL {
-        PaperwallConfiguration.applicationSupportDirectory
-            .appendingPathComponent("Generation", isDirectory: true)
+        PaperwallConfiguration.generationStateDirectory
     }
 
     private static var sourcesDirectory: URL {
-        generationDirectory.appendingPathComponent("Sources", isDirectory: true)
+        PaperwallConfiguration.sharedGenerationDirectory
+            .appendingPathComponent("Sources", isDirectory: true)
     }
 
     private static var jobsDirectory: URL {
@@ -30,7 +30,8 @@ public enum PaperwallGenerationService {
     }
 
     private static var outputsDirectory: URL {
-        generationDirectory.appendingPathComponent("Outputs", isDirectory: true)
+        PaperwallConfiguration.sharedGenerationDirectory
+            .appendingPathComponent("Outputs", isDirectory: true)
     }
 
     private static var submissionIntentURL: URL {
@@ -342,6 +343,7 @@ public enum PaperwallGenerationService {
     }
 
     private static func createDirectories() throws {
+        try PaperwallStorageMigrator.migrateSynchronouslyIfNeeded()
         for directory in [sourcesDirectory, jobsDirectory, outputsDirectory] {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         }
