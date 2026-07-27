@@ -70,14 +70,22 @@ struct PaperwallShellView: View {
                         url: previewURL,
                         setWallpaper: {
                             selectDiscovery(previewURL)
-                            withAnimation(.smooth(duration: 0.3)) { self.previewURL = nil }
+                            withAnimation(.smooth(duration: 0.3)) {
+                                section = .home
+                                self.previewURL = nil
+                            }
                         },
                         setSpeed: { speed in
                             try? PlaybackPreferences.save(playbackSpeed: speed)
                             setPlaybackSpeed(speed)
                         },
+                        previous: { movePreview(by: -1) },
+                        next: { movePreview(by: 1) },
                         close: {
-                            withAnimation(.smooth(duration: 0.3)) { self.previewURL = nil }
+                            withAnimation(.smooth(duration: 0.3)) {
+                                section = .home
+                                self.previewURL = nil
+                            }
                         }
                     )
                     .frame(width: geometry.size.width, height: geometry.size.height)
@@ -99,6 +107,11 @@ struct PaperwallShellView: View {
         .frame(minWidth: 920, minHeight: 600)
         .ignoresSafeArea(.container, edges: .top)
         .preferredColorScheme(.dark)
+        .onChange(of: discoveryLibrary.videos) { _, videos in
+            if section == .library, previewURL == nil, let first = videos.first {
+                withAnimation(.smooth(duration: 0.3)) { previewURL = first }
+            }
+        }
     }
 
     @ViewBuilder
@@ -155,7 +168,11 @@ struct PaperwallShellView: View {
                 HStack(spacing: 4) {
                     ForEach([Section.home, .library], id: \.self) { item in
                         Button {
-                            withAnimation(.smooth(duration: 0.32)) { section = item }
+                            if item == .library {
+                                openLibraryPreview()
+                            } else {
+                                withAnimation(.smooth(duration: 0.32)) { section = item }
+                            }
                         } label: {
                             Text(item.rawValue)
                                 .font(.system(size: 14, weight: .medium))
@@ -190,13 +207,8 @@ struct PaperwallShellView: View {
                     .transition(pageTransition)
             }
             if section == .library {
-                DiscoveryLibraryView(
-                    library: discoveryLibrary,
-                    openPreview: { url in
-                        withAnimation(.smooth(duration: 0.3)) { previewURL = url }
-                    }
-                )
-                .transition(pageTransition)
+                libraryLoadingContent
+                    .transition(pageTransition)
             }
             if section == .settings {
                 settingsContent
@@ -213,6 +225,48 @@ struct PaperwallShellView: View {
             insertion: .opacity.combined(with: .offset(y: 8)),
             removal: .opacity.combined(with: .offset(y: -4))
         )
+    }
+
+    private var libraryLoadingContent: some View {
+        VStack(spacing: 12) {
+            if discoveryLibrary.isLoading {
+                ProgressView()
+                    .controlSize(.small)
+                Text("Loading shared wallpapers")
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundStyle(.white.opacity(0.68))
+            } else {
+                Image(systemName: "film.stack")
+                    .font(.system(size: 28, weight: .ultraLight))
+                    .foregroundStyle(.white.opacity(0.48))
+                Text("No shared wallpapers yet")
+                    .font(.system(size: 16, weight: .medium))
+                Button("Refresh", action: discoveryLibrary.synchronize)
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 14)
+                    .frame(height: 34)
+                    .glassEffect(.regular.interactive(true), in: Capsule())
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func openLibraryPreview() {
+        withAnimation(.smooth(duration: 0.3)) {
+            section = .library
+            previewURL = discoveryLibrary.videos.first
+        }
+        if discoveryLibrary.videos.isEmpty { discoveryLibrary.synchronize() }
+    }
+
+    private func movePreview(by offset: Int) {
+        let videos = discoveryLibrary.videos
+        guard !videos.isEmpty else { return }
+        let current = previewURL.flatMap { videos.firstIndex(of: $0) } ?? 0
+        let next = (current + offset + videos.count) % videos.count
+        withAnimation(.easeInOut(duration: 0.2)) {
+            previewURL = videos[next]
+        }
     }
 
     private var homeContent: some View {

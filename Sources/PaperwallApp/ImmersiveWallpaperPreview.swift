@@ -6,6 +6,8 @@ struct ImmersiveWallpaperPreview: View {
     let url: URL
     let setWallpaper: () -> Void
     let setSpeed: (PlaybackSpeed) -> Void
+    let previous: () -> Void
+    let next: () -> Void
     let close: () -> Void
 
     @State private var assetInfo: VideoAssetInfo?
@@ -16,6 +18,8 @@ struct ImmersiveWallpaperPreview: View {
         ZStack {
             Color.black
             DiscoveryPlayerPreview(url: url, playbackSpeed: playbackSpeed)
+                .id(url)
+                .transition(.opacity)
 
             LinearGradient(
                 colors: [.clear, .clear, .black.opacity(0.12), .black.opacity(0.42)],
@@ -32,8 +36,34 @@ struct ImmersiveWallpaperPreview: View {
             .padding(.horizontal, 34)
         }
         .contentShape(Rectangle())
+        .animation(.easeInOut(duration: 0.2), value: url)
+        .background {
+            LibraryKeyboardMonitor { event in
+                guard event.modifierFlags.intersection([.command, .control, .option]).isEmpty else {
+                    return false
+                }
+                switch event.keyCode {
+                case 123:
+                    previous()
+                    return true
+                case 124:
+                    next()
+                    return true
+                case 36, 76:
+                    setWallpaper()
+                    return true
+                case 53:
+                    close()
+                    return true
+                default:
+                    return false
+                }
+            }
+        }
         .onExitCommand(perform: close)
         .task(id: url) {
+            assetInfo = nil
+            fileSize = nil
             async let info = try? VideoAssetValidator.validate(url: url)
             let values = try? url.resourceValues(forKeys: [.fileSizeKey])
             assetInfo = await info
