@@ -21,6 +21,7 @@ struct PaperwallShellView: View {
     @State private var playbackSpeed = PlaybackPreferences.playbackSpeed
     @State private var showingProviderOptions = false
     @State private var showingDurationOptions = false
+    @State private var previewURL: URL?
     @FocusState private var promptFocused: Bool
     @Namespace private var navigationSelection
 
@@ -51,15 +52,37 @@ struct PaperwallShellView: View {
                     endPoint: .bottomLeading
                 )
 
-                VStack(spacing: 0) {
-                    topBar
-                    Spacer(minLength: 48)
-                    content
-                    Spacer(minLength: 30)
-                    bottomPanel
+                if previewURL == nil {
+                    VStack(spacing: 0) {
+                        topBar
+                        Spacer(minLength: 48)
+                        content
+                        Spacer(minLength: 30)
+                        bottomPanel
+                    }
+                    .frame(width: geometry.size.width - 72, height: geometry.size.height - 88)
+                    .position(x: geometry.size.width / 2, y: geometry.size.height / 2 + 18)
+                    .transition(.opacity)
                 }
-                .frame(width: geometry.size.width - 72, height: geometry.size.height - 88)
-                .position(x: geometry.size.width / 2, y: geometry.size.height / 2 + 18)
+
+                if let previewURL {
+                    ImmersiveWallpaperPreview(
+                        url: previewURL,
+                        setWallpaper: {
+                            selectWallspace(previewURL)
+                            withAnimation(.smooth(duration: 0.3)) { self.previewURL = nil }
+                        },
+                        setSpeed: { speed in
+                            try? PlaybackPreferences.save(playbackSpeed: speed)
+                            setPlaybackSpeed(speed)
+                        },
+                        close: {
+                            withAnimation(.smooth(duration: 0.3)) { self.previewURL = nil }
+                        }
+                    )
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                    .transition(.opacity)
+                }
 
                 VStack(spacing: 0) {
                     WindowDragRegion()
@@ -71,6 +94,7 @@ struct PaperwallShellView: View {
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
             .clipped()
+            .animation(.smooth(duration: 0.3), value: previewURL)
         }
         .frame(minWidth: 920, minHeight: 600)
         .ignoresSafeArea(.container, edges: .top)
@@ -166,8 +190,13 @@ struct PaperwallShellView: View {
                     .transition(pageTransition)
             }
             if section == .library {
-                WallspaceLibraryView(library: wallspaceLibrary, importVideo: selectWallspace)
-                    .transition(pageTransition)
+                WallspaceLibraryView(
+                    library: wallspaceLibrary,
+                    openPreview: { url in
+                        withAnimation(.smooth(duration: 0.3)) { previewURL = url }
+                    }
+                )
+                .transition(pageTransition)
             }
             if section == .settings {
                 settingsContent
