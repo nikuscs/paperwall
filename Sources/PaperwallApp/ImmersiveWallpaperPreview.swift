@@ -29,11 +29,20 @@ struct ImmersiveWallpaperPreview: View {
             .allowsHitTesting(false)
 
             VStack {
+                previewNavigation
+                    .padding(.top, 52)
                 Spacer()
                 controlDock
                     .padding(.bottom, 34)
             }
             .padding(.horizontal, 34)
+
+            HStack {
+                edgeNavigationButton(symbol: "chevron.left", action: previous)
+                Spacer()
+                edgeNavigationButton(symbol: "chevron.right", action: next)
+            }
+            .padding(.horizontal, 26)
         }
         .contentShape(Rectangle())
         .animation(.easeInOut(duration: 0.2), value: url)
@@ -68,6 +77,28 @@ struct ImmersiveWallpaperPreview: View {
             let values = try? url.resourceValues(forKeys: [.fileSizeKey])
             assetInfo = await info
             fileSize = values?.fileSize
+        }
+    }
+
+    private var previewNavigation: some View {
+        GlassEffectContainer(spacing: 8) {
+            HStack(spacing: 4) {
+                Button("Home", action: close)
+                    .buttonStyle(.plain)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.84))
+                    .padding(.horizontal, 18)
+                    .frame(height: 36)
+
+                Text("Library")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(.black.opacity(0.86))
+                    .padding(.horizontal, 18)
+                    .frame(height: 36)
+                    .background(.white.opacity(0.92), in: Capsule())
+            }
+            .padding(6)
+            .glassEffect(.regular.interactive(true), in: Capsule())
         }
     }
 
@@ -145,6 +176,19 @@ struct ImmersiveWallpaperPreview: View {
         Label(text, systemImage: symbol)
             .font(.system(size: 11, weight: .regular))
             .foregroundStyle(.white.opacity(0.72))
+    }
+
+    private func edgeNavigationButton(
+        symbol: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 18, weight: .medium))
+                .frame(width: 48, height: 48)
+        }
+        .buttonStyle(.plain)
+        .glassEffect(.regular.interactive(true), in: Circle())
     }
 
     private func previewButton(symbol: String, action: @escaping () -> Void) -> some View {
