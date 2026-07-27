@@ -10,6 +10,8 @@ public struct UpscaleResult: Sendable {
 
 public enum UpscaleError: Error, LocalizedError {
     case missingTool
+    case missingInstaller
+    case installationFailed(String)
     case processFailed(String)
     case invalidOutput
     case alreadyRunning
@@ -17,7 +19,11 @@ public enum UpscaleError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .missingTool:
-            "The free 4K upscaler is not installed. Install venhance with: uv tool install git+https://github.com/TomPenguin/venhance.git"
+            "The free 4K upscaler is unavailable after setup"
+        case .missingInstaller:
+            "Paperwall's 4K setup component is missing. Reinstall Paperwall and retry."
+        case .installationFailed(let detail):
+            "Could not install the free 4K upscaler: \(detail)"
         case .processFailed(let detail):
             "4K upscaling failed: \(detail)"
         case .invalidOutput:
@@ -29,6 +35,9 @@ public enum UpscaleError: Error, LocalizedError {
 }
 
 public enum PaperwallUpscaleService {
+    private static let toolInstaller = UpscalerToolInstaller()
+    private static let pinnedVEnhanceRevision = "2fe41cad6bc32e7d7168689f242282b3b9d4e819"
+
     private struct Job: Codable {
         let sourceVideoURL: URL
         let outputVideoURL: URL
@@ -49,6 +58,10 @@ public enum PaperwallUpscaleService {
 
     private static var jobsDirectory: URL {
         generationDirectory.appendingPathComponent("UpscaleJobs", isDirectory: true)
+    }
+
+    public static func ensureToolInstalled() async throws {
+        try await toolInstaller.ensureInstalled()
     }
 
     public static func latestResumableVideoURL() -> URL? {
@@ -80,6 +93,7 @@ public enum PaperwallUpscaleService {
                 resumedExistingOutput: true
             )
         }
+        try await ensureToolInstalled()
         try FileManager.default.createDirectory(at: outputsDirectory, withIntermediateDirectories: true)
         try FileManager.default.createDirectory(at: jobsDirectory, withIntermediateDirectories: true)
 
@@ -167,7 +181,7 @@ public enum PaperwallUpscaleService {
         }
     }
 
-    private static func venhanceExecutableURL() -> URL? {
+    fileprivate static func venhanceExecutableURL() -> URL? {
         let home = FileManager.default.homeDirectoryForCurrentUser
         let candidates = [
             home.appendingPathComponent(".local/bin/venhance"),
@@ -175,6 +189,54 @@ public enum PaperwallUpscaleService {
             URL(fileURLWithPath: "/usr/local/bin/venhance"),
         ]
         return candidates.first { FileManager.default.isExecutableFile(atPath: $0.path) }
+    }
+
+    fileprivate static func uvExecutableURL() -> URL? {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        let bundled = Bundle.main.resourceURL?
+            .appendingPathComponent("Tools/uv")
+        let candidates = [
+            bundled,
+            Optional(home.appendingPathComponent(".local/bin/uv")),
+            Optional(URL(fileURLWithPath: "/opt/homebrew/bin/uv")),
+            Optional(URL(fileURLWithPath: "/usr/local/bin/uv")),
+        ]
+        return candidates.compactMap { $0 }.first {
+            FileManager.default.isExecutableFile(atPath: $0.path)
+        }
+    }
+
+    fileprivate static func installVEnhance(using uv: URL) async throws -> Int32 {
+        let dependencies = generationDirectory.appendingPathComponent("Dependencies", isDirectory: true)
+        try FileManager.default.createDirectory(at: dependencies, withIntermediateDirectories: true)
+        let logURL = dependencies.appendingPathComponent("venhance-install.log")
+        return try await Task.detached(priority: .utility) {
+            FileManager.default.createFile(atPath: logURL.path, contents: nil)
+            let log = try FileHandle(forWritingTo: logURL)
+            defer { try? log.close() }
+
+            let process = Process()
+            process.executableURL = uv
+            process.arguments = [
+                "tool", "install",
+                "git+https://github.com/TomPenguin/venhance.git@\(pinnedVEnhanceRevision)",
+                "--force",
+            ]
+            process.standardOutput = log
+            process.standardError = log
+            try process.run()
+            process.waitUntilExit()
+            return process.terminationStatus
+        }.value
+    }
+
+    fileprivate static func installationLogTail() -> String {
+        let url = generationDirectory
+            .appendingPathComponent("Dependencies/venhance-install.log")
+        guard let text = try? String(contentsOf: url, encoding: .utf8) else {
+            return "uv exited without diagnostic output"
+        }
+        return String(text.suffix(2_000))
     }
 
     private static func runUpscaler(
@@ -212,5 +274,23 @@ public enum PaperwallUpscaleService {
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
         try encoder.encode(job).write(to: url, options: .atomic)
+    }
+}
+
+private actor UpscalerToolInstaller {
+    func ensureInstalled() async throws {
+        if PaperwallUpscaleService.venhanceExecutableURL() != nil { return }
+        guard let uv = PaperwallUpscaleService.uvExecutableURL() else {
+            throw UpscaleError.missingInstaller
+        }
+        let status = try await PaperwallUpscaleService.installVEnhance(using: uv)
+        guard status == 0 else {
+            throw UpscaleError.installationFailed(
+                PaperwallUpscaleService.installationLogTail()
+            )
+        }
+        guard PaperwallUpscaleService.venhanceExecutableURL() != nil else {
+            throw UpscaleError.missingTool
+        }
     }
 }

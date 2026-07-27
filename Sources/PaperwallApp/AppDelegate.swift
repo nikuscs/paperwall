@@ -28,6 +28,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         installMainWindow()
         windowController?.show()
         discoveryLibrary.synchronize()
+        Task {
+            do {
+                try await PaperwallUpscaleService.ensureToolInstalled()
+            } catch {
+                NSLog("Paperwall: 4K upscaler setup unavailable: %@", error.localizedDescription)
+            }
+        }
         Task { await wallpaperController.start() }
     }
 

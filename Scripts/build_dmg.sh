@@ -28,13 +28,16 @@ xcodebuild build \
 [[ -d "$APP" ]] || { echo "error: Paperwall.app build product missing" >&2; exit 1; }
 [[ -x "$APP/Contents/Resources/Installer/paperwall" ]] || { echo "error: embedded CLI missing" >&2; exit 1; }
 [[ -d "$APP/Contents/Resources/Installer/Paperwall.saver" ]] || { echo "error: embedded screen saver missing" >&2; exit 1; }
+[[ -x "$APP/Contents/Resources/Tools/uv" ]] || { echo "error: embedded uv bootstrap missing" >&2; exit 1; }
 
 if [[ "$IDENTITY" == "-" ]]; then
+  codesign --force --sign - "$APP/Contents/Resources/Tools/uv"
   codesign --force --sign - "$APP/Contents/Resources/Installer/paperwall"
   codesign --force --deep --sign - "$APP/Contents/Resources/Installer/Paperwall.saver"
   codesign --force --deep --sign - --entitlements "$ROOT/Config/PaperwallApp.entitlements" "$APP"
   echo "warning: created an ad-hoc signed development DMG; public distribution requires Developer ID and notarization" >&2
 else
+  codesign --force --timestamp --options runtime --sign "$IDENTITY" "$APP/Contents/Resources/Tools/uv"
   codesign --force --timestamp --options runtime --sign "$IDENTITY" "$APP/Contents/Resources/Installer/paperwall"
   codesign --force --deep --timestamp --options runtime --sign "$IDENTITY" "$APP/Contents/Resources/Installer/Paperwall.saver"
   codesign --force --deep --timestamp --options runtime --sign "$IDENTITY" \
