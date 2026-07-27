@@ -8,6 +8,7 @@ final class PaperwallWindowController: NSWindowController, NSWindowDelegate {
 
     init(
         discoveryLibrary: DiscoveryLibraryModel,
+        generateImage: @escaping (String, @escaping (Result<URL, Error>) -> Void) -> Void,
         generate: @escaping (GenerationRequest) -> Void,
         chooseVideo: @escaping () -> Void,
         selectDiscovery: @escaping (URL) -> Void,
@@ -19,6 +20,7 @@ final class PaperwallWindowController: NSWindowController, NSWindowDelegate {
         self.activationChanged = activationChanged
         let rootView = PaperwallShellView(
             discoveryLibrary: discoveryLibrary,
+            generateImage: generateImage,
             generate: generate,
             chooseVideo: chooseVideo,
             selectDiscovery: selectDiscovery,

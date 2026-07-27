@@ -9,6 +9,9 @@ xcuserdata/
 # macOS
 .DS_Store
 
+# Local agent artifacts
+.pi/
+
 # Secrets
 .env
 .env.*

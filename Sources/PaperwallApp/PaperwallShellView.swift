@@ -21,10 +21,13 @@ struct PaperwallShellView: View {
     @State private var playbackSpeed = PlaybackPreferences.playbackSpeed
     @State private var showingProviderOptions = false
     @State private var showingDurationOptions = false
+    @State private var generatedImageURL: URL?
+    @State private var isGeneratingImage = false
     @State private var previewURL: URL?
     @FocusState private var promptFocused: Bool
     @Namespace private var navigationSelection
 
+    let generateImage: (String, @escaping (Result<URL, Error>) -> Void) -> Void
     let generate: (GenerationRequest) -> Void
     let chooseVideo: () -> Void
     let selectDiscovery: (URL) -> Void
@@ -326,23 +329,51 @@ struct PaperwallShellView: View {
 
                 Spacer()
 
-                Text("Reference image optional")
+                Text(referenceImageURL == nil ? "Step 1 of 2 · image first" : "Step 2 of 2 · approve animation")
                     .font(.system(size: 12, weight: .regular))
                     .foregroundStyle(.white.opacity(0.42))
             }
 
-            TextField(
-                "Describe the scene and the subtle motion you want…",
-                text: $prompt,
-                axis: .vertical
-            )
-            .focused($promptFocused)
-            .textFieldStyle(.plain)
-            .font(.system(size: 16, weight: .regular))
-            .lineLimit(2...4)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
-            .background(.black.opacity(0.16), in: RoundedRectangle(cornerRadius: 16))
+            if let imageURL = referenceImageURL,
+               let image = NSImage(contentsOf: imageURL) {
+                Image(nsImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 132)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .overlay(alignment: .bottomLeading) {
+                        Text("Image ready · approve to animate")
+                            .font(.system(size: 12, weight: .medium))
+                            .padding(.horizontal, 11)
+                            .frame(height: 30)
+                            .glassEffect(.regular, in: Capsule())
+                            .padding(10)
+                    }
+                    .overlay(alignment: .topTrailing) {
+                        Button(action: clearReferenceImage) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 11, weight: .medium))
+                                .frame(width: 30, height: 30)
+                        }
+                        .buttonStyle(.plain)
+                        .glassEffect(.regular.interactive(true), in: Circle())
+                        .padding(10)
+                    }
+            } else {
+                TextField(
+                    "Describe the image you want to create…",
+                    text: $prompt,
+                    axis: .vertical
+                )
+                .focused($promptFocused)
+                .textFieldStyle(.plain)
+                .font(.system(size: 16, weight: .regular))
+                .lineLimit(2...4)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
+                .background(.black.opacity(0.16), in: RoundedRectangle(cornerRadius: 16))
+            }
 
             HStack(spacing: 9) {
                 Button(action: chooseReferenceImage) {
@@ -402,15 +433,24 @@ struct PaperwallShellView: View {
 
                 Spacer()
 
-                Button(action: submitGeneration) {
-                    Label("Generate · \(generationCost)", systemImage: "arrow.up")
-                        .font(.system(size: 13, weight: .medium))
-                        .padding(.horizontal, 17)
-                        .frame(height: 38)
+                Button(action: primaryGenerationAction) {
+                    HStack(spacing: 7) {
+                        if isGeneratingImage {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Image(systemName: referenceImageURL == nil ? "photo.badge.plus" : "film")
+                        }
+                        Text(referenceImageURL == nil ? "Generate Image · \(imageGenerationCost)" : "Animate · \(generationCost)")
+                    }
+                    .font(.system(size: 13, weight: .medium))
+                    .padding(.horizontal, 17)
+                    .frame(height: 38)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.black.opacity(0.86))
                 .background(.white.opacity(0.94), in: Capsule())
+                .disabled(isGeneratingImage)
             }
 
             if let generationError {
@@ -605,6 +645,10 @@ struct PaperwallShellView: View {
         }
     }
 
+    private var imageGenerationCost: String {
+        (try? PaperwallImageGenerationService.quote(prompt: prompt).formattedCost) ?? "$0.04"
+    }
+
     private var generationCost: String {
         (try? PaperwallGenerationService.quote(for: generationRequest).formattedCost) ?? "Preview"
     }
@@ -625,8 +669,48 @@ struct PaperwallShellView: View {
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         guard panel.runModal() == .OK else { return }
+        generatedImageURL = nil
         referenceImageURL = panel.url
         generationError = nil
+    }
+
+    private func clearReferenceImage() {
+        generatedImageURL = nil
+        referenceImageURL = nil
+        generationError = nil
+        promptFocused = true
+    }
+
+    private func primaryGenerationAction() {
+        if referenceImageURL != nil {
+            submitGeneration()
+        } else {
+            submitImageGeneration()
+        }
+    }
+
+    private func submitImageGeneration() {
+        do {
+            _ = try PaperwallImageGenerationService.quote(prompt: prompt)
+        } catch {
+            generationError = error.localizedDescription
+            return
+        }
+
+        isGeneratingImage = true
+        generationError = nil
+        generateImage(prompt) { result in
+            isGeneratingImage = false
+            switch result {
+            case .success(let url):
+                generatedImageURL = url
+                referenceImageURL = url
+            case .failure(let error):
+                if (error as? GenerationError) != .approvalDeclined {
+                    generationError = error.localizedDescription
+                }
+            }
+        }
     }
 
     private func submitGeneration() {
@@ -647,7 +731,7 @@ struct PaperwallShellView: View {
                 divider
                 statusItem(symbol: "lock.display", title: "Lock Screen", value: "Ready")
                 divider
-                statusItem(symbol: "wand.and.stars", title: "AI Providers", value: "3 connected")
+                statusItem(symbol: "wand.and.stars", title: "AI Models", value: "4 available")
                 Spacer()
                 Button {
                     withAnimation(.smooth(duration: 0.32)) { section = .settings }
