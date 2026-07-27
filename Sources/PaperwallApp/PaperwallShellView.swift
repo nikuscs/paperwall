@@ -71,6 +71,10 @@ struct PaperwallShellView: View {
                 if let previewURL {
                     ImmersiveWallpaperPreview(
                         url: previewURL,
+                        wallpapers: discoveryLibrary.videos,
+                        selectPreview: { url in
+                            withAnimation(.easeInOut(duration: 0.2)) { self.previewURL = url }
+                        },
                         setWallpaper: {
                             selectDiscovery(previewURL)
                             withAnimation(.smooth(duration: 0.3)) {

@@ -1,9 +1,12 @@
 import AppKit
+import AVFoundation
 import PaperwallPlayback
 import SwiftUI
 
 struct ImmersiveWallpaperPreview: View {
     let url: URL
+    let wallpapers: [URL]
+    let selectPreview: (URL) -> Void
     let setWallpaper: () -> Void
     let setSpeed: (PlaybackSpeed) -> Void
     let previous: () -> Void
@@ -13,6 +16,7 @@ struct ImmersiveWallpaperPreview: View {
     @State private var assetInfo: VideoAssetInfo?
     @State private var fileSize: Int?
     @State private var playbackSpeed = PlaybackPreferences.playbackSpeed
+    @State private var isWallpaperDrawerExpanded = false
 
     var body: some View {
         ZStack {
@@ -32,8 +36,14 @@ struct ImmersiveWallpaperPreview: View {
                 previewNavigation
                     .padding(.top, 52)
                 Spacer()
-                controlDock
-                    .padding(.bottom, 34)
+                VStack(spacing: 18) {
+                    controlDock
+                    if isWallpaperDrawerExpanded {
+                        wallpaperDrawer
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                }
+                .padding(.bottom, 24)
             }
             .padding(.horizontal, 34)
 
@@ -161,6 +171,59 @@ struct ImmersiveWallpaperPreview: View {
                 .regular.tint(.black.opacity(0.1)),
                 in: RoundedRectangle(cornerRadius: 28)
             )
+            .overlay(alignment: .bottom) {
+                Button {
+                    withAnimation(.smooth(duration: 0.28)) {
+                        isWallpaperDrawerExpanded.toggle()
+                    }
+                } label: {
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 11, weight: .semibold))
+                        .rotationEffect(.degrees(isWallpaperDrawerExpanded ? 180 : 0))
+                        .frame(width: 34, height: 28)
+                }
+                .buttonStyle(.plain)
+                .glassEffect(.regular.interactive(true), in: Capsule())
+                .offset(y: 14)
+                .accessibilityLabel(isWallpaperDrawerExpanded ? "Hide wallpapers" : "Show wallpapers")
+            }
+        }
+    }
+
+    private var wallpaperDrawer: some View {
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal) {
+                LazyHStack(spacing: 10) {
+                    ForEach(wallpapers, id: \.self) { wallpaper in
+                        Button {
+                            selectPreview(wallpaper)
+                        } label: {
+                            WallpaperDrawerThumbnail(
+                                url: wallpaper,
+                                isSelected: wallpaper == url
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .id(wallpaper)
+                    }
+                }
+                .padding(10)
+            }
+            .scrollIndicators(.hidden)
+            .frame(maxWidth: 750)
+            .frame(height: 116)
+            .glassEffect(
+                .regular.tint(.black.opacity(0.12)),
+                in: RoundedRectangle(cornerRadius: 24)
+            )
+            .onAppear {
+                proxy.scrollTo(url, anchor: .center)
+            }
+            .onChange(of: url) { _, selected in
+                withAnimation(.easeOut(duration: 0.2)) {
+                    proxy.scrollTo(selected, anchor: .center)
+                }
+            }
         }
     }
 
@@ -213,5 +276,64 @@ struct ImmersiveWallpaperPreview: View {
 
     private func formattedDuration(_ duration: TimeInterval) -> String {
         String(format: "%.1fs", duration)
+    }
+}
+
+private struct WallpaperDrawerThumbnail: View {
+    let url: URL
+    let isSelected: Bool
+
+    @State private var image: NSImage?
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            RoundedRectangle(cornerRadius: 14)
+                .fill(.black.opacity(0.28))
+
+            if let image {
+                Image(nsImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Image(systemName: "film")
+                    .font(.system(size: 20, weight: .ultraLight))
+                    .foregroundStyle(.white.opacity(0.4))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+
+            LinearGradient(
+                colors: [.clear, .black.opacity(0.72)],
+                startPoint: .center,
+                endPoint: .bottom
+            )
+
+            Text(displayName)
+                .font(.system(size: 10, weight: .medium))
+                .lineLimit(1)
+                .padding(8)
+        }
+        .frame(width: 138, height: 88)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(isSelected ? .white.opacity(0.92) : .white.opacity(0.12), lineWidth: isSelected ? 2 : 1)
+        }
+        .task(id: url) {
+            let asset = AVURLAsset(url: url)
+            let generator = AVAssetImageGenerator(asset: asset)
+            generator.appliesPreferredTrackTransform = true
+            generator.maximumSize = CGSize(width: 360, height: 220)
+            if let (frame, _) = try? await generator.image(at: .zero) {
+                image = NSImage(cgImage: frame, size: .zero)
+            }
+        }
+    }
+
+    private var displayName: String {
+        url.deletingPathExtension().lastPathComponent.replacingOccurrences(
+            of: "-[0-9a-f]{12}$",
+            with: "",
+            options: .regularExpression
+        )
     }
 }
