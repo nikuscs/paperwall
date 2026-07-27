@@ -1,0 +1,216 @@
+import CryptoKit
+import Darwin
+import Foundation
+
+public struct UpscaleResult: Sendable {
+    public let sourceVideoURL: URL
+    public let upscaledVideoURL: URL
+    public let resumedExistingOutput: Bool
+}
+
+public enum UpscaleError: Error, LocalizedError {
+    case missingTool
+    case processFailed(String)
+    case invalidOutput
+    case alreadyRunning
+
+    public var errorDescription: String? {
+        switch self {
+        case .missingTool:
+            "The free 4K upscaler is not installed. Install venhance with: uv tool install git+https://github.com/TomPenguin/venhance.git"
+        case .processFailed(let detail):
+            "4K upscaling failed: \(detail)"
+        case .invalidOutput:
+            "The upscaler did not produce a valid 4K video"
+        case .alreadyRunning:
+            "Another Paperwall upscale is already running"
+        }
+    }
+}
+
+public enum PaperwallUpscaleService {
+    private struct Job: Codable {
+        let sourceVideoURL: URL
+        let outputVideoURL: URL
+        var status: String
+        var detail: String?
+        let createdAt: Date
+        var updatedAt: Date
+    }
+
+    private static var generationDirectory: URL {
+        PaperwallConfiguration.applicationSupportDirectory
+            .appendingPathComponent("Generation", isDirectory: true)
+    }
+
+    private static var outputsDirectory: URL {
+        generationDirectory.appendingPathComponent("Upscaled", isDirectory: true)
+    }
+
+    private static var jobsDirectory: URL {
+        generationDirectory.appendingPathComponent("UpscaleJobs", isDirectory: true)
+    }
+
+    public static func latestResumableVideoURL() -> URL? {
+        let urls = (try? FileManager.default.contentsOfDirectory(
+            at: jobsDirectory,
+            includingPropertiesForKeys: nil
+        )) ?? []
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return urls.compactMap { url -> Job? in
+            guard let data = try? Data(contentsOf: url),
+                  let job = try? decoder.decode(Job.self, from: data),
+                  ["processing", "failed"].contains(job.status),
+                  FileManager.default.fileExists(atPath: job.sourceVideoURL.path) else {
+                return nil
+            }
+            return job
+        }
+        .max { $0.updatedAt < $1.updatedAt }?
+        .sourceVideoURL
+    }
+
+    public static func upscaleTo4K(videoURL: URL) async throws -> UpscaleResult {
+        let sourceInfo = try await VideoAssetValidator.validate(url: videoURL)
+        if sourceInfo.width >= 3_840, sourceInfo.height >= 2_160 {
+            return UpscaleResult(
+                sourceVideoURL: videoURL,
+                upscaledVideoURL: videoURL,
+                resumedExistingOutput: true
+            )
+        }
+        try FileManager.default.createDirectory(at: outputsDirectory, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: jobsDirectory, withIntermediateDirectories: true)
+
+        let digest = SHA256.hash(data: try Data(contentsOf: videoURL, options: [.mappedIfSafe]))
+            .map { String(format: "%02x", $0) }
+            .joined()
+        let jobID = String(digest.prefix(16))
+        let outputURL = outputsDirectory
+            .appendingPathComponent("\(videoURL.deletingPathExtension().lastPathComponent)-4k-\(jobID)")
+            .appendingPathExtension("mp4")
+        let jobURL = jobsDirectory.appendingPathComponent(jobID).appendingPathExtension("json")
+
+        if FileManager.default.fileExists(atPath: outputURL.path),
+           let info = try? await VideoAssetValidator.validate(url: outputURL),
+           info.width >= 3_840, info.height >= 2_160 {
+            return UpscaleResult(
+                sourceVideoURL: videoURL,
+                upscaledVideoURL: outputURL,
+                resumedExistingOutput: true
+            )
+        }
+
+        let lockURL = generationDirectory.appendingPathComponent("upscale.lock")
+        let descriptor = open(lockURL.path, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)
+        guard descriptor >= 0 else { throw UpscaleError.alreadyRunning }
+        guard flock(descriptor, LOCK_EX | LOCK_NB) == 0 else {
+            close(descriptor)
+            throw UpscaleError.alreadyRunning
+        }
+        defer {
+            _ = flock(descriptor, LOCK_UN)
+            close(descriptor)
+        }
+
+        guard let executable = venhanceExecutableURL() else { throw UpscaleError.missingTool }
+        let stageURL = outputsDirectory
+            .appendingPathComponent(".\(jobID)-partial")
+            .appendingPathExtension("mp4")
+        try? FileManager.default.removeItem(at: stageURL)
+
+        var job = Job(
+            sourceVideoURL: videoURL,
+            outputVideoURL: outputURL,
+            status: "processing",
+            detail: nil,
+            createdAt: Date(),
+            updatedAt: Date()
+        )
+        try save(job, to: jobURL)
+
+        do {
+            let logURL = jobsDirectory.appendingPathComponent("\(jobID).log")
+            let terminationStatus = try await runUpscaler(
+                executable: executable,
+                input: videoURL,
+                output: stageURL,
+                logURL: logURL
+            )
+            guard terminationStatus == 0 else {
+                let detail = (try? String(contentsOf: logURL, encoding: .utf8).suffix(2_000))
+                    .map(String.init) ?? "process exited with status \(terminationStatus)"
+                throw UpscaleError.processFailed(detail)
+            }
+            let info = try await VideoAssetValidator.validate(url: stageURL)
+            guard info.width >= 3_840, info.height >= 2_160 else {
+                throw UpscaleError.invalidOutput
+            }
+            try? FileManager.default.removeItem(at: outputURL)
+            try FileManager.default.moveItem(at: stageURL, to: outputURL)
+            job.status = "completed"
+            job.updatedAt = Date()
+            try save(job, to: jobURL)
+            return UpscaleResult(
+                sourceVideoURL: videoURL,
+                upscaledVideoURL: outputURL,
+                resumedExistingOutput: false
+            )
+        } catch {
+            try? FileManager.default.removeItem(at: stageURL)
+            job.status = "failed"
+            job.detail = error.localizedDescription
+            job.updatedAt = Date()
+            try? save(job, to: jobURL)
+            throw error
+        }
+    }
+
+    private static func venhanceExecutableURL() -> URL? {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        let candidates = [
+            home.appendingPathComponent(".local/bin/venhance"),
+            URL(fileURLWithPath: "/opt/homebrew/bin/venhance"),
+            URL(fileURLWithPath: "/usr/local/bin/venhance"),
+        ]
+        return candidates.first { FileManager.default.isExecutableFile(atPath: $0.path) }
+    }
+
+    private static func runUpscaler(
+        executable: URL,
+        input: URL,
+        output: URL,
+        logURL: URL
+    ) async throws -> Int32 {
+        try await Task.detached(priority: .utility) {
+            FileManager.default.createFile(atPath: logURL.path, contents: nil)
+            let log = try FileHandle(forWritingTo: logURL)
+            defer { try? log.close() }
+
+            let process = Process()
+            process.executableURL = executable
+            process.arguments = [
+                "upscale", input.path,
+                "--scale", "2",
+                "--model", "realesr-anime",
+                "--codec", "h264",
+                "--quality", "80",
+                "--device", "mps",
+                "--output", output.path,
+            ]
+            process.standardOutput = log
+            process.standardError = log
+            try process.run()
+            process.waitUntilExit()
+            return process.terminationStatus
+        }.value
+    }
+
+    private static func save(_ job: Job, to url: URL) throws {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.dateEncodingStrategy = .iso8601
+        try encoder.encode(job).write(to: url, options: .atomic)
+    }
+}

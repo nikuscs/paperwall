@@ -10,6 +10,16 @@ struct PaperwallShellView: View {
         case settings = "Settings"
     }
 
+    private enum PipelineStage: Equatable {
+        case idle
+        case generatingImage
+        case imageReady
+        case generatingVideo
+        case upscaling
+        case ready
+        case failed
+    }
+
     @ObservedObject var wallspaceLibrary: WallspaceLibraryModel
 
     @State private var section: Section = .home
@@ -22,13 +32,17 @@ struct PaperwallShellView: View {
     @State private var showingProviderOptions = false
     @State private var showingDurationOptions = false
     @State private var generatedImageURL: URL?
-    @State private var isGeneratingImage = false
+    @State private var pipelineStage: PipelineStage = .idle
+    @State private var pipelineStatus = ""
+    @State private var pipelineError: String?
+    @State private var lastGeneratedVideoURL: URL?
     @State private var previewURL: URL?
     @FocusState private var promptFocused: Bool
     @Namespace private var navigationSelection
 
     let generateImage: (String, @escaping (Result<URL, Error>) -> Void) -> Void
-    let generate: (GenerationRequest) -> Void
+    let generate: (GenerationRequest, @escaping (Result<GenerationResult, Error>) -> Void) -> Void
+    let upscaleVideo: (URL, @escaping (Result<URL, Error>) -> Void) -> Void
     let chooseVideo: () -> Void
     let selectWallspace: (URL) -> Void
     let setPlaybackSpeed: (PlaybackSpeed) -> Void
@@ -114,6 +128,13 @@ struct PaperwallShellView: View {
         .frame(minWidth: 920, minHeight: 600)
         .ignoresSafeArea(.container, edges: .top)
         .preferredColorScheme(.dark)
+        .onAppear {
+            if let resumable = PaperwallUpscaleService.latestResumableVideoURL() {
+                lastGeneratedVideoURL = resumable
+                pipelineStage = .failed
+                pipelineError = "4K upscaling was interrupted. You can resume safely."
+            }
+        }
         .onChange(of: wallspaceLibrary.videos) { _, videos in
             if section == .library, previewURL == nil, let first = videos.first {
                 withAnimation(.smooth(duration: 0.3)) { previewURL = first }
@@ -439,7 +460,7 @@ struct PaperwallShellView: View {
 
                 Button(action: primaryGenerationAction) {
                     HStack(spacing: 7) {
-                        if isGeneratingImage {
+                        if isPipelineRunning {
                             ProgressView()
                                 .controlSize(.small)
                         } else {
@@ -454,7 +475,39 @@ struct PaperwallShellView: View {
                 .buttonStyle(.plain)
                 .foregroundStyle(.black.opacity(0.86))
                 .background(.white.opacity(0.94), in: Capsule())
-                .disabled(isGeneratingImage)
+                .disabled(isPipelineRunning)
+            }
+
+            if isPipelineRunning {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text(pipelineStatus)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(.white.opacity(0.68))
+                }
+            } else if pipelineStage == .ready {
+                Label("4K wallpaper ready and installed", systemImage: "checkmark.circle.fill")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.green)
+            }
+
+            if let pipelineError {
+                HStack(spacing: 10) {
+                    Label(pipelineError, systemImage: "exclamationmark.triangle")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(.orange)
+                        .lineLimit(2)
+                    Spacer()
+                    if lastGeneratedVideoURL != nil {
+                        Button("Retry Upscale", action: retryUpscale)
+                            .buttonStyle(.plain)
+                            .font(.system(size: 12, weight: .medium))
+                            .padding(.horizontal, 11)
+                            .frame(height: 30)
+                            .glassEffect(.regular.interactive(true), in: Capsule())
+                    }
+                }
             }
 
             if let generationError {
@@ -649,6 +702,10 @@ struct PaperwallShellView: View {
         }
     }
 
+    private var isPipelineRunning: Bool {
+        [.generatingImage, .generatingVideo, .upscaling].contains(pipelineStage)
+    }
+
     private var imageGenerationCost: String {
         (try? PaperwallImageGenerationService.quote(prompt: prompt).formattedCost) ?? "$0.04"
     }
@@ -676,12 +733,17 @@ struct PaperwallShellView: View {
         generatedImageURL = nil
         referenceImageURL = panel.url
         generationError = nil
+        pipelineError = nil
+        pipelineStage = .imageReady
     }
 
     private func clearReferenceImage() {
         generatedImageURL = nil
         referenceImageURL = nil
+        lastGeneratedVideoURL = nil
         generationError = nil
+        pipelineError = nil
+        pipelineStage = .idle
         promptFocused = true
     }
 
@@ -701,17 +763,23 @@ struct PaperwallShellView: View {
             return
         }
 
-        isGeneratingImage = true
+        pipelineStage = .generatingImage
+        pipelineStatus = "Step 1 of 3 · generating image"
+        pipelineError = nil
         generationError = nil
         generateImage(prompt) { result in
-            isGeneratingImage = false
             switch result {
             case .success(let url):
                 generatedImageURL = url
                 referenceImageURL = url
+                pipelineStage = .imageReady
+                pipelineStatus = "Image ready"
             case .failure(let error):
-                if (error as? GenerationError) != .approvalDeclined {
-                    generationError = error.localizedDescription
+                if (error as? GenerationError) == .approvalDeclined {
+                    pipelineStage = .idle
+                } else {
+                    pipelineStage = .failed
+                    pipelineError = error.localizedDescription
                 }
             }
         }
@@ -721,11 +789,51 @@ struct PaperwallShellView: View {
         let request = generationRequest
         do {
             _ = try PaperwallGenerationService.quote(for: request)
-            generationError = nil
-            generate(request)
         } catch {
             generationError = error.localizedDescription
+            return
         }
+
+        pipelineStage = .generatingVideo
+        pipelineStatus = "Step 2 of 3 · generating slow ambient video"
+        pipelineError = nil
+        generationError = nil
+        generate(request) { result in
+            switch result {
+            case .success(let generated):
+                lastGeneratedVideoURL = generated.generatedVideoURL
+                beginUpscale(generated.generatedVideoURL)
+            case .failure(let error):
+                if (error as? GenerationError) == .approvalDeclined {
+                    pipelineStage = .imageReady
+                } else {
+                    pipelineStage = .failed
+                    pipelineError = error.localizedDescription
+                }
+            }
+        }
+    }
+
+    private func beginUpscale(_ videoURL: URL) {
+        pipelineStage = .upscaling
+        pipelineStatus = "Step 3 of 3 · upscaling to 4K"
+        pipelineError = nil
+        upscaleVideo(videoURL) { result in
+            switch result {
+            case .success:
+                pipelineStage = .ready
+                pipelineStatus = "4K wallpaper ready"
+                pipelineError = nil
+            case .failure(let error):
+                pipelineStage = .failed
+                pipelineError = error.localizedDescription
+            }
+        }
+    }
+
+    private func retryUpscale() {
+        guard let lastGeneratedVideoURL else { return }
+        beginUpscale(lastGeneratedVideoURL)
     }
 
     private var bottomPanel: some View {

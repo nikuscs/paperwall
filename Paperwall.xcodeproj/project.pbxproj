@@ -11,6 +11,7 @@
 		1541471D1DA4ADA27FDAE56C /* PaperwallImageGenerationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5166438E0003549B074D1064 /* PaperwallImageGenerationService.swift */; };
 		16A95858DB4DC5EB63C134B0 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA146E3254EB214361106E52 /* Security.framework */; };
 		182D635A4E1F1BD6B63273CF /* PaperwallWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEB6ECB880AE750D63A6D475 /* PaperwallWindowController.swift */; };
+		19FFE966925D795B50244FCD /* PaperwallUpscaleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59ECA958EA31A2A6316FD86 /* PaperwallUpscaleService.swift */; };
 		21AE54A8159DBF1F11261332 /* WallpaperPreviewSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E0605D4472F56A6E5803806 /* WallpaperPreviewSupport.swift */; };
 		229554F4B6CA46CC8803BABD /* LoopingPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F58335E601A53032C32C42F3 /* LoopingPlayer.swift */; };
 		237393A1B1A15D5599C79493 /* PaperwallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86AAD7159FFB84DAB9F45DAA /* PaperwallService.swift */; };
@@ -168,6 +169,7 @@
 		CDFBE4227F068CCC3F69DD35 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		D6128687229856AE8C697300 /* PaperwallScreenSaver.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PaperwallScreenSaver.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9C88BC29E2AF6FB109DF306 /* PaperwallPlayback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallPlayback.swift; sourceTree = "<group>"; };
+		E59ECA958EA31A2A6316FD86 /* PaperwallUpscaleService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallUpscaleService.swift; sourceTree = "<group>"; };
 		E5B5ED5EC5552A5C82E3D658 /* StaticWallpaperManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaticWallpaperManager.swift; sourceTree = "<group>"; };
 		F00D13D1CD68491C70EA0EB2 /* GenerationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerationModels.swift; sourceTree = "<group>"; };
 		F28488992ACC9260FE4AED1A /* PaperwallConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallConfiguration.swift; sourceTree = "<group>"; };
@@ -342,6 +344,7 @@
 				5166438E0003549B074D1064 /* PaperwallImageGenerationService.swift */,
 				D9C88BC29E2AF6FB109DF306 /* PaperwallPlayback.swift */,
 				86AAD7159FFB84DAB9F45DAA /* PaperwallService.swift */,
+				E59ECA958EA31A2A6316FD86 /* PaperwallUpscaleService.swift */,
 				4CDAC27A8FA36F6158E04707 /* PlaybackPreferences.swift */,
 				CDFBE4227F068CCC3F69DD35 /* PlayerView.swift */,
 				68517334A8A49B4436313D06 /* ReplicateClient.swift */,
@@ -614,6 +617,7 @@
 				1541471D1DA4ADA27FDAE56C /* PaperwallImageGenerationService.swift in Sources */,
 				9F6748A1A63483D4378EF44A /* PaperwallPlayback.swift in Sources */,
 				49CC3EE12BF9038FA3121535 /* PaperwallService.swift in Sources */,
+				19FFE966925D795B50244FCD /* PaperwallUpscaleService.swift in Sources */,
 				131E45B3488D75B613069952 /* PlaybackPreferences.swift in Sources */,
 				681DD9DAB07E667412DCB6D4 /* PlayerView.swift in Sources */,
 				2E7F621B6E98C349E87699CD /* ReplicateClient.swift in Sources */,
