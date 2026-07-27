@@ -8,12 +8,13 @@ public enum PaperwallGenerationService {
     public typealias ProgressHandler = @Sendable (String) -> Void
 
     private static let defaultPrompt =
-        "Create subtle ambient motion suitable for a seamless animated wallpaper. " +
-        "Keep the camera fixed and preserve the composition, geometry, colors, and style."
+        "Create extremely slow, subtle ambient motion suitable for a calm seamless wallpaper. " +
+        "Keep the camera completely fixed and preserve the composition, geometry, colors, and style."
     private static let constraints =
-        "Seamless loop; fixed camera; no zoom, parallax, flicker, exposure shift, text, " +
+        "Motion must be minimal and tranquil, approximately quarter-speed, with tiny displacement only. " +
+        "Seamless loop; fixed camera; no fast movement, zoom, pan, parallax, flicker, exposure shift, text, " +
         "watermark, duplicated subjects, geometry deformation, or style drift. " +
-        "Use only gentle natural motion and return silently to the first-frame composition."
+        "Only mist, water, clouds, light, or foliage may move gently; return silently to the first-frame composition."
 
     private static var generationDirectory: URL {
         PaperwallConfiguration.applicationSupportDirectory

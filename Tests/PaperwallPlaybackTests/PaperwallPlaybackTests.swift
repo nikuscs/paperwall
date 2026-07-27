@@ -91,6 +91,12 @@ private func fixtureURL(_ name: String, extension ext: String) throws -> URL {
 
     #expect(seedance15["camera_fixed"] == .bool(true))
     #expect(seedance15["generate_audio"] == .bool(false))
+    if case .string(let prompt) = seedance15["prompt"] {
+        #expect(prompt.contains("quarter-speed"))
+        #expect(prompt.contains("tiny displacement"))
+    } else {
+        Issue.record("Seedance prompt was not emitted")
+    }
     #expect(seedance20["generate_audio"] == .bool(false))
     #expect(seedance20["fps"] == nil)
 }
