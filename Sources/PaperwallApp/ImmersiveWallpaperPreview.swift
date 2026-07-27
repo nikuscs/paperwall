@@ -8,6 +8,7 @@ struct ImmersiveWallpaperPreview: View {
     let wallpapers: [URL]
     let metadata: WallpaperMetadata?
     let selectPreview: (URL) -> Void
+    let isApplyingWallpaper: Bool
     let setWallpaper: () -> Void
     let setSpeed: (PlaybackSpeed) -> Void
     let saveMetadata: (String, String, [String]) -> Void
@@ -185,13 +186,20 @@ struct ImmersiveWallpaperPreview: View {
                 .buttonStyle(.plain)
 
                 Button(action: setWallpaper) {
-                    Text("Set Wallpaper")
-                        .font(.system(size: 14, weight: .medium))
-                        .padding(.horizontal, 24)
-                        .frame(height: 42)
+                    HStack(spacing: 8) {
+                        if isApplyingWallpaper {
+                            ProgressView()
+                                .controlSize(.small)
+                        }
+                        Text(isApplyingWallpaper ? "Applying…" : "Set Wallpaper")
+                    }
+                    .font(.system(size: 14, weight: .medium))
+                    .padding(.horizontal, 24)
+                    .frame(height: 42)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.black.opacity(0.86))
+                .disabled(isApplyingWallpaper)
                 .background(.white.opacity(0.94), in: Capsule())
             }
             .padding(10)
