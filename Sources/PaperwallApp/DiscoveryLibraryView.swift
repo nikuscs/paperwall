@@ -6,7 +6,7 @@ struct DiscoveryLibraryView: View {
     @ObservedObject var library: DiscoveryLibraryModel
     @State private var selectedURL: URL?
 
-    let importVideo: (URL) -> Void
+    let openPreview: (URL) -> Void
 
     private var videos: [URL] { library.videos }
 
@@ -23,7 +23,7 @@ struct DiscoveryLibraryView: View {
                         .tracking(-0.8)
                 }
                 Spacer()
-                Text("← → Preview  ·  Return Use")
+                Text("← → Browse  ·  Return Preview")
                     .font(.system(size: 11, weight: .regular))
                     .foregroundStyle(.white.opacity(0.42))
                 Button(action: library.synchronize) {
@@ -74,6 +74,18 @@ struct DiscoveryLibraryView: View {
                                 .padding(12)
                         }
                     }
+                    .overlay(alignment: .topTrailing) {
+                        if let selectedURL {
+                            Button { openPreview(selectedURL) } label: {
+                                Image(systemName: "arrow.up.left.and.arrow.down.right")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .frame(width: 36, height: 36)
+                            }
+                            .buttonStyle(.plain)
+                            .glassEffect(.regular.interactive(true), in: Circle())
+                            .padding(12)
+                        }
+                    }
 
                     VStack(spacing: 10) {
                         ScrollViewReader { proxy in
@@ -114,9 +126,9 @@ struct DiscoveryLibraryView: View {
                         }
 
                         Button {
-                            if let selectedURL { importVideo(selectedURL) }
+                            if let selectedURL { openPreview(selectedURL) }
                         } label: {
-                            Label("Use selected wallpaper", systemImage: "checkmark.circle")
+                            Label("Open preview", systemImage: "arrow.up.left.and.arrow.down.right")
                                 .font(.system(size: 13, weight: .medium))
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 38)
@@ -160,7 +172,7 @@ struct DiscoveryLibraryView: View {
                     moveSelection(by: 1)
                     return true
                 case 36, 76:
-                    if let selectedURL { importVideo(selectedURL) }
+                    if let selectedURL { openPreview(selectedURL) }
                     return true
                 default:
                     return false
@@ -251,25 +263,32 @@ private struct LibraryKeyboardMonitor: NSViewRepresentable {
 }
 
 @MainActor
-private struct DiscoveryPlayerPreview: NSViewRepresentable {
+struct DiscoveryPlayerPreview: NSViewRepresentable {
     let url: URL
+    var playbackSpeed: PlaybackSpeed = PlaybackPreferences.playbackSpeed
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(url: url)
+        Coordinator(url: url, playbackSpeed: playbackSpeed)
     }
 
     func makeNSView(context: Context) -> PlayerView {
         let view = PlayerView()
         view.prepare(assetURL: url)
         view.start()
+        view.setPlaybackSpeed(playbackSpeed)
         return view
     }
 
     func updateNSView(_ view: PlayerView, context: Context) {
-        guard context.coordinator.url != url else { return }
-        context.coordinator.url = url
-        view.prepare(assetURL: url)
-        view.start()
+        if context.coordinator.url != url {
+            context.coordinator.url = url
+            view.prepare(assetURL: url)
+            view.start()
+        }
+        if context.coordinator.playbackSpeed != playbackSpeed {
+            context.coordinator.playbackSpeed = playbackSpeed
+            view.setPlaybackSpeed(playbackSpeed)
+        }
     }
 
     static func dismantleNSView(_ view: PlayerView, coordinator: Coordinator) {
@@ -279,9 +298,11 @@ private struct DiscoveryPlayerPreview: NSViewRepresentable {
     @MainActor
     final class Coordinator {
         var url: URL
+        var playbackSpeed: PlaybackSpeed
 
-        init(url: URL) {
+        init(url: URL, playbackSpeed: PlaybackSpeed) {
             self.url = url
+            self.playbackSpeed = playbackSpeed
         }
     }
 }
