@@ -640,11 +640,11 @@ struct PaperwallShellView: View {
 
                 settingsRow(
                     symbol: "folder",
-                    title: "Paperwall storage",
-                    detail: "Current, generated, and fallback assets"
+                    title: "Synced Paperwall storage",
+                    detail: "Wallpapers and generated media · ~/.config/paperwall"
                 ) {
                     settingsButton("Open Folder") {
-                        NSWorkspace.shared.open(PaperwallConfiguration.applicationSupportDirectory)
+                        NSWorkspace.shared.open(PaperwallConfiguration.sharedDataDirectory)
                     }
                 }
             }

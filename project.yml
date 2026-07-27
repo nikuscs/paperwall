@@ -81,6 +81,7 @@ targets:
     sources:
       - Sources/PaperwallCLI
       - Sources/PaperwallPlayback/PaperwallConfiguration.swift
+      - Sources/PaperwallPlayback/PaperwallStorageMigrator.swift
       - Sources/PaperwallPlayback/VideoAssetValidator.swift
       - Sources/PaperwallPlayback/AssetLibrary.swift
       - Sources/PaperwallPlayback/LaunchAtLoginManager.swift

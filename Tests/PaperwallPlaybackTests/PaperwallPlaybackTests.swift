@@ -176,6 +176,16 @@ private func fixtureURL(_ name: String, extension ext: String) throws -> URL {
     ))
 }
 
+@Test func sharedMediaLocation() {
+    #expect(PaperwallConfiguration.sharedDataDirectory.path.hasSuffix("/.config/paperwall"))
+    #expect(PaperwallConfiguration.sharedLibraryDirectory.path.hasSuffix(
+        "/.config/paperwall/Library/Discovery"
+    ))
+    #expect(PaperwallConfiguration.generationStateDirectory.path.contains(
+        "/Library/Application Support/Paperwall/Generation"
+    ))
+}
+
 @Test func customAssetLocation() {
     let url = URL(fileURLWithPath: "/tmp/custom-paperwall.mov")
     #expect(PaperwallConfiguration(assetURL: url).assetURL == url)

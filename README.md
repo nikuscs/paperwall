@@ -12,6 +12,10 @@ On first launch, the app automatically installs its bundled CLI to `~/.local/bin
 
 If your shell does not include `~/.local/bin`, add it to `PATH`.
 
+## Storage and multi-Mac sync
+
+Paperwall stores sync-safe wallpapers, imported library videos, generated images and videos, source images, and 4K upscales under `~/.config/paperwall`. Machine-specific playback state, the active `current.mov`, native fallbacks, generation jobs, locks, and logs remain under `~/Library/Application Support/Paperwall` and must not be synchronized. Existing media is copied non-destructively into the shared location on first launch.
+
 ## Generate
 
 In the app, describe a scene and generate a still image first. Review it, then choose **Animate** to submit a separately approved video request. Paperwall automatically upscales the finished video to 4K using the free `venhance` Real-ESRGAN pipeline. The app bundles its setup bootstrap, verifies the pinned upscaler at every launch, and installs it automatically when missing. Image and video spending are confirmed independently; interrupted predictions resume safely and failed upscaling can be retried.

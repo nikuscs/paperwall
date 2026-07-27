@@ -18,8 +18,12 @@ public enum AssetLibrary {
     }
 
     public static var paperwallLibraryDirectory: URL {
+        PaperwallConfiguration.sharedLibraryDirectory
+    }
+
+    private static var mirrorIndexURL: URL {
         PaperwallConfiguration.applicationSupportDirectory
-            .appendingPathComponent("Library/Discovery", isDirectory: true)
+            .appendingPathComponent("Library/Discovery/index.json")
     }
 
     public static func discoveryVideos() -> [URL] {
@@ -32,14 +36,18 @@ public enum AssetLibrary {
 
     public static func synchronizeDiscoveryCache() async throws -> [URL] {
         try await Task.detached(priority: .utility) {
+            try PaperwallStorageMigrator.migrateSynchronouslyIfNeeded()
             let fileManager = FileManager.default
             try fileManager.createDirectory(
                 at: paperwallLibraryDirectory,
                 withIntermediateDirectories: true
             )
 
-            let indexURL = paperwallLibraryDirectory.appendingPathComponent("index.json")
-            var index = (try? Data(contentsOf: indexURL))
+            try fileManager.createDirectory(
+                at: mirrorIndexURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            var index = (try? Data(contentsOf: mirrorIndexURL))
                 .flatMap { try? JSONDecoder().decode(MirrorIndex.self, from: $0) }
                 ?? MirrorIndex()
 
@@ -92,7 +100,7 @@ public enum AssetLibrary {
             }
             let encoder = JSONEncoder()
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-            try encoder.encode(index).write(to: indexURL, options: .atomic)
+            try encoder.encode(index).write(to: mirrorIndexURL, options: .atomic)
             return paperwallLibraryVideos()
         }.value
     }
