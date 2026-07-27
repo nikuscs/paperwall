@@ -14,7 +14,7 @@ struct PaperwallShellView: View {
 
     @State private var section: Section = .home
     @State private var prompt = ""
-    @State private var provider: GenerationProvider = .pruna
+    @State private var provider: GenerationProvider = .seedance15
     @State private var duration = 4
     @State private var referenceImageURL: URL?
     @State private var generationError: String?
@@ -400,7 +400,7 @@ struct PaperwallShellView: View {
                 .glassEffect(.regular.interactive(true), in: Capsule())
                 .popover(isPresented: $showingProviderOptions, arrowEdge: .bottom) {
                     optionPopover(width: 220, height: 126) {
-                        ForEach(GenerationProvider.allCases, id: \.self) { option in
+                        ForEach(GenerationProvider.availableCases, id: \.self) { option in
                             optionButton(option.displayName, selected: provider == option) {
                                 provider = option
                                 if !providerDuration.contains(duration) {
@@ -731,7 +731,7 @@ struct PaperwallShellView: View {
                 divider
                 statusItem(symbol: "lock.display", title: "Lock Screen", value: "Ready")
                 divider
-                statusItem(symbol: "wand.and.stars", title: "AI Models", value: "4 available")
+                statusItem(symbol: "wand.and.stars", title: "AI Models", value: "3 available")
                 Spacer()
                 Button {
                     withAnimation(.smooth(duration: 0.32)) { section = .settings }

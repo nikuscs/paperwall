@@ -5,9 +5,12 @@ public enum GenerationProvider: String, CaseIterable, Codable, Sendable {
     case seedance15 = "seedance-1.5"
     case seedance20 = "seedance-2.0"
 
+    public static var availableCases: [GenerationProvider] {
+        [.seedance15, .seedance20]
+    }
+
     public init(alias: String) throws {
         switch alias.lowercased() {
-        case "pruna", "prune", "p-video", "pvideo": self = .pruna
         case "seedance-1.5", "seedance-1.5-pro", "seedance15": self = .seedance15
         case "seedance-2.0", "seedance20": self = .seedance20
         default: throw GenerationError.unknownProvider(alias)
@@ -55,7 +58,7 @@ public struct GenerationRequest: Codable, Equatable, Sendable {
     public let seed: Int
 
     public init(
-        provider: GenerationProvider = .pruna,
+        provider: GenerationProvider = .seedance15,
         prompt: String? = nil,
         imageURL: URL? = nil,
         duration: Int = 4,
