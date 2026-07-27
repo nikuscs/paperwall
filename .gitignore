@@ -1,0 +1,29 @@
+# Xcode
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.moved-aside
+
+# macOS
+.DS_Store
+
+# Secrets
+.env
+.env.*
+!.env.example
+*API_TOKEN*
+
+# Generated motion candidates (keep sidecar metadata and selected final asset)
+Assets/Generated/*.mp4
+Assets/Generated/*.mov
+Assets/Generated/*.webm
+Assets/Generated/*.mkv
+Assets/Generated/*.png
+Assets/Generated/*.jpg
+Assets/Generated/*.jpeg
+
+# Local video-processing intermediates
+Assets/Final/*.tmp.*
+Assets/Final/*-intermediate.*

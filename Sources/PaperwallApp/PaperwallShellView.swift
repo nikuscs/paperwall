@@ -1,0 +1,624 @@
+import AppKit
+import PaperwallPlayback
+import SwiftUI
+import UniformTypeIdentifiers
+
+struct PaperwallShellView: View {
+    enum Section: String {
+        case home = "Home"
+        case library = "Library"
+        case settings = "Settings"
+    }
+
+    @ObservedObject var wallspaceLibrary: WallspaceLibraryModel
+
+    @State private var section: Section = .home
+    @State private var prompt = ""
+    @State private var provider: GenerationProvider = .pruna
+    @State private var duration = 4
+    @State private var referenceImageURL: URL?
+    @State private var generationError: String?
+    @State private var playbackSpeed = PlaybackPreferences.playbackSpeed
+    @State private var showingProviderOptions = false
+    @State private var showingDurationOptions = false
+    @FocusState private var promptFocused: Bool
+    @Namespace private var navigationSelection
+
+    let generate: (GenerationRequest) -> Void
+    let chooseVideo: () -> Void
+    let selectWallspace: (URL) -> Void
+    let setPlaybackSpeed: (PlaybackSpeed) -> Void
+    let configureToken: () -> Void
+    let openSettings: () -> Void
+
+    private let backgroundImage = NSImage(contentsOf: StaticShellAssets.backgroundURL)
+    private let brandLogo: NSImage? = {
+        guard let url = Bundle.main.url(forResource: "PaperwallLogo", withExtension: "svg"),
+              let image = NSImage(contentsOf: url) else { return nil }
+        image.isTemplate = true
+        return image
+    }()
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                background
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                    .clipped()
+                LinearGradient(
+                    colors: [.black.opacity(0.16), .black.opacity(0.56), .black.opacity(0.86)],
+                    startPoint: .topTrailing,
+                    endPoint: .bottomLeading
+                )
+
+                VStack(spacing: 0) {
+                    topBar
+                    Spacer(minLength: 48)
+                    content
+                    Spacer(minLength: 30)
+                    bottomPanel
+                }
+                .frame(width: geometry.size.width - 72, height: geometry.size.height - 88)
+                .position(x: geometry.size.width / 2, y: geometry.size.height / 2 + 18)
+
+                VStack(spacing: 0) {
+                    WindowDragRegion()
+                        .frame(height: 30)
+                        .padding(.leading, 88)
+                        .padding(.trailing, 16)
+                    Spacer()
+                }
+            }
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            .clipped()
+        }
+        .frame(minWidth: 920, minHeight: 600)
+        .ignoresSafeArea(.container, edges: .top)
+        .preferredColorScheme(.dark)
+    }
+
+    @ViewBuilder
+    private var background: some View {
+        if let backgroundImage {
+            Image(nsImage: backgroundImage)
+                .resizable()
+                .scaledToFill()
+                .blur(radius: 0.25)
+                .overlay(alignment: .trailing) {
+                    LinearGradient(
+                        colors: [.clear, .black.opacity(0.2)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                }
+        } else {
+            LinearGradient(
+                colors: [Color(red: 0.08, green: 0.12, blue: 0.18), .black],
+                startPoint: .topTrailing,
+                endPoint: .bottomLeading
+            )
+        }
+    }
+
+    private var topBar: some View {
+        ZStack {
+            HStack {
+                HStack(spacing: 12) {
+                    Group {
+                        if let brandLogo {
+                            Image(nsImage: brandLogo)
+                                .renderingMode(.template)
+                                .resizable()
+                                .scaledToFit()
+                                .padding(8)
+                        } else {
+                            Image(systemName: "photo.circle")
+                                .font(.system(size: 19, weight: .regular))
+                        }
+                    }
+                    .frame(width: 40, height: 40)
+                    .glassEffect(.regular.tint(.white.opacity(0.08)), in: RoundedRectangle(cornerRadius: 13))
+                    Text("Paperwall ®")
+                        .font(.system(size: 22, weight: .medium, design: .rounded))
+                }
+                Spacer()
+                circleButton(symbol: "gearshape") {
+                    withAnimation(.smooth(duration: 0.32)) { section = .settings }
+                }
+            }
+
+            GlassEffectContainer(spacing: 10) {
+                HStack(spacing: 4) {
+                    ForEach([Section.home, .library], id: \.self) { item in
+                        Button {
+                            withAnimation(.smooth(duration: 0.32)) { section = item }
+                        } label: {
+                            Text(item.rawValue)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(section == item ? .black : .white)
+                                .padding(.horizontal, 18)
+                                .frame(height: 36)
+                                .background {
+                                    if section == item {
+                                        Capsule()
+                                            .fill(.white.opacity(0.92))
+                                            .matchedGeometryEffect(
+                                                id: "navigation-selection",
+                                                in: navigationSelection
+                                            )
+                                    }
+                                }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(6)
+                .glassEffect(.regular.interactive(true), in: Capsule())
+            }
+        }
+        .frame(height: 52)
+    }
+
+    private var content: some View {
+        ZStack(alignment: .leading) {
+            if section == .home {
+                homeContent
+                    .transition(pageTransition)
+            }
+            if section == .library {
+                WallspaceLibraryView(library: wallspaceLibrary, importVideo: selectWallspace)
+                    .transition(pageTransition)
+            }
+            if section == .settings {
+                settingsContent
+                    .transition(pageTransition)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .clipped()
+        .animation(.smooth(duration: 0.32), value: section)
+    }
+
+    private var pageTransition: AnyTransition {
+        .asymmetric(
+            insertion: .opacity.combined(with: .offset(y: 8)),
+            removal: .opacity.combined(with: .offset(y: -4))
+        )
+    }
+
+    private var homeContent: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("ANIMATED WALLPAPERS")
+                        .font(.system(size: 11, weight: .medium))
+                        .tracking(2.2)
+                        .foregroundStyle(.white.opacity(0.52))
+
+                    Text("Motion that belongs on your Mac.")
+                        .font(.system(size: 38, weight: .medium, design: .rounded))
+                        .tracking(-1.15)
+
+                    Text("Describe a scene or add a reference image. Paperwall generates it, installs it, and keeps every display in sync.")
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundStyle(.white.opacity(0.66))
+                        .frame(maxWidth: 660, alignment: .leading)
+                        .lineSpacing(3)
+                }
+
+                generationComposer
+            }
+            .frame(maxWidth: 760, alignment: .leading)
+            Spacer(minLength: 80)
+        }
+    }
+
+    private var generationComposer: some View {
+        VStack(alignment: .leading, spacing: 11) {
+            HStack(spacing: 0) {
+                Button {
+                    promptFocused = true
+                } label: {
+                    Label("Generate with AI", systemImage: "sparkles")
+                        .font(.system(size: 13, weight: .medium))
+                        .padding(.horizontal, 14)
+                        .frame(height: 34)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.black.opacity(0.84))
+                .background(.white.opacity(0.92), in: Capsule())
+
+                Rectangle()
+                    .fill(.white.opacity(0.18))
+                    .frame(width: 1, height: 18)
+                    .padding(.horizontal, 10)
+
+                Button(action: chooseVideo) {
+                    Label("Use your own", systemImage: "film")
+                        .font(.system(size: 13, weight: .regular))
+                        .frame(height: 34)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.white.opacity(0.72))
+
+                Spacer()
+
+                Text("Reference image optional")
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundStyle(.white.opacity(0.42))
+            }
+
+            TextField(
+                "Describe the scene and the subtle motion you want…",
+                text: $prompt,
+                axis: .vertical
+            )
+            .focused($promptFocused)
+            .textFieldStyle(.plain)
+            .font(.system(size: 16, weight: .regular))
+            .lineLimit(2...4)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(.black.opacity(0.16), in: RoundedRectangle(cornerRadius: 16))
+
+            HStack(spacing: 9) {
+                Button(action: chooseReferenceImage) {
+                    Label(
+                        referenceImageURL?.lastPathComponent ?? "Add image",
+                        systemImage: referenceImageURL == nil ? "photo.badge.plus" : "photo.fill"
+                    )
+                    .font(.system(size: 13, weight: .regular))
+                    .lineLimit(1)
+                    .frame(maxWidth: 170)
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 13)
+                .frame(height: 36)
+                .glassEffect(.regular.interactive(true), in: Capsule())
+
+                Button {
+                    showingProviderOptions.toggle()
+                } label: {
+                    composerMenuLabel(provider.displayName)
+                        .frame(width: 166)
+                }
+                .buttonStyle(.plain)
+                .glassEffect(.regular.interactive(true), in: Capsule())
+                .popover(isPresented: $showingProviderOptions, arrowEdge: .bottom) {
+                    optionPopover(width: 220, height: 126) {
+                        ForEach(GenerationProvider.allCases, id: \.self) { option in
+                            optionButton(option.displayName, selected: provider == option) {
+                                provider = option
+                                if !providerDuration.contains(duration) {
+                                    duration = providerDuration.lowerBound
+                                }
+                                showingProviderOptions = false
+                            }
+                        }
+                    }
+                }
+
+                Button {
+                    showingDurationOptions.toggle()
+                } label: {
+                    composerMenuLabel("\(duration) sec")
+                        .frame(width: 88)
+                }
+                .buttonStyle(.plain)
+                .glassEffect(.regular.interactive(true), in: Capsule())
+                .popover(isPresented: $showingDurationOptions, arrowEdge: .bottom) {
+                    optionPopover(width: 120, height: 260) {
+                        ForEach(Array(providerDuration), id: \.self) { seconds in
+                            optionButton("\(seconds) sec", selected: duration == seconds) {
+                                duration = seconds
+                                showingDurationOptions = false
+                            }
+                        }
+                    }
+                }
+
+                Spacer()
+
+                Button(action: submitGeneration) {
+                    Label("Generate · \(generationCost)", systemImage: "arrow.up")
+                        .font(.system(size: 13, weight: .medium))
+                        .padding(.horizontal, 17)
+                        .frame(height: 38)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.black.opacity(0.86))
+                .background(.white.opacity(0.94), in: Capsule())
+            }
+
+            if let generationError {
+                Label(generationError, systemImage: "exclamationmark.circle")
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundStyle(.orange)
+            }
+        }
+        .padding(16)
+        .glassEffect(.regular.tint(.black.opacity(0.06)), in: RoundedRectangle(cornerRadius: 23))
+    }
+
+    private func optionPopover<Content: View>(
+        width: CGFloat,
+        height: CGFloat,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        ScrollView {
+            VStack(spacing: 4) {
+                content()
+            }
+            .padding(6)
+        }
+        .scrollIndicators(.hidden)
+        .frame(width: width, height: height)
+    }
+
+    private func optionButton(
+        _ title: String,
+        selected: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                    .font(.system(size: 13, weight: .regular))
+                Spacer()
+                if selected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 11, weight: .medium))
+                }
+            }
+            .padding(.horizontal, 10)
+            .frame(height: 34)
+            .background(selected ? Color.primary.opacity(0.08) : Color.clear, in: RoundedRectangle(cornerRadius: 9))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func composerMenuLabel(_ title: String) -> some View {
+        HStack(spacing: 8) {
+            Text(title)
+                .font(.system(size: 13, weight: .regular))
+                .lineLimit(1)
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.down")
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(.white.opacity(0.55))
+        }
+        .padding(.horizontal, 13)
+        .frame(height: 36)
+        .contentShape(Capsule())
+    }
+
+    private var settingsContent: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 5) {
+                Text("SETTINGS")
+                    .font(.system(size: 11, weight: .medium))
+                    .tracking(2.2)
+                    .foregroundStyle(.white.opacity(0.52))
+                Text("Playback & system")
+                    .font(.system(size: 30, weight: .medium, design: .rounded))
+                    .tracking(-0.8)
+            }
+
+            VStack(spacing: 0) {
+                settingsRow(
+                    symbol: "speedometer",
+                    title: "Playback speed",
+                    detail: "Applies to the desktop and screen saver"
+                ) {
+                    HStack(spacing: 3) {
+                        ForEach(PlaybackSpeed.allCases, id: \.self) { speed in
+                            Button {
+                                playbackSpeed = speed
+                                setPlaybackSpeed(speed)
+                            } label: {
+                                Text(speed.displayName)
+                                    .font(.system(size: 13, weight: .medium))
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 30)
+                                    .foregroundStyle(playbackSpeed == speed ? .black.opacity(0.84) : .white.opacity(0.68))
+                                    .background {
+                                        if playbackSpeed == speed {
+                                            Capsule().fill(.white.opacity(0.9))
+                                        }
+                                    }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(3)
+                    .frame(width: 190)
+                    .glassEffect(.regular.interactive(true), in: Capsule())
+                }
+
+                settingsDivider
+
+                settingsRow(
+                    symbol: "lock.display",
+                    title: "Screen saver",
+                    detail: "Guided setup: Others → Show All → Paperwall"
+                ) {
+                    settingsButton("Choose Paperwall", action: openSettings)
+                }
+
+                settingsDivider
+
+                settingsRow(
+                    symbol: "key",
+                    title: "Replicate API token",
+                    detail: "Stored securely in your macOS Keychain"
+                ) {
+                    settingsButton("Configure", action: configureToken)
+                }
+
+                settingsDivider
+
+                settingsRow(
+                    symbol: "folder",
+                    title: "Paperwall storage",
+                    detail: "Current, generated, and fallback assets"
+                ) {
+                    settingsButton("Open Folder") {
+                        NSWorkspace.shared.open(PaperwallConfiguration.applicationSupportDirectory)
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+            .glassEffect(.regular.tint(.black.opacity(0.06)), in: RoundedRectangle(cornerRadius: 23))
+        }
+    }
+
+    private func settingsRow<Accessory: View>(
+        symbol: String,
+        title: String,
+        detail: String,
+        @ViewBuilder accessory: () -> Accessory
+    ) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: symbol)
+                .font(.system(size: 15, weight: .regular))
+                .foregroundStyle(.white.opacity(0.72))
+                .frame(width: 34, height: 34)
+                .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 10))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 14, weight: .medium))
+                Text(detail)
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundStyle(.white.opacity(0.46))
+            }
+            Spacer()
+            accessory()
+                .frame(width: 230, alignment: .trailing)
+        }
+        .frame(height: 58)
+    }
+
+    private var settingsDivider: some View {
+        Rectangle()
+            .fill(.white.opacity(0.1))
+            .frame(height: 1)
+    }
+
+    private func settingsButton(_ title: String, action: @escaping () -> Void) -> some View {
+        Button(title, action: action)
+            .buttonStyle(.plain)
+            .font(.system(size: 13, weight: .regular))
+            .padding(.horizontal, 13)
+            .frame(height: 34)
+            .glassEffect(.regular.interactive(true), in: Capsule())
+    }
+
+    private var providerDuration: ClosedRange<Int> {
+        switch provider {
+        case .pruna: 1...20
+        case .seedance15: 2...12
+        case .seedance20: 1...15
+        }
+    }
+
+    private var generationCost: String {
+        (try? PaperwallGenerationService.quote(for: generationRequest).formattedCost) ?? "Preview"
+    }
+
+    private var generationRequest: GenerationRequest {
+        GenerationRequest(
+            provider: provider,
+            prompt: prompt,
+            imageURL: referenceImageURL,
+            duration: duration
+        )
+    }
+
+    private func chooseReferenceImage() {
+        let panel = NSOpenPanel()
+        panel.message = "Choose an optional reference image"
+        panel.allowedContentTypes = [.png, .jpeg, .webP]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        guard panel.runModal() == .OK else { return }
+        referenceImageURL = panel.url
+        generationError = nil
+    }
+
+    private func submitGeneration() {
+        let request = generationRequest
+        do {
+            _ = try PaperwallGenerationService.quote(for: request)
+            generationError = nil
+            generate(request)
+        } catch {
+            generationError = error.localizedDescription
+        }
+    }
+
+    private var bottomPanel: some View {
+        GlassEffectContainer(spacing: 14) {
+            HStack(spacing: 12) {
+                statusItem(symbol: "desktopcomputer", title: "Desktop", value: "Active")
+                divider
+                statusItem(symbol: "lock.display", title: "Lock Screen", value: "Ready")
+                divider
+                statusItem(symbol: "wand.and.stars", title: "AI Providers", value: "3 connected")
+                Spacer()
+                Button {
+                    withAnimation(.smooth(duration: 0.32)) { section = .settings }
+                } label: {
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 14, weight: .medium))
+                        .frame(width: 42, height: 42)
+                }
+                .buttonStyle(.plain)
+                .glassEffect(.regular.interactive(true), in: Circle())
+            }
+            .padding(16)
+            .glassEffect(.regular.tint(.black.opacity(0.12)), in: RoundedRectangle(cornerRadius: 25))
+        }
+    }
+
+    private var divider: some View {
+        Rectangle()
+            .fill(.white.opacity(0.14))
+            .frame(width: 1, height: 36)
+            .padding(.horizontal, 10)
+    }
+
+    private func statusItem(symbol: String, title: String, value: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: symbol)
+                .font(.system(size: 16, weight: .regular))
+                .foregroundStyle(.white.opacity(0.8))
+                .frame(width: 34, height: 34)
+                .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 11))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.5))
+                Text(value)
+                    .font(.system(size: 14, weight: .medium))
+            }
+        }
+    }
+
+    private func circleButton(symbol: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 17, weight: .regular))
+                .frame(width: 44, height: 44)
+        }
+        .buttonStyle(.plain)
+        .glassEffect(.regular.interactive(true), in: Circle())
+    }
+}
+
+private enum StaticShellAssets {
+    static var backgroundURL: URL {
+        PaperwallConfiguration.applicationSupportDirectory
+            .appendingPathComponent("fallback.jpg")
+    }
+}
