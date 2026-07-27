@@ -70,6 +70,13 @@ private func fixtureURL(_ name: String, extension ext: String) throws -> URL {
     #expect(pruna.formattedCost == "$0.04")
     #expect(seedance15.formattedCost == "$0.23")
     #expect(seedance20.formattedCost == "$1.80")
+
+    let image = try PaperwallImageGenerationService.quote(prompt: "emerald anime valley")
+    #expect(image.modelName == "FLUX 1.1 Pro")
+    #expect(image.formattedCost == "$0.04")
+    #expect(throws: GenerationError.missingInput) {
+        try PaperwallImageGenerationService.quote(prompt: "   ")
+    }
 }
 
 @Test func providersEmitWallpaperSafeModelInputs() throws {

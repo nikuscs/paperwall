@@ -14,6 +14,8 @@ If your shell does not include `~/.local/bin`, add it to `PATH`.
 
 ## Generate
 
+In the app, describe a scene and generate a still image first. Review it, then choose **Animate** to submit a separately approved video request. Image and video spending are confirmed independently.
+
 Set `REPLICATE_API_TOKEN` in your shell, or choose **Configure Replicate Token…** in the menu-bar app.
 
 ```bash

@@ -110,6 +110,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func installMainWindow() {
         windowController = PaperwallWindowController(
             wallspaceLibrary: wallspaceLibrary,
+            generateImage: { [weak self] prompt, completion in
+                self?.submitImageGeneration(prompt: prompt, completion: completion)
+            },
             generate: { [weak self] request in self?.submitGeneration(request) },
             chooseVideo: { [weak self] in self?.selectVideo() },
             selectWallspace: { [weak self] url in self?.selectAsset(url) },
@@ -222,6 +225,68 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             imageURL: imageURL
         )
         submitGeneration(request)
+    }
+
+    private func submitImageGeneration(
+        prompt: String,
+        completion: @escaping (Result<URL, Error>) -> Void
+    ) {
+        guard !generationInProgress else {
+            let error = GenerationError.generationAlreadyRunning
+            presentError(error.localizedDescription)
+            completion(.failure(error))
+            return
+        }
+
+        let quote: ImageGenerationQuote
+        do {
+            quote = try PaperwallImageGenerationService.quote(prompt: prompt)
+        } catch {
+            presentError(error.localizedDescription)
+            completion(.failure(error))
+            return
+        }
+
+        let approval = NSAlert()
+        approval.alertStyle = .warning
+        approval.messageText = "Generate Still Image for \(quote.formattedCost)?"
+        approval.informativeText = "Paperwall will submit exactly one paid \(quote.modelName) request. The video will not be generated until you approve the image separately."
+        approval.addButton(withTitle: "Generate Image for \(quote.formattedCost)")
+        approval.addButton(withTitle: "Cancel")
+        guard approval.runModal() == .alertFirstButtonReturn else {
+            completion(.failure(GenerationError.approvalDeclined))
+            return
+        }
+
+        let token: String
+        do {
+            token = try ReplicateCredentialStore.resolvedToken()
+        } catch GenerationError.missingToken {
+            guard let entered = promptForReplicateToken() else {
+                completion(.failure(GenerationError.missingToken))
+                return
+            }
+            token = entered
+        } catch {
+            presentError(error.localizedDescription)
+            completion(.failure(error))
+            return
+        }
+
+        generationInProgress = true
+        Task {
+            defer { generationInProgress = false }
+            do {
+                let result = try await PaperwallImageGenerationService.generate(
+                    prompt: prompt,
+                    token: token
+                )
+                completion(.success(result.imageURL))
+            } catch {
+                presentError(error.localizedDescription)
+                completion(.failure(error))
+            }
+        }
     }
 
     private func submitGeneration(_ request: GenerationRequest) {
