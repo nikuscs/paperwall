@@ -19,7 +19,6 @@ In the app, describe a scene and generate a still image first. Review it, then c
 Set `REPLICATE_API_TOKEN` in your shell, or choose **Configure Replicate Token…** in the menu-bar app.
 
 ```bash
-paperwall generate --provider pruna --image image.png --prompt "gentle motion"
 paperwall generate --provider seedance-1.5 --image image.png --prompt "leaves sway"
 paperwall generate --provider seedance-2.0 --prompt "slow clouds over a lake"
 ```

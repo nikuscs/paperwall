@@ -44,17 +44,14 @@ private func fixtureURL(_ name: String, extension ext: String) throws -> URL {
 }
 
 @Test func generationProviderAliasesAndQuotes() throws {
-    #expect(try GenerationProvider(alias: "prune") == .pruna)
-    #expect(try GenerationProvider(alias: "p-video") == .pruna)
     #expect(try GenerationProvider(alias: "seedance-1.5-pro") == .seedance15)
     #expect(try GenerationProvider(alias: "seedance-2.0") == .seedance20)
+    #expect(GenerationProvider.availableCases == [.seedance15, .seedance20])
+    #expect(GenerationRequest(prompt: "waves").provider == .seedance15)
+    #expect(throws: GenerationError.unknownProvider("pruna")) {
+        try GenerationProvider(alias: "pruna")
+    }
 
-    let pruna = try PaperwallGenerationService.quote(for: GenerationRequest(
-        provider: .pruna,
-        prompt: "waves",
-        duration: 4,
-        seed: 1
-    ))
     let seedance15 = try PaperwallGenerationService.quote(for: GenerationRequest(
         provider: .seedance15,
         prompt: "waves",
@@ -67,7 +64,6 @@ private func fixtureURL(_ name: String, extension ext: String) throws -> URL {
         duration: 4,
         seed: 1
     ))
-    #expect(pruna.formattedCost == "$0.04")
     #expect(seedance15.formattedCost == "$0.23")
     #expect(seedance20.formattedCost == "$1.80")
 
@@ -80,12 +76,6 @@ private func fixtureURL(_ name: String, extension ext: String) throws -> URL {
 }
 
 @Test func providersEmitWallpaperSafeModelInputs() throws {
-    let pruna = try PaperwallGenerationService.modelInput(for: GenerationRequest(
-        provider: .pruna,
-        prompt: "waves",
-        duration: 4,
-        seed: 1
-    ))
     let seedance15 = try PaperwallGenerationService.modelInput(for: GenerationRequest(
         provider: .seedance15,
         prompt: "waves",
@@ -99,8 +89,6 @@ private func fixtureURL(_ name: String, extension ext: String) throws -> URL {
         seed: 1
     ))
 
-    #expect(pruna["draft"] == .bool(true))
-    #expect(pruna["save_audio"] == .bool(false))
     #expect(seedance15["camera_fixed"] == .bool(true))
     #expect(seedance15["generate_audio"] == .bool(false))
     #expect(seedance20["generate_audio"] == .bool(false))

@@ -80,7 +80,7 @@ enum PaperwallCLI {
     }
 
     private static func generate(_ arguments: [String]) async throws {
-        var provider = GenerationProvider.pruna
+        var provider = GenerationProvider.seedance15
         var prompt: String?
         var imageURL: URL?
         var duration = 4
@@ -286,7 +286,7 @@ enum PaperwallCLI {
 
           set VIDEO             Select a local video
           generate [options]    Generate, install, and play an AI wallpaper
-            --provider pruna|seedance-1.5|seedance-2.0
+            --provider seedance-1.5|seedance-2.0
             --image IMAGE and/or --prompt TEXT [--duration N] [--seed N] [--dry-run]
           discovery-list        List cached Discovery videos
           discovery-set ID      Select a cached Discovery video
