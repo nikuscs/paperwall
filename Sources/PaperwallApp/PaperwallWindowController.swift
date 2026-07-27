@@ -8,6 +8,7 @@ final class PaperwallWindowController: NSWindowController, NSWindowDelegate {
 
     init(
         wallspaceLibrary: WallspaceLibraryModel,
+        generateImage: @escaping (String, @escaping (Result<URL, Error>) -> Void) -> Void,
         generate: @escaping (GenerationRequest) -> Void,
         chooseVideo: @escaping () -> Void,
         selectWallspace: @escaping (URL) -> Void,
@@ -19,6 +20,7 @@ final class PaperwallWindowController: NSWindowController, NSWindowDelegate {
         self.activationChanged = activationChanged
         let rootView = PaperwallShellView(
             wallspaceLibrary: wallspaceLibrary,
+            generateImage: generateImage,
             generate: generate,
             chooseVideo: chooseVideo,
             selectWallspace: selectWallspace,
