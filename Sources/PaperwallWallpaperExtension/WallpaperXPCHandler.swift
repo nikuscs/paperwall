@@ -222,6 +222,12 @@ final class WallpaperXPCHandler: NSObject, WallpaperExtensionXPCProtocol {
         if WallpaperState.shared.currentVideoID == nil, let videoID = choiceConfiguration {
             WallpaperState.shared.currentVideoID = videoID
         }
+        if !isPreview, choiceConfiguration != nil {
+            let marker = FileManager.default.homeDirectoryForCurrentUser
+                .appendingPathComponent("Documents/native-lock-active")
+            try? Data(ISO8601DateFormatter().string(from: Date()).utf8)
+                .write(to: marker, options: .atomic)
+        }
 
         // Each WallpaperID (a Space, the lock-screen surface, or a Settings preview) is its own
         // hosted surface and must get its OWN CAContext — sharing one context per display let a

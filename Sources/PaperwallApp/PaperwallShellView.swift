@@ -36,6 +36,7 @@ struct PaperwallShellView: View {
     @State private var pipelineStatus = ""
     @State private var pipelineError: String?
     @State private var lastGeneratedVideoURL: URL?
+    @AppStorage("nativeLockSetupComplete") private var nativeLockSetupComplete = false
     @State private var previewURL: URL?
     @State private var isApplyingWallpaper = false
     @FocusState private var promptFocused: Bool
@@ -146,6 +147,9 @@ struct PaperwallShellView: View {
         .ignoresSafeArea(.container, edges: .top)
         .preferredColorScheme(.dark)
         .onAppear {
+            if NativeWallpaperExtensionBridge.isNativeWallpaperActivated {
+                nativeLockSetupComplete = true
+            }
             if let resumable = PaperwallUpscaleService.latestResumableVideoURL() {
                 lastGeneratedVideoURL = resumable
                 pipelineStage = .failed
@@ -334,10 +338,65 @@ struct PaperwallShellView: View {
                         .lineSpacing(3)
                 }
 
+                if !nativeLockSetupComplete {
+                    nativeLockSetupCard
+                }
+
                 generationComposer
             }
             .frame(maxWidth: 760, alignment: .leading)
             Spacer(minLength: 80)
+        }
+    }
+
+    private var nativeLockSetupCard: some View {
+        HStack(spacing: 13) {
+            Image(systemName: "lock.display")
+                .font(.system(size: 19, weight: .regular))
+                .foregroundStyle(.white.opacity(0.86))
+                .frame(width: 38, height: 38)
+                .background(.white.opacity(0.08), in: Circle())
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Enable animated Lock Screen")
+                    .font(.system(size: 13, weight: .medium))
+                Text("Select Paperwall in Wallpaper settings, then enable Show as Screen Saver.")
+                    .font(.system(size: 11, weight: .regular))
+                    .foregroundStyle(.white.opacity(0.62))
+                    .lineLimit(2)
+            }
+
+            Spacer(minLength: 10)
+
+            Button("Open Settings", action: openSettings)
+                .buttonStyle(.plain)
+                .font(.system(size: 12, weight: .medium))
+                .padding(.horizontal, 12)
+                .frame(height: 32)
+                .glassEffect(.regular.interactive(true), in: Capsule())
+
+            Button("Done") {
+                withAnimation(.smooth(duration: 0.25)) {
+                    nativeLockSetupComplete = true
+                }
+            }
+            .buttonStyle(.plain)
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(.white.opacity(0.66))
+        }
+        .padding(12)
+        .frame(maxWidth: 760)
+        .glassEffect(.regular.tint(.black.opacity(0.08)), in: RoundedRectangle(cornerRadius: 18))
+        .task {
+            while !nativeLockSetupComplete && !Task.isCancelled {
+                if NativeWallpaperExtensionBridge.isNativeWallpaperActivated {
+                    withAnimation(.smooth(duration: 0.25)) {
+                        nativeLockSetupComplete = true
+                    }
+                    return
+                }
+                try? await Task.sleep(for: .seconds(2))
+            }
         }
     }
 
