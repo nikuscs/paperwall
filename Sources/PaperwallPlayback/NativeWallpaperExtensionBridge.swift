@@ -42,6 +42,12 @@ public enum NativeWallpaperExtensionBridge {
             )
     }
 
+    public static var isNativeWallpaperActivated: Bool {
+        FileManager.default.fileExists(
+            atPath: documentsDirectory.appendingPathComponent("native-lock-active").path
+        )
+    }
+
     private static var entryDirectory: URL {
         documentsDirectory
             .appendingPathComponent("videos", isDirectory: true)
