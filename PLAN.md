@@ -5,7 +5,7 @@
 A user-scoped macOS animated-wallpaper system with:
 
 - Desktop playback through `Paperwall.app`.
-- Lock Screen playback through `Paperwall.saver`.
+- Native Lock Screen playback through the embedded WallpaperExtensionKit provider, with `Paperwall.saver` retained as a legacy fallback.
 - A compiled `paperwall` CLI and menu-bar UI.
 - AI generation through Replicate.
 - Launch-at-login persistence and reversible uninstall.

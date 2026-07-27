@@ -7,16 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		02A348BF8F45AB8E2427FCF5 /* ColorDiag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7962C5E656C9F797B3490E44 /* ColorDiag.swift */; };
 		080DDBAD77715C638A5B5838 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 462EB9108A129B219CDDDDD7 /* libsqlite3.tbd */; };
+		0DD4B8EC7F3F3E77C35FFDAE /* CodableShims.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01E5A128181B8C421486C88 /* CodableShims.swift */; };
 		131E45B3488D75B613069952 /* PlaybackPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDAC27A8FA36F6158E04707 /* PlaybackPreferences.swift */; };
 		1541471D1DA4ADA27FDAE56C /* PaperwallImageGenerationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5166438E0003549B074D1064 /* PaperwallImageGenerationService.swift */; };
 		16A95858DB4DC5EB63C134B0 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA146E3254EB214361106E52 /* Security.framework */; };
+		170319463AA3FAE272557F56 /* SpiralRecovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7591E0D82B2E56D604DD2A0C /* SpiralRecovery.swift */; };
+		1720DD88F5EB519D2B64E83A /* WallpaperXPCHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E12773A805C3190F4EBBC8D /* WallpaperXPCHandler.swift */; };
 		17DD93DD76322F98ED02C9AB /* WallpaperCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2049EA2EE3D714286DB9B5 /* WallpaperCatalog.swift */; };
+		17FD84C7CC00491F75BC6205 /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C2AD42B081F9D65E33624B6 /* Logging.swift */; };
 		182D635A4E1F1BD6B63273CF /* PaperwallWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEB6ECB880AE750D63A6D475 /* PaperwallWindowController.swift */; };
 		19FFE966925D795B50244FCD /* PaperwallUpscaleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59ECA958EA31A2A6316FD86 /* PaperwallUpscaleService.swift */; };
+		1B813AE51A5A875C9B81D9FC /* PlaybackPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DD80F0D0FCA174AB930EEA /* PlaybackPolicy.swift */; };
 		213CD10BFF97C29006304456 /* PaperwallStorageMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 789F1FDE4C4BC8377D29FB6E /* PaperwallStorageMigrator.swift */; };
 		21AE54A8159DBF1F11261332 /* WallpaperPreviewSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E0605D4472F56A6E5803806 /* WallpaperPreviewSupport.swift */; };
 		229554F4B6CA46CC8803BABD /* LoopingPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F58335E601A53032C32C42F3 /* LoopingPlayer.swift */; };
+		22CB50245A47AF83687B361C /* VideoDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10C5A66E38B8DFE74233EF2C /* VideoDiscovery.swift */; };
 		237393A1B1A15D5599C79493 /* PaperwallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86AAD7159FFB84DAB9F45DAA /* PaperwallService.swift */; };
 		25F2873A51E2B1BC670683AD /* PaperwallScreenSaver.bundle in Resources */ = {isa = PBXBuildFile; fileRef = D6128687229856AE8C697300 /* PaperwallScreenSaver.bundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		27BE6F297890EFA9B4428678 /* PaperwallConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28488992ACC9260FE4AED1A /* PaperwallConfiguration.swift */; };
@@ -25,15 +32,24 @@
 		2E7906FFC7ED327A7ECB259F /* PaperwallStorageMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 789F1FDE4C4BC8377D29FB6E /* PaperwallStorageMigrator.swift */; };
 		2E7F621B6E98C349E87699CD /* ReplicateClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68517334A8A49B4436313D06 /* ReplicateClient.swift */; };
 		2F4A4BD7186F168F3B88CCEC /* ImmersiveWallpaperPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 305BE6E3CEFE13013CB180C4 /* ImmersiveWallpaperPreview.swift */; };
+		30ACE3B77641BFCDCCC4A11F /* PhospheneExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = A124684FEA07AE6BCF75DD9F /* PhospheneExtension.swift */; };
+		3BCCD8ED92FACFF52DB295C1 /* RuntimeHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7392FD291C78BBC46C7B5D29 /* RuntimeHelpers.swift */; };
+		431F035C82B74D2EFF9DE354 /* SnapshotCreation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4A16491673589FCD202F802 /* SnapshotCreation.swift */; };
 		4495F014E044599A04FDEB13 /* ReplicateClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68517334A8A49B4436313D06 /* ReplicateClient.swift */; };
+		48D7446703B24FD07A6E141B /* VideoRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 001F1F878D0F6370BC40195E /* VideoRenderer.swift */; };
 		49CC3EE12BF9038FA3121535 /* PaperwallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86AAD7159FFB84DAB9F45DAA /* PaperwallService.swift */; };
 		4E84A5C29B2DDBD3C42F1D7B /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 462EB9108A129B219CDDDDD7 /* libsqlite3.tbd */; };
+		52F56F735237C2516C64CDFA /* PaperwallWallpaperExtension.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 55C8839FDA6A5A3821927F63 /* PaperwallWallpaperExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		55CCC81303B5A65F79881F3A /* PathSafety.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A1FE2F45B2BCD9A0F8385B /* PathSafety.swift */; };
 		56656AE70FE90002A31A1523 /* WallspaceLibraryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33E431DC75D784C9C9CDB301 /* WallspaceLibraryModel.swift */; };
 		596001926F7E1789ECCDAD57 /* tiny-video.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = FE584C7EA260CCC7DFB848F3 /* tiny-video.mp4 */; };
 		5FB7669FF29F130E24496750 /* GenerationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00D13D1CD68491C70EA0EB2 /* GenerationModels.swift */; };
+		6082EBC6486CD7FB8BB6A95C /* SettingsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB59DE3C43D20E6C5DD9A6DE /* SettingsProvider.swift */; };
 		6717B812D95CCFF359BB96D6 /* PaperwallConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28488992ACC9260FE4AED1A /* PaperwallConfiguration.swift */; };
 		681DD9DAB07E667412DCB6D4 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFBE4227F068CCC3F69DD35 /* PlayerView.swift */; };
+		6F3792F7F741812F0203BBF2 /* CallerValidation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44D542CB638A14C2876BE171 /* CallerValidation.swift */; };
 		7769D39F2463ACD82584D1A2 /* AssetLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA3211578C9CF71A2C74D39 /* AssetLibrary.swift */; };
+		784069498E1AA79A121296CE /* PowerMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EA1BCFADA67DA3ECCD6B2E /* PowerMonitor.swift */; };
 		78EB8F8747D88F43446E6C89 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 311A60DD763979D19C7D0478 /* AppIcon.icon */; };
 		78F7735CE4E7A4950CD40F65 /* PaperwallPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A284945522D04165D00A0A41 /* PaperwallPlayback.framework */; };
 		7B37CAA1944C34058C7060FF /* PaperwallScreenSaverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F984B12829C68BD53A8E378 /* PaperwallScreenSaverView.swift */; };
@@ -42,6 +58,7 @@
 		7ECCA2A6A37F0D4ED566B4B6 /* VideoAssetValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C4AA1179C7FB712667FF954 /* VideoAssetValidator.swift */; };
 		8090329C6077CF5A114760FA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 716A6D4D9E745E1AA01F0042 /* AppDelegate.swift */; };
 		84EFD6B5FEEA0B3DB0F2D465 /* Main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA0749CC3542B868AB12A37 /* Main.swift */; };
+		85B27BF1F3E4EC6D7A40456C /* WallpaperExtensionConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB366E144E6D4B12136C48C /* WallpaperExtensionConfig.swift */; };
 		86EE3750FB6CA5206D3C953E /* PaperwallPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A284945522D04165D00A0A41 /* PaperwallPlayback.framework */; };
 		87468E420D61FEBAE8581EEE /* PaperwallPlayback.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A284945522D04165D00A0A41 /* PaperwallPlayback.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		87B5431B22F7D863EC4DFF9A /* PaperwallGenerationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A1ABEFA5A3A6E3ED22C525 /* PaperwallGenerationService.swift */; };
@@ -51,11 +68,18 @@
 		9C0F33FE4F5CF0DC510A8D93 /* invalid-video.mov in Resources */ = {isa = PBXBuildFile; fileRef = F5AE20752A5B9D56C7B913D7 /* invalid-video.mov */; };
 		9F6748A1A63483D4378EF44A /* PaperwallPlayback.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C88BC29E2AF6FB109DF306 /* PaperwallPlayback.swift */; };
 		A607E496323C3C8F17A9D4AF /* StaticWallpaperManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B5ED5EC5552A5C82E3D658 /* StaticWallpaperManager.swift */; };
+		A79C5595A3C6F48475E0B7F5 /* NativeWallpaperExtensionBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30AD624A9C5B0EB9AC679D47 /* NativeWallpaperExtensionBridge.swift */; };
+		A8D363C966172280C90149F3 /* WallpaperIDProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DA59E4D54D25635C2700086 /* WallpaperIDProbe.swift */; };
 		A9DEC06217E6AD35EE2672BA /* WallpaperCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2049EA2EE3D714286DB9B5 /* WallpaperCatalog.swift */; };
 		AA59AE795B068F75FB513DC4 /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B2B6CD2428FB284147828A /* ScreenSaver.framework */; };
+		AA6D5640456863D9B3E70B4D /* VideoLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBBFD9EE4567227FFDF4D953 /* VideoLibrary.swift */; };
+		AC92A9EE91FAAC9B81E5C674 /* THIRD_PARTY_NOTICES.md in Resources */ = {isa = PBXBuildFile; fileRef = 180C7A7AEFFE9124BA4D7AF6 /* THIRD_PARTY_NOTICES.md */; };
 		AE64EF2FEC786DBCEF079D6E /* PaperwallPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A284945522D04165D00A0A41 /* PaperwallPlayback.framework */; };
 		BCCDEFBA4662717EB52A9BCD /* BundledComponentInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74C5FDAB15754E56A253D67F /* BundledComponentInstaller.swift */; };
+		BDD096CA087E07B35FDCBC3C /* NativeWallpaperExtensionBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30AD624A9C5B0EB9AC679D47 /* NativeWallpaperExtensionBridge.swift */; };
+		C300A443A06BCEF7B6C25E3C /* StillFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF348D1524626577CA0C7CC /* StillFrame.swift */; };
 		C8DC3FECE0853EA1FE625D1B /* PaperwallGenerationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A1ABEFA5A3A6E3ED22C525 /* PaperwallGenerationService.swift */; };
+		C8FD58B7E27192F0E3523251 /* WallpaperPrefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = C610D3CF91277BF03A193014 /* WallpaperPrefs.swift */; };
 		C977AF3F420552D70816B758 /* LaunchAtLoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A7779D1A28756855D8CAA1 /* LaunchAtLoginManager.swift */; };
 		CCB701A9E680C0597CB8BBE5 /* VideoAssetValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C4AA1179C7FB712667FF954 /* VideoAssetValidator.swift */; };
 		CDBD4DC7CBD85E6611E4F196 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA146E3254EB214361106E52 /* Security.framework */; };
@@ -65,6 +89,9 @@
 		D67027C90630FBFF5A8E3D79 /* ReplicateCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 496BB5D74C84FEA1D78842F4 /* ReplicateCredentialStore.swift */; };
 		DAF4B351FAB9A35E296CBE07 /* PaperwallShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 023DEB2E9A9E37CD40868593 /* PaperwallShellView.swift */; };
 		DB5F663DAED92276A82E7ABB /* PaperwallCLI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20725334C0B15078C5E22B0E /* PaperwallCLI.swift */; };
+		E0D0F4BF3696F767B989EFCF /* WallpaperState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AFF625C1778CBF88EF54AFB /* WallpaperState.swift */; };
+		EEA42A6328F42423D288F41A /* StillBisect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75490E174ED306C91B098B67 /* StillBisect.swift */; };
+		F00D751DEE842E053DDFC5F3 /* BMPCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D51716918BA010FCA06618 /* BMPCache.swift */; };
 		F2D8C20EC994F2E0E1A69BC3 /* ReplicateCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 496BB5D74C84FEA1D78842F4 /* ReplicateCredentialStore.swift */; };
 /* End PBXBuildFile section */
 
@@ -104,6 +131,13 @@
 			remoteGlobalIDString = 1EE29E8C9DD46C777893860D;
 			remoteInfo = PaperwallPlayback;
 		};
+		EBABB2E1C1DC038D2DF2AF91 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FF45AA54CEB9497D17F214CD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CA07E49DA642963AE1BAA387;
+			remoteInfo = PaperwallWallpaperExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -129,6 +163,17 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6E28C79DC76733DCC3E5EE9A /* Embed ExtensionKit Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
+			dstSubfolderSpec = 16;
+			files = (
+				52F56F735237C2516C64CDFA /* PaperwallWallpaperExtension.appex in Embed ExtensionKit Extensions */,
+			);
+			name = "Embed ExtensionKit Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B233509AB1BE983272EE5F02 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -143,30 +188,51 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		001F1F878D0F6370BC40195E /* VideoRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderer.swift; sourceTree = "<group>"; };
+		006159A07535BC65CCCDC82D /* WallpaperExtension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WallpaperExtension-Bridging-Header.h"; sourceTree = "<group>"; };
 		023DEB2E9A9E37CD40868593 /* PaperwallShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallShellView.swift; sourceTree = "<group>"; };
 		0E0605D4472F56A6E5803806 /* WallpaperPreviewSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperPreviewSupport.swift; sourceTree = "<group>"; };
+		10C5A66E38B8DFE74233EF2C /* VideoDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoDiscovery.swift; sourceTree = "<group>"; };
+		17DD80F0D0FCA174AB930EEA /* PlaybackPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackPolicy.swift; sourceTree = "<group>"; };
+		180C7A7AEFFE9124BA4D7AF6 /* THIRD_PARTY_NOTICES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = THIRD_PARTY_NOTICES.md; sourceTree = "<group>"; };
 		19ACE0FCDB4270B2E96E31E1 /* PaperwallPlaybackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PaperwallPlaybackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		20725334C0B15078C5E22B0E /* PaperwallCLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallCLI.swift; sourceTree = "<group>"; };
+		2E12773A805C3190F4EBBC8D /* WallpaperXPCHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperXPCHandler.swift; sourceTree = "<group>"; };
 		305BE6E3CEFE13013CB180C4 /* ImmersiveWallpaperPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImmersiveWallpaperPreview.swift; sourceTree = "<group>"; };
+		30AD624A9C5B0EB9AC679D47 /* NativeWallpaperExtensionBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeWallpaperExtensionBridge.swift; sourceTree = "<group>"; };
 		311A60DD763979D19C7D0478 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		33E431DC75D784C9C9CDB301 /* WallspaceLibraryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallspaceLibraryModel.swift; sourceTree = "<group>"; };
+		44D542CB638A14C2876BE171 /* CallerValidation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallerValidation.swift; sourceTree = "<group>"; };
 		462EB9108A129B219CDDDDD7 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		496BB5D74C84FEA1D78842F4 /* ReplicateCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplicateCredentialStore.swift; sourceTree = "<group>"; };
 		4CDAC27A8FA36F6158E04707 /* PlaybackPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackPreferences.swift; sourceTree = "<group>"; };
 		5166438E0003549B074D1064 /* PaperwallImageGenerationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallImageGenerationService.swift; sourceTree = "<group>"; };
+		55C8839FDA6A5A3821927F63 /* PaperwallWallpaperExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = PaperwallWallpaperExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		5CA0749CC3542B868AB12A37 /* Main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Main.swift; sourceTree = "<group>"; };
+		5DA59E4D54D25635C2700086 /* WallpaperIDProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperIDProbe.swift; sourceTree = "<group>"; };
 		68517334A8A49B4436313D06 /* ReplicateClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplicateClient.swift; sourceTree = "<group>"; };
 		716A6D4D9E745E1AA01F0042 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		7392FD291C78BBC46C7B5D29 /* RuntimeHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeHelpers.swift; sourceTree = "<group>"; };
 		74C5FDAB15754E56A253D67F /* BundledComponentInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundledComponentInstaller.swift; sourceTree = "<group>"; };
+		75490E174ED306C91B098B67 /* StillBisect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StillBisect.swift; sourceTree = "<group>"; };
+		7591E0D82B2E56D604DD2A0C /* SpiralRecovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpiralRecovery.swift; sourceTree = "<group>"; };
 		75A1ABEFA5A3A6E3ED22C525 /* PaperwallGenerationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallGenerationService.swift; sourceTree = "<group>"; };
 		789F1FDE4C4BC8377D29FB6E /* PaperwallStorageMigrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallStorageMigrator.swift; sourceTree = "<group>"; };
+		7962C5E656C9F797B3490E44 /* ColorDiag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorDiag.swift; sourceTree = "<group>"; };
+		7AFF625C1778CBF88EF54AFB /* WallpaperState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperState.swift; sourceTree = "<group>"; };
+		7C2AD42B081F9D65E33624B6 /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
 		86AAD7159FFB84DAB9F45DAA /* PaperwallService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallService.swift; sourceTree = "<group>"; };
+		8CB366E144E6D4B12136C48C /* WallpaperExtensionConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperExtensionConfig.swift; sourceTree = "<group>"; };
 		8FA3211578C9CF71A2C74D39 /* AssetLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetLibrary.swift; sourceTree = "<group>"; };
 		94A7779D1A28756855D8CAA1 /* LaunchAtLoginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginManager.swift; sourceTree = "<group>"; };
 		9B08C6E0AFDF51703097A28B /* PaperwallApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PaperwallApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9C4AA1179C7FB712667FF954 /* VideoAssetValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoAssetValidator.swift; sourceTree = "<group>"; };
 		9F984B12829C68BD53A8E378 /* PaperwallScreenSaverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallScreenSaverView.swift; sourceTree = "<group>"; };
+		A124684FEA07AE6BCF75DD9F /* PhospheneExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhospheneExtension.swift; sourceTree = "<group>"; };
 		A284945522D04165D00A0A41 /* PaperwallPlayback.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PaperwallPlayback.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2883723653F0C8D35E89B70 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		A2D51716918BA010FCA06618 /* BMPCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BMPCache.swift; sourceTree = "<group>"; };
+		A5EA1BCFADA67DA3ECCD6B2E /* PowerMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMonitor.swift; sourceTree = "<group>"; };
 		A99D754AAA228E05D834532E /* PaperwallPlaybackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallPlaybackTests.swift; sourceTree = "<group>"; };
 		B4BDAA8280907B1C3F1F0A7F /* PaperwallLogo.svg */ = {isa = PBXFileReference; path = PaperwallLogo.svg; sourceTree = "<group>"; };
 		B7B2B6CD2428FB284147828A /* ScreenSaver.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScreenSaver.framework; path = System/Library/Frameworks/ScreenSaver.framework; sourceTree = SDKROOT; };
@@ -174,16 +240,23 @@
 		BADAE08FCD05A41BB7993C3C /* WallpaperController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperController.swift; sourceTree = "<group>"; };
 		BD8931CDC4DA78E8505924AA /* PaperwallCLI */ = {isa = PBXFileReference; includeInIndex = 0; path = PaperwallCLI; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEB6ECB880AE750D63A6D475 /* PaperwallWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallWindowController.swift; sourceTree = "<group>"; };
+		C610D3CF91277BF03A193014 /* WallpaperPrefs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperPrefs.swift; sourceTree = "<group>"; };
+		CB59DE3C43D20E6C5DD9A6DE /* SettingsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsProvider.swift; sourceTree = "<group>"; };
 		CDFBE4227F068CCC3F69DD35 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
+		D4A16491673589FCD202F802 /* SnapshotCreation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotCreation.swift; sourceTree = "<group>"; };
 		D6128687229856AE8C697300 /* PaperwallScreenSaver.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PaperwallScreenSaver.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9C88BC29E2AF6FB109DF306 /* PaperwallPlayback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallPlayback.swift; sourceTree = "<group>"; };
+		DDF348D1524626577CA0C7CC /* StillFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StillFrame.swift; sourceTree = "<group>"; };
 		DE2049EA2EE3D714286DB9B5 /* WallpaperCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperCatalog.swift; sourceTree = "<group>"; };
+		E01E5A128181B8C421486C88 /* CodableShims.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableShims.swift; sourceTree = "<group>"; };
 		E59ECA958EA31A2A6316FD86 /* PaperwallUpscaleService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallUpscaleService.swift; sourceTree = "<group>"; };
+		E5A1FE2F45B2BCD9A0F8385B /* PathSafety.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PathSafety.swift; sourceTree = "<group>"; };
 		E5B5ED5EC5552A5C82E3D658 /* StaticWallpaperManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaticWallpaperManager.swift; sourceTree = "<group>"; };
 		F00D13D1CD68491C70EA0EB2 /* GenerationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerationModels.swift; sourceTree = "<group>"; };
 		F28488992ACC9260FE4AED1A /* PaperwallConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallConfiguration.swift; sourceTree = "<group>"; };
 		F58335E601A53032C32C42F3 /* LoopingPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopingPlayer.swift; sourceTree = "<group>"; };
 		F5AE20752A5B9D56C7B913D7 /* invalid-video.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = "invalid-video.mov"; sourceTree = "<group>"; };
+		FBBFD9EE4567227FFDF4D953 /* VideoLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoLibrary.swift; sourceTree = "<group>"; };
 		FE584C7EA260CCC7DFB848F3 /* tiny-video.mp4 */ = {isa = PBXFileReference; path = "tiny-video.mp4"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -237,6 +310,7 @@
 		1C389BFA526D03BE47974CCC = {
 			isa = PBXGroup;
 			children = (
+				180C7A7AEFFE9124BA4D7AF6 /* THIRD_PARTY_NOTICES.md */,
 				B972CE61DEE1252B3E010996 /* Assets */,
 				9E73AF86F262C9C64FFBF0F9 /* Sources */,
 				97EE829F262EAD0710DFF54D /* Tests */,
@@ -303,8 +377,41 @@
 				A284945522D04165D00A0A41 /* PaperwallPlayback.framework */,
 				19ACE0FCDB4270B2E96E31E1 /* PaperwallPlaybackTests.xctest */,
 				D6128687229856AE8C697300 /* PaperwallScreenSaver.bundle */,
+				55C8839FDA6A5A3821927F63 /* PaperwallWallpaperExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		7BD11446CF43AC0E603B8DEA /* PaperwallWallpaperExtension */ = {
+			isa = PBXGroup;
+			children = (
+				A2D51716918BA010FCA06618 /* BMPCache.swift */,
+				44D542CB638A14C2876BE171 /* CallerValidation.swift */,
+				E01E5A128181B8C421486C88 /* CodableShims.swift */,
+				7962C5E656C9F797B3490E44 /* ColorDiag.swift */,
+				A2883723653F0C8D35E89B70 /* Info.plist */,
+				7C2AD42B081F9D65E33624B6 /* Logging.swift */,
+				E5A1FE2F45B2BCD9A0F8385B /* PathSafety.swift */,
+				A124684FEA07AE6BCF75DD9F /* PhospheneExtension.swift */,
+				17DD80F0D0FCA174AB930EEA /* PlaybackPolicy.swift */,
+				A5EA1BCFADA67DA3ECCD6B2E /* PowerMonitor.swift */,
+				7392FD291C78BBC46C7B5D29 /* RuntimeHelpers.swift */,
+				CB59DE3C43D20E6C5DD9A6DE /* SettingsProvider.swift */,
+				D4A16491673589FCD202F802 /* SnapshotCreation.swift */,
+				7591E0D82B2E56D604DD2A0C /* SpiralRecovery.swift */,
+				75490E174ED306C91B098B67 /* StillBisect.swift */,
+				DDF348D1524626577CA0C7CC /* StillFrame.swift */,
+				10C5A66E38B8DFE74233EF2C /* VideoDiscovery.swift */,
+				FBBFD9EE4567227FFDF4D953 /* VideoLibrary.swift */,
+				001F1F878D0F6370BC40195E /* VideoRenderer.swift */,
+				006159A07535BC65CCCDC82D /* WallpaperExtension-Bridging-Header.h */,
+				8CB366E144E6D4B12136C48C /* WallpaperExtensionConfig.swift */,
+				5DA59E4D54D25635C2700086 /* WallpaperIDProbe.swift */,
+				C610D3CF91277BF03A193014 /* WallpaperPrefs.swift */,
+				7AFF625C1778CBF88EF54AFB /* WallpaperState.swift */,
+				2E12773A805C3190F4EBBC8D /* WallpaperXPCHandler.swift */,
+			);
+			path = PaperwallWallpaperExtension;
 			sourceTree = "<group>";
 		};
 		97EE829F262EAD0710DFF54D /* Tests */ = {
@@ -323,6 +430,7 @@
 				5D46C8785C0E19A9BADE5493 /* PaperwallCLI */,
 				E73DA381161A57B376F863E4 /* PaperwallPlayback */,
 				AF8A9248F1998F22911341C5 /* PaperwallScreenSaver */,
+				7BD11446CF43AC0E603B8DEA /* PaperwallWallpaperExtension */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -351,6 +459,7 @@
 				F00D13D1CD68491C70EA0EB2 /* GenerationModels.swift */,
 				94A7779D1A28756855D8CAA1 /* LaunchAtLoginManager.swift */,
 				F58335E601A53032C32C42F3 /* LoopingPlayer.swift */,
+				30AD624A9C5B0EB9AC679D47 /* NativeWallpaperExtensionBridge.swift */,
 				F28488992ACC9260FE4AED1A /* PaperwallConfiguration.swift */,
 				75A1ABEFA5A3A6E3ED22C525 /* PaperwallGenerationService.swift */,
 				5166438E0003549B074D1064 /* PaperwallImageGenerationService.swift */,
@@ -388,6 +497,7 @@
 				657B97C4F25B9B397874134E /* Sources */,
 				5322F3EB9CD4C887C2258C63 /* Resources */,
 				4AE3C00C69C22752A7110AA7 /* Frameworks */,
+				6E28C79DC76733DCC3E5EE9A /* Embed ExtensionKit Extensions */,
 				4CC8164DE1B8D37FAF9ABA6D /* Embed Frameworks */,
 				F7DC1EBEF6221E415C9B2EB1 /* Embed CLI and Screen Saver */,
 			);
@@ -397,6 +507,7 @@
 				A2C6FA8ADD1C1126D482F3C1 /* PBXTargetDependency */,
 				28413508F39C913302FE1632 /* PBXTargetDependency */,
 				7946E81950F650BF8A42FFD7 /* PBXTargetDependency */,
+				6BFC1F5EC3F3AAF6CF6FA3AA /* PBXTargetDependency */,
 			);
 			name = PaperwallApp;
 			packageProductDependencies = (
@@ -422,6 +533,23 @@
 			productName = PaperwallPlayback;
 			productReference = A284945522D04165D00A0A41 /* PaperwallPlayback.framework */;
 			productType = "com.apple.product-type.framework";
+		};
+		CA07E49DA642963AE1BAA387 /* PaperwallWallpaperExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A4D47B972256AF45AC22F6D0 /* Build configuration list for PBXNativeTarget "PaperwallWallpaperExtension" */;
+			buildPhases = (
+				5900E9453F33A7CE05854034 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PaperwallWallpaperExtension;
+			packageProductDependencies = (
+			);
+			productName = PaperwallWallpaperExtension;
+			productReference = 55C8839FDA6A5A3821927F63 /* PaperwallWallpaperExtension.appex */;
+			productType = "com.apple.product-type.extensionkit-extension";
 		};
 		CBD264530C3B25A75EBA5A65 /* PaperwallScreenSaver */ = {
 			isa = PBXNativeTarget;
@@ -497,6 +625,9 @@
 					1EE29E8C9DD46C777893860D = {
 						ProvisioningStyle = Automatic;
 					};
+					CA07E49DA642963AE1BAA387 = {
+						ProvisioningStyle = Automatic;
+					};
 					CBD264530C3B25A75EBA5A65 = {
 						ProvisioningStyle = Automatic;
 					};
@@ -524,6 +655,7 @@
 			targets = (
 				1EE29E8C9DD46C777893860D /* PaperwallPlayback */,
 				02FDD9F87D9AC0BCF1EA1D5A /* PaperwallApp */,
+				CA07E49DA642963AE1BAA387 /* PaperwallWallpaperExtension */,
 				DC199AC454A3457AEF56A223 /* PaperwallCLI */,
 				CBD264530C3B25A75EBA5A65 /* PaperwallScreenSaver */,
 				F24C28E7C5F28B7C3C5546E8 /* PaperwallPlaybackTests */,
@@ -547,6 +679,7 @@
 			files = (
 				78EB8F8747D88F43446E6C89 /* AppIcon.icon in Resources */,
 				28F2751FF60441166F0F472E /* PaperwallLogo.svg in Resources */,
+				AC92A9EE91FAAC9B81E5C674 /* THIRD_PARTY_NOTICES.md in Resources */,
 				8807F600E76D09C3E7390F12 /* PaperwallCLI in Resources */,
 				25F2873A51E2B1BC670683AD /* PaperwallScreenSaver.bundle in Resources */,
 			);
@@ -576,6 +709,36 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		5900E9453F33A7CE05854034 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F00D751DEE842E053DDFC5F3 /* BMPCache.swift in Sources */,
+				6F3792F7F741812F0203BBF2 /* CallerValidation.swift in Sources */,
+				0DD4B8EC7F3F3E77C35FFDAE /* CodableShims.swift in Sources */,
+				02A348BF8F45AB8E2427FCF5 /* ColorDiag.swift in Sources */,
+				17FD84C7CC00491F75BC6205 /* Logging.swift in Sources */,
+				55CCC81303B5A65F79881F3A /* PathSafety.swift in Sources */,
+				30ACE3B77641BFCDCCC4A11F /* PhospheneExtension.swift in Sources */,
+				1B813AE51A5A875C9B81D9FC /* PlaybackPolicy.swift in Sources */,
+				784069498E1AA79A121296CE /* PowerMonitor.swift in Sources */,
+				3BCCD8ED92FACFF52DB295C1 /* RuntimeHelpers.swift in Sources */,
+				6082EBC6486CD7FB8BB6A95C /* SettingsProvider.swift in Sources */,
+				431F035C82B74D2EFF9DE354 /* SnapshotCreation.swift in Sources */,
+				170319463AA3FAE272557F56 /* SpiralRecovery.swift in Sources */,
+				EEA42A6328F42423D288F41A /* StillBisect.swift in Sources */,
+				C300A443A06BCEF7B6C25E3C /* StillFrame.swift in Sources */,
+				22CB50245A47AF83687B361C /* VideoDiscovery.swift in Sources */,
+				AA6D5640456863D9B3E70B4D /* VideoLibrary.swift in Sources */,
+				48D7446703B24FD07A6E141B /* VideoRenderer.swift in Sources */,
+				85B27BF1F3E4EC6D7A40456C /* WallpaperExtensionConfig.swift in Sources */,
+				A8D363C966172280C90149F3 /* WallpaperIDProbe.swift in Sources */,
+				C8FD58B7E27192F0E3523251 /* WallpaperPrefs.swift in Sources */,
+				E0D0F4BF3696F767B989EFCF /* WallpaperState.swift in Sources */,
+				1720DD88F5EB519D2B64E83A /* WallpaperXPCHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		657B97C4F25B9B397874134E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -599,6 +762,7 @@
 				D167B73CB257AA83DD3D186A /* AssetLibrary.swift in Sources */,
 				5FB7669FF29F130E24496750 /* GenerationModels.swift in Sources */,
 				C977AF3F420552D70816B758 /* LaunchAtLoginManager.swift in Sources */,
+				A79C5595A3C6F48475E0B7F5 /* NativeWallpaperExtensionBridge.swift in Sources */,
 				DB5F663DAED92276A82E7ABB /* PaperwallCLI.swift in Sources */,
 				6717B812D95CCFF359BB96D6 /* PaperwallConfiguration.swift in Sources */,
 				C8DC3FECE0853EA1FE625D1B /* PaperwallGenerationService.swift in Sources */,
@@ -628,6 +792,7 @@
 				2AF99255DDA9647972698E82 /* GenerationModels.swift in Sources */,
 				7EA4ECE242E149247CC92E4A /* LaunchAtLoginManager.swift in Sources */,
 				229554F4B6CA46CC8803BABD /* LoopingPlayer.swift in Sources */,
+				BDD096CA087E07B35FDCBC3C /* NativeWallpaperExtensionBridge.swift in Sources */,
 				27BE6F297890EFA9B4428678 /* PaperwallConfiguration.swift in Sources */,
 				87B5431B22F7D863EC4DFF9A /* PaperwallGenerationService.swift in Sources */,
 				1541471D1DA4ADA27FDAE56C /* PaperwallImageGenerationService.swift in Sources */,
@@ -665,6 +830,11 @@
 			isa = PBXTargetDependency;
 			target = DC199AC454A3457AEF56A223 /* PaperwallCLI */;
 			targetProxy = 3AF4CC3A614B7A3887AA6ED7 /* PBXContainerItemProxy */;
+		};
+		6BFC1F5EC3F3AAF6CF6FA3AA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CA07E49DA642963AE1BAA387 /* PaperwallWallpaperExtension */;
+			targetProxy = EBABB2E1C1DC038D2DF2AF91 /* PBXContainerItemProxy */;
 		};
 		7946E81950F650BF8A42FFD7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -951,6 +1121,28 @@
 			};
 			name = Release;
 		};
+		DDA0616B69C810DF88B633DF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = Config/PaperwallWallpaperExtension.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				INFOPLIST_FILE = Sources/PaperwallWallpaperExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.paperwall.app.wallpaper-extension";
+				PRODUCT_MODULE_NAME = PaperwallWallpaperExtension;
+				PRODUCT_NAME = PaperwallWallpaperExtension;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Sources/PaperwallWallpaperExtension/WallpaperExtension-Bridging-Header.h";
+			};
+			name = Debug;
+		};
 		EF8B2171EC14D9C24D8E64EC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -964,6 +1156,28 @@
 				SDKROOT = macosx;
 			};
 			name = Debug;
+		};
+		F5A4F01D54F75A91B5BFD628 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = Config/PaperwallWallpaperExtension.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				INFOPLIST_FILE = Sources/PaperwallWallpaperExtension/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.paperwall.app.wallpaper-extension";
+				PRODUCT_MODULE_NAME = PaperwallWallpaperExtension;
+				PRODUCT_NAME = PaperwallWallpaperExtension;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Sources/PaperwallWallpaperExtension/WallpaperExtension-Bridging-Header.h";
+			};
+			name = Release;
 		};
 		F6B3C6BC95D574D97E45E102 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1016,6 +1230,15 @@
 			buildConfigurations = (
 				EF8B2171EC14D9C24D8E64EC /* Debug */,
 				7D7CA3AD2D47E61648424B90 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A4D47B972256AF45AC22F6D0 /* Build configuration list for PBXNativeTarget "PaperwallWallpaperExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DDA0616B69C810DF88B633DF /* Debug */,
+				F5A4F01D54F75A91B5BFD628 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
