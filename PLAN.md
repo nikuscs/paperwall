@@ -29,7 +29,6 @@ The core generates `fallback.jpg` from its first frame and applies it as the nat
 
 Provider aliases:
 
-- `pruna` → `prunaai/p-video`
 - `seedance-1.5` → `bytedance/seedance-1.5-pro`
 - `seedance-2.0` → `bytedance/seedance-2.0`
 

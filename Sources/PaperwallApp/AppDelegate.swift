@@ -201,7 +201,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         guard panel.runModal() == .OK, let imageURL = panel.url else { return }
 
         let providerPopup = NSPopUpButton(frame: NSRect(x: 0, y: 54, width: 360, height: 26))
-        for provider in GenerationProvider.allCases {
+        for provider in GenerationProvider.availableCases {
             providerPopup.addItem(withTitle: provider.displayName)
         }
         let promptField = NSTextField(frame: NSRect(x: 0, y: 8, width: 360, height: 26))
@@ -218,7 +218,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         options.addButton(withTitle: "Cancel")
         guard options.runModal() == .alertFirstButtonReturn else { return }
 
-        let provider = GenerationProvider.allCases[providerPopup.indexOfSelectedItem]
+        let provider = GenerationProvider.availableCases[providerPopup.indexOfSelectedItem]
         let request = GenerationRequest(
             provider: provider,
             prompt: promptField.stringValue,
