@@ -637,8 +637,8 @@ struct PaperwallShellView: View {
 
                 settingsRow(
                     symbol: "lock.display",
-                    title: "Screen saver",
-                    detail: "Guided setup: Others → Show All → Paperwall"
+                    title: "Native Lock Screen",
+                    detail: "One-time setup: select Paperwall in Wallpaper settings"
                 ) {
                     settingsButton("Choose Paperwall", action: openSettings)
                 }

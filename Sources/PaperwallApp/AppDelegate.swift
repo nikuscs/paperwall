@@ -35,7 +35,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 NSLog("Paperwall: 4K upscaler setup unavailable: %@", error.localizedDescription)
             }
         }
-        Task { await wallpaperController.start() }
+        Task {
+            let active = PaperwallConfiguration.defaultAssetURL
+            if FileManager.default.fileExists(atPath: active.path) {
+                do {
+                    try await NativeWallpaperExtensionBridge.deployActiveWallpaper(from: active)
+                } catch {
+                    NSLog("Paperwall: native Lock Screen deployment unavailable: %@", error.localizedDescription)
+                }
+            }
+            await wallpaperController.start()
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -97,12 +107,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             action: #selector(configureReplicateToken),
             keyEquivalent: ""
         )
-        let saverItem = NSMenuItem(title: "Screen Saver", action: nil, keyEquivalent: "")
+        let saverItem = NSMenuItem(title: "Native Lock Screen", action: nil, keyEquivalent: "")
         saverItem.isEnabled = false
         menu.addItem(saverItem)
         saverStatusItem = saverItem
         menu.addItem(
-            withTitle: "Open Screen Saver Settings…",
+            withTitle: "Set Up Native Lock Screen…",
             action: #selector(openScreenSaverSettings),
             keyEquivalent: ""
         )
@@ -149,11 +159,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         launchAtLoginItem?.state = LaunchAtLoginManager.isEnabled ? .on : .off
-        let saver = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Library/Screen Savers/Paperwall.saver")
-        saverStatusItem?.title = FileManager.default.fileExists(atPath: saver.path)
-            ? "Screen Saver: Installed"
-            : "Screen Saver: Not Installed"
+        let extensionURL = Bundle.main.bundleURL
+            .appendingPathComponent("Contents/Extensions/PaperwallWallpaperExtension.appex")
+        saverStatusItem?.title = FileManager.default.fileExists(atPath: extensionURL.path)
+            ? "Native Lock Screen: Ready"
+            : "Native Lock Screen: Unavailable"
         rebuildDiscoveryMenu()
     }
 
@@ -462,14 +472,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func openScreenSaverSettings() {
         let guide = NSAlert()
-        guide.messageText = "Select Paperwall as Your Screen Saver"
-        guide.informativeText = "1. Choose Others.\n2. Click Show All in the top-right corner.\n3. Select Paperwall.\n4. Use Preview to verify playback."
-        guide.addButton(withTitle: "Open Screen Saver Settings")
+        guide.messageText = "Enable Paperwall on the Native Lock Screen"
+        guide.informativeText = "1. Find Paperwall — Animated Wallpapers.\n2. Select Paperwall.\n3. Enable Show as Screen Saver if macOS displays the option.\n\nAfter this one-time selection, wallpapers applied in Paperwall update the Desktop and Lock Screen together."
+        guide.addButton(withTitle: "Open Wallpaper Settings")
         guide.addButton(withTitle: "Cancel")
         guard guide.runModal() == .alertFirstButtonReturn else { return }
 
         let links = [
-            "x-apple.systempreferences:com.apple.Wallpaper-Settings.extension?ScreenSaver",
             "x-apple.systempreferences:com.apple.Wallpaper-Settings.extension",
         ]
         for link in links {

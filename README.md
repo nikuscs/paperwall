@@ -8,7 +8,9 @@ Native macOS animated wallpapers for the desktop and Lock Screen, with AI genera
 2. Drag **Paperwall** to **Applications**.
 3. Launch Paperwall.
 
-On first launch, the app automatically installs its bundled CLI to `~/.local/bin/paperwall` and screen saver to `~/Library/Screen Savers/Paperwall.saver`. Select **Paperwall** once in System Settings → Screen Saver for Lock Screen playback.
+On first launch, the app installs its CLI and deploys the active video to its embedded native wallpaper extension. Select **Paperwall** once under System Settings → Wallpaper and enable **Show as Screen Saver** when offered. After that one-time setup, applying a wallpaper in Paperwall updates the native Desktop and animated Lock Screen together. A legacy `Paperwall.saver` is also installed as a fallback.
+
+The native integration uses macOS's private `WallpaperExtensionKit` runtime, following Phosphene's MIT-licensed approach. It is validated on macOS 26/27 but may require compatibility updates after major macOS releases.
 
 If your shell does not include `~/.local/bin`, add it to `PATH`.
 
