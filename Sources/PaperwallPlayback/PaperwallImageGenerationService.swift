@@ -172,6 +172,12 @@ public enum PaperwallImageGenerationService {
         guard let remoteOutput else { throw GenerationError.missingOutput }
         progress("Downloading generated image")
         let local = try await download(remoteOutput, predictionID: job.predictionID)
+        _ = try? await WallpaperCatalog.shared.enrich(
+            mediaURL: local,
+            description: job.prompt,
+            tags: ["generated", "source-image", "flux-1.1-pro"],
+            provenance: .generated
+        )
         job.outputRemoteURL = remoteOutput
         job.outputLocalURL = local
         job.status = "ready"

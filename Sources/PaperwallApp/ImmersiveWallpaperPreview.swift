@@ -6,9 +6,11 @@ import SwiftUI
 struct ImmersiveWallpaperPreview: View {
     let url: URL
     let wallpapers: [URL]
+    let metadata: WallpaperMetadata?
     let selectPreview: (URL) -> Void
     let setWallpaper: () -> Void
     let setSpeed: (PlaybackSpeed) -> Void
+    let saveMetadata: (String, String, [String]) -> Void
     let previous: () -> Void
     let next: () -> Void
     let close: () -> Void
@@ -17,6 +19,10 @@ struct ImmersiveWallpaperPreview: View {
     @State private var fileSize: Int?
     @State private var playbackSpeed = PlaybackPreferences.playbackSpeed
     @State private var isWallpaperDrawerExpanded = false
+    @State private var isMetadataEditorPresented = false
+    @State private var draftTitle = ""
+    @State private var draftDescription = ""
+    @State private var draftTags = ""
 
     var body: some View {
         ZStack {
@@ -87,6 +93,7 @@ struct ImmersiveWallpaperPreview: View {
             let values = try? url.resourceValues(forKeys: [.fileSizeKey])
             assetInfo = await info
             fileSize = values?.fileSize
+            loadMetadataDrafts()
         }
     }
 
@@ -118,9 +125,15 @@ struct ImmersiveWallpaperPreview: View {
                 previewButton(symbol: "chevron.left", action: close)
 
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(displayName)
+                    Text(metadata?.title ?? displayName)
                         .font(.system(size: 16, weight: .medium))
                         .lineLimit(1)
+                    if let description = metadata?.description, !description.isEmpty {
+                        Text(description)
+                            .font(.system(size: 11, weight: .regular))
+                            .foregroundStyle(.white.opacity(0.62))
+                            .lineLimit(1)
+                    }
                     HStack(spacing: 12) {
                         if let assetInfo {
                             metadata(symbol: "rectangle", text: "\(assetInfo.width)×\(assetInfo.height)")
@@ -131,11 +144,27 @@ struct ImmersiveWallpaperPreview: View {
                         if let assetInfo {
                             metadata(symbol: "clock", text: formattedDuration(assetInfo.duration))
                         }
+                        ForEach(Array((metadata?.tags ?? []).prefix(3)), id: \.self) { tag in
+                            metadata(symbol: "tag", text: tag)
+                        }
                     }
                 }
                 .frame(minWidth: 250, alignment: .leading)
 
                 Spacer(minLength: 8)
+
+                Button {
+                    loadMetadataDrafts()
+                    isMetadataEditorPresented = true
+                } label: {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 17, weight: .regular))
+                        .frame(width: 42, height: 42)
+                }
+                .buttonStyle(.plain)
+                .popover(isPresented: $isMetadataEditorPresented, arrowEdge: .bottom) {
+                    metadataEditor
+                }
 
                 ShareLink(item: url) {
                     Image(systemName: "square.and.arrow.up")
@@ -225,6 +254,49 @@ struct ImmersiveWallpaperPreview: View {
                 }
             }
         }
+    }
+
+    private var metadataEditor: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Wallpaper details")
+                .font(.system(size: 16, weight: .medium))
+
+            TextField("Title", text: $draftTitle)
+                .textFieldStyle(.roundedBorder)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Description")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.secondary)
+                TextEditor(text: $draftDescription)
+                    .font(.system(size: 13, weight: .regular))
+                    .frame(height: 76)
+                    .padding(5)
+                    .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+            }
+
+            TextField("Tags, separated by commas", text: $draftTags)
+                .textFieldStyle(.roundedBorder)
+
+            HStack {
+                Spacer()
+                Button("Cancel") { isMetadataEditorPresented = false }
+                Button("Save") {
+                    let tags = draftTags.split(separator: ",").map(String.init)
+                    saveMetadata(draftTitle, draftDescription, tags)
+                    isMetadataEditorPresented = false
+                }
+                .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(18)
+        .frame(width: 380)
+    }
+
+    private func loadMetadataDrafts() {
+        draftTitle = metadata?.title ?? displayName
+        draftDescription = metadata?.description ?? ""
+        draftTags = (metadata?.tags ?? []).joined(separator: ", ")
     }
 
     private var displayName: String {

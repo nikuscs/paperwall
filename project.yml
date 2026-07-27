@@ -21,6 +21,7 @@ targets:
       - Sources/PaperwallPlayback
     dependencies:
       - sdk: Security.framework
+      - sdk: libsqlite3.tbd
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.paperwall.playback
@@ -82,6 +83,7 @@ targets:
       - Sources/PaperwallCLI
       - Sources/PaperwallPlayback/PaperwallConfiguration.swift
       - Sources/PaperwallPlayback/PaperwallStorageMigrator.swift
+      - Sources/PaperwallPlayback/WallpaperCatalog.swift
       - Sources/PaperwallPlayback/VideoAssetValidator.swift
       - Sources/PaperwallPlayback/AssetLibrary.swift
       - Sources/PaperwallPlayback/LaunchAtLoginManager.swift
@@ -93,6 +95,7 @@ targets:
       - Sources/PaperwallPlayback/PaperwallGenerationService.swift
     dependencies:
       - sdk: Security.framework
+      - sdk: libsqlite3.tbd
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.paperwall.cli

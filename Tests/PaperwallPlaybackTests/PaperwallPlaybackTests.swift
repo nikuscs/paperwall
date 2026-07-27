@@ -186,6 +186,28 @@ private func fixtureURL(_ name: String, extension ext: String) throws -> URL {
     ))
 }
 
+@Test func wallpaperMetadataRoundTrips() throws {
+    let metadata = WallpaperMetadata(
+        id: "abc123",
+        mediaRelativePath: "Library/Wallspace/forest.mp4",
+        mediaKind: .video,
+        title: "Quiet Forest",
+        description: "Slow mist and subtle foliage movement.",
+        tags: ["forest", "calm"],
+        provenance: .wallspace,
+        width: 3840,
+        height: 2160,
+        duration: 8,
+        createdAt: Date(timeIntervalSince1970: 1_000_000),
+        updatedAt: Date(timeIntervalSince1970: 1_000_000)
+    )
+    let encoder = JSONEncoder()
+    encoder.dateEncodingStrategy = .iso8601
+    let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .iso8601
+    #expect(try decoder.decode(WallpaperMetadata.self, from: encoder.encode(metadata)) == metadata)
+}
+
 @Test func customAssetLocation() {
     let url = URL(fileURLWithPath: "/tmp/custom-paperwall.mov")
     #expect(PaperwallConfiguration(assetURL: url).assetURL == url)
