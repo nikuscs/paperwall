@@ -127,7 +127,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 self?.upscaleAndInstall(videoURL: url, completion: completion)
             },
             chooseVideo: { [weak self] in self?.selectVideo() },
-            selectDiscovery: { [weak self] url in self?.selectAsset(url) },
+            selectDiscovery: { [weak self] url, completion in
+                self?.selectAsset(url, completion: completion)
+            },
             setPlaybackSpeed: { [weak self] speed in self?.setPlaybackSpeed(speed) },
             configureToken: { [weak self] in self?.configureReplicateToken() },
             openSettings: { [weak self] in self?.openScreenSaverSettings() },
@@ -427,14 +429,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
-    private func selectAsset(_ url: URL) {
+    private func selectAsset(
+        _ url: URL,
+        completion: ((Result<Void, Error>) -> Void)? = nil
+    ) {
         Task {
+            wallpaperController.stop()
             do {
                 _ = try await PaperwallService.selectWallpaper(from: url)
-                wallpaperController.stop()
                 await wallpaperController.start()
+                completion?(.success(()))
             } catch {
+                await wallpaperController.start()
                 presentError("Could not select the wallpaper: \(error.localizedDescription)")
+                completion?(.failure(error))
             }
         }
     }

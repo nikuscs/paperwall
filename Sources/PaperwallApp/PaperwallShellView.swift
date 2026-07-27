@@ -37,6 +37,7 @@ struct PaperwallShellView: View {
     @State private var pipelineError: String?
     @State private var lastGeneratedVideoURL: URL?
     @State private var previewURL: URL?
+    @State private var isApplyingWallpaper = false
     @FocusState private var promptFocused: Bool
     @Namespace private var navigationSelection
 
@@ -44,12 +45,12 @@ struct PaperwallShellView: View {
     let generate: (GenerationRequest, @escaping (Result<GenerationResult, Error>) -> Void) -> Void
     let upscaleVideo: (URL, @escaping (Result<URL, Error>) -> Void) -> Void
     let chooseVideo: () -> Void
-    let selectDiscovery: (URL) -> Void
+    let selectDiscovery: (URL, @escaping (Result<Void, Error>) -> Void) -> Void
     let setPlaybackSpeed: (PlaybackSpeed) -> Void
     let configureToken: () -> Void
     let openSettings: () -> Void
 
-    private let backgroundImage = NSImage(contentsOf: StaticShellAssets.backgroundURL)
+    @State private var backgroundImage = StaticShellAssets.loadBackgroundImage()
     private let brandLogo: NSImage? = {
         guard let url = Bundle.main.url(forResource: "PaperwallLogo", withExtension: "svg"),
               let image = NSImage(contentsOf: url) else { return nil }
@@ -90,11 +91,18 @@ struct PaperwallShellView: View {
                         selectPreview: { url in
                             withAnimation(.easeInOut(duration: 0.2)) { self.previewURL = url }
                         },
+                        isApplyingWallpaper: isApplyingWallpaper,
                         setWallpaper: {
-                            selectDiscovery(previewURL)
-                            withAnimation(.smooth(duration: 0.3)) {
-                                section = .home
-                                self.previewURL = nil
+                            guard !isApplyingWallpaper else { return }
+                            isApplyingWallpaper = true
+                            selectDiscovery(previewURL) { result in
+                                isApplyingWallpaper = false
+                                guard case .success = result else { return }
+                                backgroundImage = StaticShellAssets.loadBackgroundImage()
+                                withAnimation(.smooth(duration: 0.3)) {
+                                    section = .home
+                                    self.previewURL = nil
+                                }
                             }
                         },
                         setSpeed: { speed in
@@ -908,5 +916,12 @@ private enum StaticShellAssets {
     static var backgroundURL: URL {
         PaperwallConfiguration.applicationSupportDirectory
             .appendingPathComponent("fallback.jpg")
+    }
+
+    static func loadBackgroundImage() -> NSImage? {
+        guard let data = try? Data(contentsOf: backgroundURL),
+              let image = NSImage(data: data) else { return nil }
+        image.cacheMode = .always
+        return image
     }
 }
