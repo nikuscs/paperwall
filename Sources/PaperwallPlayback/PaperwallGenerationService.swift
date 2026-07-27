@@ -179,6 +179,12 @@ public enum PaperwallGenerationService {
             predictionID: job.predictionID
         )
         _ = try await VideoAssetValidator.validate(url: output)
+        _ = try? await WallpaperCatalog.shared.enrich(
+            mediaURL: output,
+            description: job.prompt,
+            tags: ["generated", job.provider.rawValue],
+            provenance: .generated
+        )
         job.outputRemoteURL = remoteOutput
         job.outputLocalURL = output
         job.status = "downloaded"

@@ -164,6 +164,14 @@ public enum PaperwallUpscaleService {
             }
             try? FileManager.default.removeItem(at: outputURL)
             try FileManager.default.moveItem(at: stageURL, to: outputURL)
+            let sourceMetadata = try? await WallpaperCatalog.shared.metadata(for: videoURL)
+            _ = try? await WallpaperCatalog.shared.enrich(
+                mediaURL: outputURL,
+                description: sourceMetadata?.description ?? "Paperwall 4K upscale.",
+                tags: (sourceMetadata?.tags ?? []) + ["upscaled", "4k"],
+                provenance: .upscaled,
+                sourceWallpaperID: sourceMetadata?.id
+            )
             job.status = "completed"
             job.updatedAt = Date()
             try save(job, to: jobURL)

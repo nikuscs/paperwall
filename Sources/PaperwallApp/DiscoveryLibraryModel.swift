@@ -5,8 +5,30 @@ import PaperwallPlayback
 @MainActor
 final class DiscoveryLibraryModel: ObservableObject {
     @Published private(set) var videos: [URL] = AssetLibrary.paperwallLibraryVideos()
+    @Published private(set) var metadataByURL: [URL: WallpaperMetadata] = [:]
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
+
+    func updateMetadata(
+        for url: URL,
+        title: String,
+        description: String,
+        tags: [String]
+    ) {
+        Task {
+            do {
+                let metadata = try await WallpaperCatalog.shared.update(
+                    mediaURL: url,
+                    title: title,
+                    description: description,
+                    tags: tags
+                )
+                metadataByURL[url.standardizedFileURL] = metadata
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
 
     func synchronize() {
         guard !isLoading else { return }
@@ -14,7 +36,12 @@ final class DiscoveryLibraryModel: ObservableObject {
         errorMessage = nil
         Task {
             do {
-                videos = try await AssetLibrary.synchronizeDiscoveryCache()
+                _ = try await AssetLibrary.synchronizeDiscoveryCache()
+                let catalog = try await WallpaperCatalog.shared.refresh()
+                videos = AssetLibrary.paperwallLibraryVideos()
+                metadataByURL = Dictionary(uniqueKeysWithValues: catalog.map {
+                    ($0.mediaURL.standardizedFileURL, $0)
+                })
             } catch {
                 videos = AssetLibrary.paperwallLibraryVideos()
                 errorMessage = error.localizedDescription

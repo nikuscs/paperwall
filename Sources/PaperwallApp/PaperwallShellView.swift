@@ -86,6 +86,7 @@ struct PaperwallShellView: View {
                     ImmersiveWallpaperPreview(
                         url: previewURL,
                         wallpapers: discoveryLibrary.videos,
+                        metadata: discoveryLibrary.metadataByURL[previewURL.standardizedFileURL],
                         selectPreview: { url in
                             withAnimation(.easeInOut(duration: 0.2)) { self.previewURL = url }
                         },
@@ -99,6 +100,14 @@ struct PaperwallShellView: View {
                         setSpeed: { speed in
                             try? PlaybackPreferences.save(playbackSpeed: speed)
                             setPlaybackSpeed(speed)
+                        },
+                        saveMetadata: { title, description, tags in
+                            discoveryLibrary.updateMetadata(
+                                for: previewURL,
+                                title: title,
+                                description: description,
+                                tags: tags
+                            )
                         },
                         previous: { movePreview(by: -1) },
                         next: { movePreview(by: 1) },

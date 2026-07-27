@@ -14,7 +14,7 @@ If your shell does not include `~/.local/bin`, add it to `PATH`.
 
 ## Storage and multi-Mac sync
 
-Paperwall stores sync-safe wallpapers, imported library videos, generated images and videos, source images, and 4K upscales under `~/.config/paperwall`. Machine-specific playback state, the active `current.mov`, native fallbacks, generation jobs, locks, and logs remain under `~/Library/Application Support/Paperwall` and must not be synchronized. Existing media is copied non-destructively into the shared location on first launch.
+Paperwall stores sync-safe wallpapers, imported library videos, generated images and videos, source images, 4K upscales, and one editable `.paperwall.json` metadata sidecar per asset under `~/.config/paperwall`. Sidecars carry titles, descriptions, tags, provenance, dimensions, duration, and stable content IDs. Each Mac builds a fast local SQLite catalog at `~/Library/Application Support/Paperwall/Catalog/catalog.sqlite3`; the database is disposable and never synchronized. Machine-specific playback state, the active `current.mov`, native fallbacks, generation jobs, locks, and logs also remain under Application Support. Existing media is copied non-destructively into the shared location on first launch.
 
 ## Generate
 
