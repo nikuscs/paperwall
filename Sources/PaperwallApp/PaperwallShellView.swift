@@ -10,6 +10,17 @@ struct PaperwallShellView: View {
         case settings = "Settings"
     }
 
+    private struct MainScrollMetrics: Equatable {
+        let offset: CGFloat
+        let contentHeight: CGFloat
+        let viewportHeight: CGFloat
+
+        var hasMoreBelow: Bool {
+            contentHeight > viewportHeight + 2
+                && offset + viewportHeight < contentHeight - 12
+        }
+    }
+
     private enum PipelineStage: Equatable {
         case idle
         case generatingImage
@@ -23,6 +34,11 @@ struct PaperwallShellView: View {
     @ObservedObject var wallspaceLibrary: WallspaceLibraryModel
 
     @State private var section: Section = .home
+    @State private var mainScrollMetrics = MainScrollMetrics(
+        offset: 0,
+        contentHeight: 0,
+        viewportHeight: 0
+    )
     @State private var prompt = ""
     @State private var provider: GenerationProvider = .seedance15
     @State private var duration = 4
@@ -75,15 +91,10 @@ struct PaperwallShellView: View {
                 )
 
                 if previewURL == nil {
-                    VStack(spacing: 0) {
-                        topBar
-                        content
-                            .padding(.vertical, 18)
-                        bottomPanel
-                    }
-                    .frame(width: geometry.size.width - 72, height: geometry.size.height - 88)
-                    .position(x: geometry.size.width / 2, y: geometry.size.height / 2 + 18)
-                    .transition(.opacity)
+                    mainInterface(size: geometry.size)
+                        .frame(width: geometry.size.width - 72, height: geometry.size.height - 88)
+                        .position(x: geometry.size.width / 2, y: geometry.size.height / 2 + 18)
+                        .transition(.opacity)
                 }
 
                 if let previewURL {
@@ -192,6 +203,82 @@ struct PaperwallShellView: View {
                 startPoint: .topTrailing,
                 endPoint: .bottomLeading
             )
+        }
+    }
+
+    private func mainInterface(size: CGSize) -> some View {
+        let viewportHeight = max(0, size.height - 88)
+        return ScrollViewReader { proxy in
+            ScrollView(.vertical) {
+                VStack(spacing: 0) {
+                    Color.clear
+                        .frame(height: 1)
+                        .id("main-top")
+                    topBar
+                    content
+                        .padding(.vertical, 28)
+                    Spacer(minLength: 18)
+                    bottomPanel
+                        .id("main-bottom")
+                }
+                .frame(minHeight: viewportHeight)
+            }
+            .scrollIndicators(.hidden)
+            .scrollBounceBehavior(.basedOnSize)
+            .onScrollGeometryChange(for: MainScrollMetrics.self) { geometry in
+                MainScrollMetrics(
+                    offset: geometry.contentOffset.y,
+                    contentHeight: geometry.contentSize.height,
+                    viewportHeight: geometry.containerSize.height
+                )
+            } action: { _, metrics in
+                mainScrollMetrics = metrics
+            }
+            .overlay(alignment: .bottom) {
+                if mainScrollMetrics.hasMoreBelow {
+                    ZStack(alignment: .bottom) {
+                        Rectangle()
+                            .fill(.ultraThinMaterial)
+                            .mask {
+                                LinearGradient(
+                                    colors: [.clear, .black.opacity(0.9)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            }
+                            .frame(height: 88)
+                            .allowsHitTesting(false)
+
+                        LinearGradient(
+                            colors: [.clear, .black.opacity(0.32)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .frame(height: 88)
+                        .allowsHitTesting(false)
+
+                        Button {
+                            withAnimation(.smooth(duration: 0.38)) {
+                                proxy.scrollTo("main-bottom", anchor: .bottom)
+                            }
+                        } label: {
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 12, weight: .semibold))
+                                .frame(width: 38, height: 32)
+                        }
+                        .buttonStyle(.plain)
+                        .glassEffect(.regular.interactive(true), in: Capsule())
+                        .padding(.bottom, 10)
+                        .accessibilityLabel("Scroll to more content")
+                    }
+                    .transition(.opacity)
+                }
+            }
+            .onChange(of: section) { _, _ in
+                withAnimation(.smooth(duration: 0.25)) {
+                    proxy.scrollTo("main-top", anchor: .top)
+                }
+            }
         }
     }
 
@@ -360,32 +447,21 @@ struct PaperwallShellView: View {
     }
 
     private var content: some View {
-        GeometryReader { geometry in
-            ScrollView(.vertical) {
-                ZStack(alignment: .leading) {
-                    if section == .home {
-                        homeContent
-                            .transition(pageTransition)
-                    }
-                    if section == .library {
-                        libraryLoadingContent
-                            .transition(pageTransition)
-                    }
-                    if section == .settings {
-                        settingsContent
-                            .transition(pageTransition)
-                    }
-                }
-                .frame(
-                    maxWidth: .infinity,
-                    minHeight: geometry.size.height,
-                    alignment: .leading
-                )
-                .padding(.vertical, 8)
+        ZStack(alignment: .leading) {
+            if section == .home {
+                homeContent
+                    .transition(pageTransition)
             }
-            .scrollIndicators(.visible)
-            .scrollBounceBehavior(.basedOnSize)
+            if section == .library {
+                libraryLoadingContent
+                    .transition(pageTransition)
+            }
+            if section == .settings {
+                settingsContent
+                    .transition(pageTransition)
+            }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .animation(.smooth(duration: 0.32), value: section)
     }
 
