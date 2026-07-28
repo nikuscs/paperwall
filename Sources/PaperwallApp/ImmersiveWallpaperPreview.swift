@@ -229,8 +229,11 @@ struct ImmersiveWallpaperPreview: View {
 
     private var wallpaperDrawer: some View {
         ScrollViewReader { proxy in
-            ScrollView(.horizontal) {
-                LazyHStack(spacing: 10) {
+            ScrollView(.vertical) {
+                LazyVGrid(
+                    columns: Array(repeating: GridItem(.fixed(138), spacing: 10), count: 5),
+                    spacing: 10
+                ) {
                     ForEach(wallpapers, id: \.self) { wallpaper in
                         Button {
                             selectPreview(wallpaper)
@@ -248,7 +251,7 @@ struct ImmersiveWallpaperPreview: View {
             }
             .scrollIndicators(.hidden)
             .frame(maxWidth: 750)
-            .frame(height: 116)
+            .frame(height: 402)
             .glassEffect(
                 .regular.tint(.black.opacity(0.12)),
                 in: RoundedRectangle(cornerRadius: 24)
