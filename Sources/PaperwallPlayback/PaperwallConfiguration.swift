@@ -27,6 +27,10 @@ public struct PaperwallConfiguration: Equatable, Sendable {
         sharedDataDirectory.appendingPathComponent("Library/Wallspace", isDirectory: true)
     }
 
+    public static var sharedImportsDirectory: URL {
+        sharedDataDirectory.appendingPathComponent("Library/Imports", isDirectory: true)
+    }
+
     public static var sharedGenerationDirectory: URL {
         sharedDataDirectory.appendingPathComponent("Generation", isDirectory: true)
     }
