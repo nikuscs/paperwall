@@ -115,7 +115,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(withTitle: "Start", action: #selector(startPlayback), keyEquivalent: "")
         menu.addItem(withTitle: "Stop", action: #selector(stopPlayback), keyEquivalent: "")
         menu.addItem(.separator())
-        menu.addItem(withTitle: "Select Video…", action: #selector(selectVideo), keyEquivalent: "")
+        menu.addItem(withTitle: "Select Video…", action: #selector(selectVideoFromMenu), keyEquivalent: "")
         let wallspaceItem = NSMenuItem(title: "Import from Wallspace Cache", action: nil, keyEquivalent: "")
         wallspaceItem.submenu = wallspaceMenu
         menu.addItem(wallspaceItem)
@@ -170,7 +170,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             upscaleVideo: { [weak self] url, completion in
                 self?.upscaleAndInstall(videoURL: url, completion: completion)
             },
-            chooseVideo: { [weak self] in self?.selectVideo() },
+            chooseVideo: { [weak self] progress in self?.selectVideo(progress: progress) },
             selectWallspace: { [weak self] url, completion in
                 self?.selectAsset(url, completion: completion)
             },
@@ -231,14 +231,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         wallpaperController.stop()
     }
 
-    @objc private func selectVideo() {
+    @objc private func selectVideoFromMenu() {
+        selectVideo { _ in }
+    }
+
+    private func selectVideo(progress: @escaping (VideoImportProgress) -> Void) {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.movie]
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         NSApp.activate(ignoringOtherApps: true)
-        guard panel.runModal() == .OK, let url = panel.url else { return }
-        upscaleAndInstall(videoURL: url) { _ in }
+        guard panel.runModal() == .OK, let url = panel.url else {
+            progress(.idle)
+            return
+        }
+        importAndInstall(videoURL: url, progress: progress)
     }
 
     @objc private func selectWallspaceVideo(_ sender: NSMenuItem) {
@@ -415,6 +422,44 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             } catch {
                 presentError(error.localizedDescription)
                 completion?(.failure(error))
+            }
+        }
+    }
+
+    private func importAndInstall(
+        videoURL: URL,
+        progress: @escaping (VideoImportProgress) -> Void
+    ) {
+        guard !generationInProgress else {
+            progress(.failed(GenerationError.generationAlreadyRunning.localizedDescription))
+            return
+        }
+        generationInProgress = true
+        progress(.validating(videoURL.lastPathComponent))
+        Task {
+            defer { generationInProgress = false }
+            do {
+                let info = try await VideoAssetValidator.validate(url: videoURL)
+                progress(.importing)
+                let ownedURL = try await AssetLibrary.importLocalVideo(videoURL)
+                let needsUpscale = info.width < 3_840 || info.height < 2_160
+                let preparedURL: URL
+                if needsUpscale {
+                    progress(.upscaling)
+                    let result = try await PaperwallUpscaleService.upscaleTo4K(videoURL: ownedURL)
+                    preparedURL = result.upscaledVideoURL
+                } else {
+                    preparedURL = ownedURL
+                }
+                progress(.installing)
+                _ = try await PaperwallService.selectWallpaper(from: preparedURL)
+                wallpaperController.stop()
+                await wallpaperController.start()
+                wallspaceLibrary.synchronize()
+                progress(.completed(preparedURL, wasUpscaled: needsUpscale))
+            } catch {
+                progress(.failed(error.localizedDescription))
+                presentError(error.localizedDescription)
             }
         }
     }

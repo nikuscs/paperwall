@@ -33,6 +33,7 @@ public enum AssetLibrary {
     public static func paperwallLibraryVideos() -> [URL] {
         let directories = [
             paperwallLibraryDirectory,
+            PaperwallConfiguration.sharedImportsDirectory,
             PaperwallConfiguration.sharedGenerationDirectory
                 .appendingPathComponent("Outputs", isDirectory: true),
             PaperwallConfiguration.sharedGenerationDirectory
@@ -118,14 +119,59 @@ public enum AssetLibrary {
         }.value
     }
 
+    public static func importLocalVideo(_ sourceURL: URL) async throws -> URL {
+        let source = sourceURL.resolvingSymlinksInPath().standardizedFileURL
+        _ = try await VideoAssetValidator.validate(url: source)
+        let sharedRoot = PaperwallConfiguration.sharedDataDirectory.resolvingSymlinksInPath().path
+        if source.path == sharedRoot || source.path.hasPrefix(sharedRoot + "/") {
+            return source
+        }
+
+        return try await Task.detached(priority: .userInitiated) {
+            let fileManager = FileManager.default
+            let directory = PaperwallConfiguration.sharedImportsDirectory
+            try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+            let digest = try sha256(source)
+            let hash = digest.map { String(format: "%02x", $0) }.joined()
+            let fileExtension = source.pathExtension.isEmpty ? "mov" : source.pathExtension.lowercased()
+            let destination = directory
+                .appendingPathComponent("\(source.deletingPathExtension().lastPathComponent)-\(hash.prefix(12))")
+                .appendingPathExtension(fileExtension)
+            if fileManager.fileExists(atPath: destination.path) {
+                guard try sha256(destination) == digest else { throw AssetLibraryError.hashMismatch }
+                return destination
+            }
+
+            let stage = directory
+                .appendingPathComponent(".import-\(UUID().uuidString)")
+                .appendingPathExtension(fileExtension)
+            do {
+                try fileManager.copyItem(at: source, to: stage)
+                guard try sha256(stage) == digest else { throw AssetLibraryError.hashMismatch }
+                try fileManager.moveItem(at: stage, to: destination)
+                _ = try? await WallpaperCatalog.shared.enrich(
+                    mediaURL: destination,
+                    description: "Imported into Paperwall.",
+                    tags: ["imported"],
+                    provenance: .imported
+                )
+                return destination
+            } catch {
+                try? fileManager.removeItem(at: stage)
+                throw error
+            }
+        }.value
+    }
+
     private static func videos(in directory: URL) -> [URL] {
         let urls = (try? FileManager.default.contentsOfDirectory(
             at: directory,
             includingPropertiesForKeys: [.isRegularFileKey],
             options: [.skipsHiddenFiles]
         )) ?? []
+        let supportedExtensions = Set(["mp4", "mov", "m4v"])
         return urls
-            .filter { $0.pathExtension.lowercased() == "mp4" }
+            .filter { supportedExtensions.contains($0.pathExtension.lowercased()) }
             .sorted { $0.deletingPathExtension().lastPathComponent < $1.deletingPathExtension().lastPathComponent }
     }
 
