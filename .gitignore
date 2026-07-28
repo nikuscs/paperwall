@@ -30,3 +30,6 @@ Assets/Generated/*.jpeg
 # Local video-processing intermediates
 Assets/Final/*.tmp.*
 Assets/Final/*-intermediate.*
+
+# Local Xcode build cache
+.build/
