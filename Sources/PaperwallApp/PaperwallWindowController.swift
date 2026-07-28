@@ -5,6 +5,7 @@ import SwiftUI
 @MainActor
 final class PaperwallWindowController: NSWindowController, NSWindowDelegate {
     private let activationChanged: () -> Void
+    private let hasActiveWork: () -> Bool
 
     init(
         discoveryLibrary: DiscoveryLibraryModel,
@@ -16,9 +17,11 @@ final class PaperwallWindowController: NSWindowController, NSWindowDelegate {
         setPlaybackSpeed: @escaping (PlaybackSpeed) -> Void,
         configureToken: @escaping () -> Void,
         openSettings: @escaping () -> Void,
+        hasActiveWork: @escaping () -> Bool,
         activationChanged: @escaping () -> Void
     ) {
         self.activationChanged = activationChanged
+        self.hasActiveWork = hasActiveWork
         let rootView = PaperwallShellView(
             discoveryLibrary: discoveryLibrary,
             generateImage: generateImage,
@@ -68,6 +71,15 @@ final class PaperwallWindowController: NSWindowController, NSWindowDelegate {
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
+        if hasActiveWork() {
+            let alert = NSAlert()
+            alert.alertStyle = .warning
+            alert.messageText = "Wallpaper processing is still running"
+            alert.informativeText = "Paperwall will continue in the background. Keep this window open to follow progress, or hide it and return from the menu bar."
+            alert.addButton(withTitle: "Keep Open")
+            alert.addButton(withTitle: "Hide Anyway")
+            guard alert.runModal() == .alertSecondButtonReturn else { return false }
+        }
         sender.orderOut(nil)
         NSApp.setActivationPolicy(.accessory)
         DispatchQueue.main.async { [activationChanged] in

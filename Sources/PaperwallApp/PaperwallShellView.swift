@@ -31,6 +31,8 @@ struct PaperwallShellView: View {
     @State private var playbackSpeed = PlaybackPreferences.playbackSpeed
     @State private var showingProviderOptions = false
     @State private var showingDurationOptions = false
+    @State private var showingWorkQueue = false
+    @State private var workItems: [PaperwallWorkItem] = []
     @State private var generatedImageURL: URL?
     @State private var pipelineStage: PipelineStage = .idle
     @State private var pipelineStatus = ""
@@ -150,10 +152,17 @@ struct PaperwallShellView: View {
             if NativeWallpaperExtensionBridge.isNativeWallpaperActivated {
                 nativeLockSetupComplete = true
             }
+            refreshWorkQueue()
             if let resumable = PaperwallUpscaleService.latestResumableVideoURL() {
                 lastGeneratedVideoURL = resumable
                 pipelineStage = .failed
                 pipelineError = "4K upscaling was interrupted. You can resume safely."
+            }
+        }
+        .task {
+            while !Task.isCancelled {
+                refreshWorkQueue()
+                try? await Task.sleep(for: .seconds(2))
             }
         }
         .onChange(of: discoveryLibrary.videos) { _, videos in
@@ -208,8 +217,33 @@ struct PaperwallShellView: View {
                         .font(.system(size: 22, weight: .medium, design: .rounded))
                 }
                 Spacer()
-                circleButton(symbol: "gearshape") {
-                    withAnimation(.smooth(duration: 0.32)) { section = .settings }
+                HStack(spacing: 8) {
+                    Button {
+                        refreshWorkQueue()
+                        showingWorkQueue.toggle()
+                    } label: {
+                        ZStack(alignment: .topTrailing) {
+                            Image(systemName: "tray.full")
+                                .font(.system(size: 14, weight: .medium))
+                                .frame(width: 40, height: 40)
+                            if workItems.contains(where: \.isActive) {
+                                Circle()
+                                    .fill(.orange)
+                                    .frame(width: 8, height: 8)
+                                    .offset(x: -2, y: 2)
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .glassEffect(.regular.interactive(true), in: Circle())
+                    .popover(isPresented: $showingWorkQueue, arrowEdge: .top) {
+                        workQueuePopover
+                    }
+                    .accessibilityLabel("Work queue")
+
+                    circleButton(symbol: "gearshape") {
+                        withAnimation(.smooth(duration: 0.32)) { section = .settings }
+                    }
                 }
             }
 
@@ -247,6 +281,82 @@ struct PaperwallShellView: View {
             }
         }
         .frame(height: 52)
+    }
+
+    private var workQueuePopover: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Work Queue")
+                    .font(.system(size: 15, weight: .medium))
+                Spacer()
+                Text("\(workItems.count) jobs")
+                    .font(.system(size: 11, weight: .regular))
+                    .foregroundStyle(.secondary)
+            }
+
+            if workItems.isEmpty {
+                ContentUnavailableView(
+                    "No generation jobs yet",
+                    systemImage: "tray",
+                    description: Text("Image, video, and 4K processing will appear here.")
+                )
+                .frame(height: 150)
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 6) {
+                        ForEach(workItems) { item in
+                            HStack(spacing: 10) {
+                                Image(systemName: workQueueSymbol(for: item))
+                                    .foregroundStyle(item.isFailed ? .orange : (item.isActive ? .blue : .green))
+                                    .frame(width: 22)
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(item.title)
+                                        .font(.system(size: 12, weight: .medium))
+                                        .lineLimit(1)
+                                    Text("\(item.kind.rawValue) · \(item.status.capitalized)")
+                                        .font(.system(size: 10, weight: .regular))
+                                        .foregroundStyle(.secondary)
+                                }
+
+                                Spacer()
+
+                                if item.isActive {
+                                    ProgressView()
+                                        .controlSize(.small)
+                                } else if let outputURL = item.outputURL,
+                                          FileManager.default.fileExists(atPath: outputURL.path) {
+                                    Button {
+                                        NSWorkspace.shared.activateFileViewerSelecting([outputURL])
+                                    } label: {
+                                        Image(systemName: "folder")
+                                            .frame(width: 28, height: 28)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .help("Show output in Finder")
+                                }
+                            }
+                            .padding(.horizontal, 10)
+                            .frame(height: 48)
+                            .background(.quaternary.opacity(0.45), in: RoundedRectangle(cornerRadius: 10))
+                        }
+                    }
+                }
+                .frame(maxHeight: 330)
+            }
+        }
+        .padding(14)
+        .frame(width: 390)
+    }
+
+    private func workQueueSymbol(for item: PaperwallWorkItem) -> String {
+        if item.isFailed { return "exclamationmark.triangle.fill" }
+        if item.isActive { return "clock.arrow.circlepath" }
+        return "checkmark.circle.fill"
+    }
+
+    private func refreshWorkQueue() {
+        workItems = PaperwallWorkQueue.items()
     }
 
     private var content: some View {
