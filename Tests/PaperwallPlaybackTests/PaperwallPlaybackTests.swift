@@ -281,6 +281,51 @@ private func fixtureURL(_ name: String, extension ext: String) throws -> URL {
     #expect(representation.pixelsHigh == 36)
 }
 
+@Test func nativeWallpaperRecoveryRequiresRecentUnresolvedInvalidation() {
+    let transition = Date(timeIntervalSince1970: 1_000)
+    let surfaceID = UUID().uuidString
+    let invalidated = NativeWallpaperRecoveryHealth(
+        pendingInvalidations: [surfaceID: 1_005]
+    )
+    #expect(NativeWallpaperRecovery.shouldRecover(
+        health: invalidated,
+        transitionStartedAt: transition,
+        now: Date(timeIntervalSince1970: 1_007)
+    ))
+
+    let reacquired = NativeWallpaperRecoveryHealth()
+    #expect(!NativeWallpaperRecovery.shouldRecover(
+        health: reacquired,
+        transitionStartedAt: transition,
+        now: Date(timeIntervalSince1970: 1_007)
+    ))
+}
+
+@Test func nativeWallpaperRecoveryTracksSurfacesIndependently() {
+    let staleSurface = UUID().uuidString
+    let otherSurface = UUID().uuidString
+    let expected: [String: TimeInterval] = [staleSurface: 1_005, otherSurface: 1_006]
+    let health = NativeWallpaperRecoveryHealth(
+        pendingInvalidations: [staleSurface: 1_005]
+    )
+
+    #expect(NativeWallpaperRecovery.unresolvedInvalidations(
+        in: health,
+        expected: expected
+    ) == [staleSurface: 1_005])
+}
+
+@Test func nativeWallpaperRecoveryRejectsOldInvalidations() {
+    let stale = NativeWallpaperRecoveryHealth(
+        pendingInvalidations: [UUID().uuidString: 900]
+    )
+    #expect(!NativeWallpaperRecovery.shouldRecover(
+        health: stale,
+        transitionStartedAt: Date(timeIntervalSince1970: 1_000),
+        now: Date(timeIntervalSince1970: 1_007)
+    ))
+}
+
 @MainActor
 @Test func loopingPlayerTearsDownDeterministically() throws {
     let player = LoopingPlayer(assetURL: try fixtureURL("tiny-video", extension: "mp4"))

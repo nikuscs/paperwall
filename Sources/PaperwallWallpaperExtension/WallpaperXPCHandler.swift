@@ -240,6 +240,9 @@ final class WallpaperXPCHandler: NSObject, WallpaperExtensionXPCProtocol {
         // A re-acquire of THIS surface (display woke / preview refresh / switch) cancels its
         // pending teardown so a brief invalidate→re-acquire flicker doesn't drop it.
         cancelTeardown(for: key)
+        if !isPreview {
+            NativeSurfaceRecovery.recordAcquire(surfaceID: surfaceUUID)
+        }
         let videoURL = findVideoURL(forChoice: choiceConfiguration)
         let cachedStill = loadCachedSnapshotImage(forChoice: choiceConfiguration)
 
@@ -572,6 +575,11 @@ final class WallpaperXPCHandler: NSObject, WallpaperExtensionXPCProtocol {
         guard let key = WallpaperState.shared.resolveWallpaperKey(uuid) else {
             extensionLog("=== INVALIDATE === UUID \(uuid) unknown (not ours / already forgotten) → ignore")
             reply(nil); return
+        }
+        if let context = WallpaperState.shared.context(for: key),
+           !context.isPreview,
+           context.renderer != nil {
+            NativeSurfaceRecovery.recordLiveInvalidation(surfaceID: uuid)
         }
         WallpaperState.shared.forgetWallpaperID(uuid)
         scheduleTeardown(for: key)

@@ -41,6 +41,7 @@
 		48D7446703B24FD07A6E141B /* VideoRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 001F1F878D0F6370BC40195E /* VideoRenderer.swift */; };
 		49CC3EE12BF9038FA3121535 /* PaperwallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86AAD7159FFB84DAB9F45DAA /* PaperwallService.swift */; };
 		4E84A5C29B2DDBD3C42F1D7B /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 462EB9108A129B219CDDDDD7 /* libsqlite3.tbd */; };
+		51633ED20DB182EEE0AF1D5A /* NativeWallpaperRecovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4498D5B7C6C8B7D4A459F53C /* NativeWallpaperRecovery.swift */; };
 		52F56F735237C2516C64CDFA /* PaperwallWallpaperExtension.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 55C8839FDA6A5A3821927F63 /* PaperwallWallpaperExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		55CCC81303B5A65F79881F3A /* PathSafety.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A1FE2F45B2BCD9A0F8385B /* PathSafety.swift */; };
 		56656AE70FE90002A31A1523 /* DiscoveryLibraryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33E431DC75D784C9C9CDB301 /* DiscoveryLibraryModel.swift */; };
@@ -94,6 +95,7 @@
 		DAF4B351FAB9A35E296CBE07 /* PaperwallShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 023DEB2E9A9E37CD40868593 /* PaperwallShellView.swift */; };
 		DB5F663DAED92276A82E7ABB /* PaperwallCLI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20725334C0B15078C5E22B0E /* PaperwallCLI.swift */; };
 		E0D0F4BF3696F767B989EFCF /* WallpaperState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AFF625C1778CBF88EF54AFB /* WallpaperState.swift */; };
+		EAD0684038F2E0AB6199C627 /* NativeSurfaceRecovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = F34489ECA6A79158A32BC592 /* NativeSurfaceRecovery.swift */; };
 		EEA42A6328F42423D288F41A /* StillBisect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75490E174ED306C91B098B67 /* StillBisect.swift */; };
 		F00D751DEE842E053DDFC5F3 /* BMPCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D51716918BA010FCA06618 /* BMPCache.swift */; };
 		F2D8C20EC994F2E0E1A69BC3 /* ReplicateCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 496BB5D74C84FEA1D78842F4 /* ReplicateCredentialStore.swift */; };
@@ -206,6 +208,7 @@
 		30AD624A9C5B0EB9AC679D47 /* NativeWallpaperExtensionBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeWallpaperExtensionBridge.swift; sourceTree = "<group>"; };
 		311A60DD763979D19C7D0478 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		33E431DC75D784C9C9CDB301 /* DiscoveryLibraryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryLibraryModel.swift; sourceTree = "<group>"; };
+		4498D5B7C6C8B7D4A459F53C /* NativeWallpaperRecovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeWallpaperRecovery.swift; sourceTree = "<group>"; };
 		44D542CB638A14C2876BE171 /* CallerValidation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallerValidation.swift; sourceTree = "<group>"; };
 		462EB9108A129B219CDDDDD7 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		496BB5D74C84FEA1D78842F4 /* ReplicateCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplicateCredentialStore.swift; sourceTree = "<group>"; };
@@ -262,6 +265,7 @@
 		E5B5ED5EC5552A5C82E3D658 /* StaticWallpaperManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaticWallpaperManager.swift; sourceTree = "<group>"; };
 		F00D13D1CD68491C70EA0EB2 /* GenerationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerationModels.swift; sourceTree = "<group>"; };
 		F28488992ACC9260FE4AED1A /* PaperwallConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallConfiguration.swift; sourceTree = "<group>"; };
+		F34489ECA6A79158A32BC592 /* NativeSurfaceRecovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeSurfaceRecovery.swift; sourceTree = "<group>"; };
 		F58335E601A53032C32C42F3 /* LoopingPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopingPlayer.swift; sourceTree = "<group>"; };
 		F5AE20752A5B9D56C7B913D7 /* invalid-video.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = "invalid-video.mov"; sourceTree = "<group>"; };
 		FBBFD9EE4567227FFDF4D953 /* VideoLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoLibrary.swift; sourceTree = "<group>"; };
@@ -402,6 +406,7 @@
 				7962C5E656C9F797B3490E44 /* ColorDiag.swift */,
 				A2883723653F0C8D35E89B70 /* Info.plist */,
 				7C2AD42B081F9D65E33624B6 /* Logging.swift */,
+				F34489ECA6A79158A32BC592 /* NativeSurfaceRecovery.swift */,
 				E5A1FE2F45B2BCD9A0F8385B /* PathSafety.swift */,
 				A124684FEA07AE6BCF75DD9F /* PhospheneExtension.swift */,
 				17DD80F0D0FCA174AB930EEA /* PlaybackPolicy.swift */,
@@ -471,6 +476,7 @@
 				94A7779D1A28756855D8CAA1 /* LaunchAtLoginManager.swift */,
 				F58335E601A53032C32C42F3 /* LoopingPlayer.swift */,
 				30AD624A9C5B0EB9AC679D47 /* NativeWallpaperExtensionBridge.swift */,
+				4498D5B7C6C8B7D4A459F53C /* NativeWallpaperRecovery.swift */,
 				F28488992ACC9260FE4AED1A /* PaperwallConfiguration.swift */,
 				75A1ABEFA5A3A6E3ED22C525 /* PaperwallGenerationService.swift */,
 				5166438E0003549B074D1064 /* PaperwallImageGenerationService.swift */,
@@ -732,6 +738,7 @@
 				0DD4B8EC7F3F3E77C35FFDAE /* CodableShims.swift in Sources */,
 				02A348BF8F45AB8E2427FCF5 /* ColorDiag.swift in Sources */,
 				17FD84C7CC00491F75BC6205 /* Logging.swift in Sources */,
+				EAD0684038F2E0AB6199C627 /* NativeSurfaceRecovery.swift in Sources */,
 				55CCC81303B5A65F79881F3A /* PathSafety.swift in Sources */,
 				30ACE3B77641BFCDCCC4A11F /* PhospheneExtension.swift in Sources */,
 				1B813AE51A5A875C9B81D9FC /* PlaybackPolicy.swift in Sources */,
@@ -808,6 +815,7 @@
 				7EA4ECE242E149247CC92E4A /* LaunchAtLoginManager.swift in Sources */,
 				229554F4B6CA46CC8803BABD /* LoopingPlayer.swift in Sources */,
 				BDD096CA087E07B35FDCBC3C /* NativeWallpaperExtensionBridge.swift in Sources */,
+				51633ED20DB182EEE0AF1D5A /* NativeWallpaperRecovery.swift in Sources */,
 				27BE6F297890EFA9B4428678 /* PaperwallConfiguration.swift in Sources */,
 				87B5431B22F7D863EC4DFF9A /* PaperwallGenerationService.swift in Sources */,
 				1541471D1DA4ADA27FDAE56C /* PaperwallImageGenerationService.swift in Sources */,

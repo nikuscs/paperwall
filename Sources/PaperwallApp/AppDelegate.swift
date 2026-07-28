@@ -12,6 +12,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var saverStatusItem: NSMenuItem?
     private var generationInProgress = false
     private var wallpaperServiceRestartInProgress = false
+    private var nativeRecoveryTransitionStartedAt: Date?
+    private var nativeRecoveryTask: Task<Void, Never>?
+    private var lastAutomaticNativeRecovery = Date.distantPast
+    private var workspaceRecoveryObservers: [NSObjectProtocol] = []
+    private var distributedRecoveryObservers: [NSObjectProtocol] = []
     private let discoveryMenu = NSMenu(title: "Import from Discovery Cache")
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -27,6 +32,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         installMainMenu()
         installStatusItem()
+        installNativeWallpaperRecovery()
         do {
             try BundledComponentInstaller.installIfNeeded()
         } catch {
@@ -70,6 +76,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        nativeRecoveryTask?.cancel()
+        for observer in workspaceRecoveryObservers {
+            NSWorkspace.shared.notificationCenter.removeObserver(observer)
+        }
+        for observer in distributedRecoveryObservers {
+            DistributedNotificationCenter.default().removeObserver(observer)
+        }
+        CFNotificationCenterRemoveEveryObserver(
+            CFNotificationCenterGetDarwinNotifyCenter(),
+            Unmanaged.passUnretained(self).toOpaque()
+        )
         wallpaperController.stop()
     }
 
@@ -616,12 +633,109 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
+    private func installNativeWallpaperRecovery() {
+        let workspaceCenter = NSWorkspace.shared.notificationCenter
+        workspaceRecoveryObservers.append(workspaceCenter.addObserver(
+            forName: NSWorkspace.screensDidWakeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.beginNativeWallpaperRecoveryWindow()
+        })
+
+        let distributedCenter = DistributedNotificationCenter.default()
+        for name in ["com.apple.screenIsLocked", "com.apple.screenIsUnlocked"] {
+            distributedRecoveryObservers.append(distributedCenter.addObserver(
+                forName: .init(name),
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                self?.beginNativeWallpaperRecoveryWindow()
+            })
+        }
+
+        let darwinCenter = CFNotificationCenterGetDarwinNotifyCenter()
+        let observer = Unmanaged.passUnretained(self).toOpaque()
+        for name in [
+            NativeWallpaperRecovery.surfaceInvalidatedNotification,
+            NativeWallpaperRecovery.agentStuckNotification,
+        ] {
+            CFNotificationCenterAddObserver(
+                darwinCenter,
+                observer,
+                { _, observer, name, _, _ in
+                    guard let observer, let name else { return }
+                    let delegate = Unmanaged<AppDelegate>.fromOpaque(observer).takeUnretainedValue()
+                    let signal = name.rawValue as String
+                    Task { @MainActor in
+                        delegate.handleNativeWallpaperRecoverySignal(signal)
+                    }
+                },
+                name as CFString,
+                nil,
+                .deliverImmediately
+            )
+        }
+    }
+
+    private func beginNativeWallpaperRecoveryWindow() {
+        nativeRecoveryTransitionStartedAt = Date()
+    }
+
+    private func handleNativeWallpaperRecoverySignal(_ signal: String) {
+        if signal == NativeWallpaperRecovery.agentStuckNotification {
+            scheduleAutomaticNativeWallpaperRecovery(requiresInvalidatedSurface: false)
+            return
+        }
+        guard let transitionStartedAt = nativeRecoveryTransitionStartedAt,
+              Date().timeIntervalSince(transitionStartedAt) <= 30
+        else { return }
+        scheduleAutomaticNativeWallpaperRecovery(requiresInvalidatedSurface: true)
+    }
+
+    private func scheduleAutomaticNativeWallpaperRecovery(requiresInvalidatedSurface: Bool) {
+        nativeRecoveryTask?.cancel()
+        let transitionStartedAt = nativeRecoveryTransitionStartedAt ?? Date()
+        let expectedInvalidations = NativeWallpaperRecovery.readHealth()?.pendingInvalidations ?? [:]
+        nativeRecoveryTask = Task { [weak self] in
+            do {
+                try await Task.sleep(for: .seconds(2))
+            } catch {
+                return
+            }
+            guard let self else { return }
+            if requiresInvalidatedSurface {
+                let health = NativeWallpaperRecovery.readHealth()
+                let unresolved = NativeWallpaperRecovery.unresolvedInvalidations(
+                    in: health,
+                    expected: expectedInvalidations
+                )
+                guard !unresolved.isEmpty,
+                      NativeWallpaperRecovery.shouldRecover(
+                          health: NativeWallpaperRecoveryHealth(pendingInvalidations: unresolved),
+                          transitionStartedAt: transitionStartedAt
+                      )
+                else { return }
+            }
+            guard NativeWallpaperExtensionBridge.isNativeWallpaperActivated,
+                  Date().timeIntervalSince(lastAutomaticNativeRecovery) >= 30
+            else { return }
+            lastAutomaticNativeRecovery = Date()
+            NSLog("Paperwall: recovering native wallpaper service after a stale lock/wake transition")
+            performNativeWallpaperServiceRestart(showConfirmation: false)
+        }
+    }
+
     @objc private func restartNativeWallpaperServices() {
+        performNativeWallpaperServiceRestart(showConfirmation: true)
+    }
+
+    private func performNativeWallpaperServiceRestart(showConfirmation: Bool) {
         guard !wallpaperServiceRestartInProgress else { return }
         wallpaperServiceRestartInProgress = true
 
         let targets = NSWorkspace.shared.runningApplications.filter { application in
-            if application.bundleIdentifier == "com.paperwall.app.wallpaper-extension" {
+            if application.bundleIdentifier == NativeWallpaperExtensionBridge.extensionBundleIdentifier {
                 return true
             }
             return application.executableURL?.lastPathComponent == "WallpaperAgent"
@@ -639,13 +753,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     try await NativeWallpaperExtensionBridge.deployActiveWallpaper(from: active)
                 }
                 try await Task.sleep(for: .seconds(1))
-                let complete = NSAlert()
-                complete.messageText = "Native Wallpaper Service Restarted"
-                complete.informativeText = "Paperwall refreshed the active video and macOS will relaunch the current wallpaper extension automatically."
-                complete.addButton(withTitle: "Done")
-                complete.runModal()
+                if showConfirmation {
+                    let complete = NSAlert()
+                    complete.messageText = "Native Wallpaper Service Restarted"
+                    complete.informativeText = "Paperwall refreshed the active video and macOS will relaunch the current wallpaper extension automatically."
+                    complete.addButton(withTitle: "Done")
+                    complete.runModal()
+                }
             } catch {
-                presentError("Could not restart the native wallpaper service: \(error.localizedDescription)")
+                if showConfirmation {
+                    presentError("Could not restart the native wallpaper service: \(error.localizedDescription)")
+                } else {
+                    NSLog("Paperwall: automatic native wallpaper recovery failed: %@", error.localizedDescription)
+                }
             }
         }
     }
