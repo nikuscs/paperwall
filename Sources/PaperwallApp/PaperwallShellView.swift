@@ -60,6 +60,10 @@ struct PaperwallShellView: View {
     @AppStorage("nativeLockSetupComplete") private var nativeLockSetupComplete = false
     @State private var previewURL: URL?
     @State private var isApplyingWallpaper = false
+    @State private var hasActiveWallpaper = FileManager.default.fileExists(
+        atPath: PaperwallConfiguration.defaultAssetURL.path
+    )
+    @State private var nativeLockActivated = NativeWallpaperExtensionBridge.isNativeWallpaperActivated
     @FocusState private var promptFocused: Bool
     @Namespace private var navigationSelection
 
@@ -108,6 +112,8 @@ struct PaperwallShellView: View {
                         url: previewURL,
                         wallpapers: discoveryLibrary.videos,
                         metadata: discoveryLibrary.metadataByURL[previewURL.standardizedFileURL],
+                        libraryError: discoveryLibrary.errorMessage,
+                        retryLibrary: discoveryLibrary.synchronize,
                         selectPreview: { url in
                             withAnimation(.easeInOut(duration: 0.2)) { self.previewURL = url }
                         },
@@ -118,6 +124,7 @@ struct PaperwallShellView: View {
                             selectDiscovery(previewURL) { result in
                                 isApplyingWallpaper = false
                                 guard case .success = result else { return }
+                                hasActiveWallpaper = true
                                 backgroundImage = StaticShellAssets.loadBackgroundImage()
                                 withAnimation(.smooth(duration: 0.3)) {
                                     section = .home
@@ -166,9 +173,13 @@ struct PaperwallShellView: View {
         .ignoresSafeArea(.container, edges: .top)
         .preferredColorScheme(.dark)
         .onAppear {
-            if NativeWallpaperExtensionBridge.isNativeWallpaperActivated {
+            nativeLockActivated = NativeWallpaperExtensionBridge.isNativeWallpaperActivated
+            if nativeLockActivated {
                 nativeLockSetupComplete = true
             }
+            hasActiveWallpaper = FileManager.default.fileExists(
+                atPath: PaperwallConfiguration.defaultAssetURL.path
+            )
             launchAtLoginEnabled = LaunchAtLoginManager.isEnabled
             refreshWorkQueue()
             if let resumable = PaperwallUpscaleService.latestResumableVideoURL() {
@@ -180,6 +191,10 @@ struct PaperwallShellView: View {
         .task {
             while !Task.isCancelled {
                 refreshWorkQueue()
+                hasActiveWallpaper = FileManager.default.fileExists(
+                    atPath: PaperwallConfiguration.defaultAssetURL.path
+                )
+                nativeLockActivated = NativeWallpaperExtensionBridge.isNativeWallpaperActivated
                 try? await Task.sleep(for: .seconds(2))
             }
         }
@@ -534,20 +549,55 @@ struct PaperwallShellView: View {
                 Text("Loading shared wallpapers")
                     .font(.system(size: 14, weight: .regular))
                     .foregroundStyle(.white.opacity(0.68))
+            } else if let errorMessage = discoveryLibrary.errorMessage {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.system(size: 28, weight: .ultraLight))
+                    .foregroundStyle(.orange.opacity(0.86))
+                Text("Couldn’t load the Library")
+                    .font(.system(size: 16, weight: .medium))
+                Text(errorMessage)
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundStyle(.white.opacity(0.58))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+                    .frame(maxWidth: 440)
+                HStack(spacing: 10) {
+                    libraryActionButton("Retry", symbol: "arrow.clockwise", action: discoveryLibrary.synchronize)
+                    libraryActionButton("Import Video", symbol: "square.and.arrow.down", action: beginVideoImport)
+                }
             } else {
                 Image(systemName: "film.stack")
                     .font(.system(size: 28, weight: .ultraLight))
                     .foregroundStyle(.white.opacity(0.48))
-                Text("No shared wallpapers yet")
+                Text("Your Library is empty")
                     .font(.system(size: 16, weight: .medium))
-                Button("Refresh", action: discoveryLibrary.synchronize)
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, 14)
-                    .frame(height: 34)
-                    .glassEffect(.regular.interactive(true), in: Capsule())
+                Text("Import a video or create a new animated wallpaper with AI.")
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundStyle(.white.opacity(0.58))
+                HStack(spacing: 10) {
+                    libraryActionButton("Import Video", symbol: "square.and.arrow.down", action: beginVideoImport)
+                    libraryActionButton("Generate", symbol: "sparkles", action: openGenerationComposer)
+                    libraryActionButton("Refresh", symbol: "arrow.clockwise", action: discoveryLibrary.synchronize)
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func libraryActionButton(_ title: String, symbol: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Label(title, systemImage: symbol)
+                .font(.system(size: 12, weight: .medium))
+                .padding(.horizontal, 14)
+                .frame(height: 34)
+        }
+        .buttonStyle(.plain)
+        .glassEffect(.regular.interactive(true), in: Capsule())
+    }
+
+    private func openGenerationComposer() {
+        withAnimation(.smooth(duration: 0.3)) { section = .home }
+        DispatchQueue.main.async { promptFocused = true }
     }
 
     private func openLibraryPreview() {
@@ -588,6 +638,10 @@ struct PaperwallShellView: View {
                         .lineSpacing(3)
                 }
 
+                if !hasActiveWallpaper {
+                    noActiveWallpaperCard
+                }
+
                 if !nativeLockSetupComplete {
                     nativeLockSetupCard
                 }
@@ -597,6 +651,43 @@ struct PaperwallShellView: View {
             .frame(maxWidth: 760, alignment: .leading)
             Spacer(minLength: 80)
         }
+    }
+
+    private var noActiveWallpaperCard: some View {
+        HStack(spacing: 13) {
+            Image(systemName: "photo.badge.plus")
+                .font(.system(size: 19, weight: .regular))
+                .foregroundStyle(.white.opacity(0.86))
+                .frame(width: 38, height: 38)
+                .background(.white.opacity(0.08), in: Circle())
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Choose your first wallpaper")
+                    .font(.system(size: 13, weight: .medium))
+                Text("Import a video or describe a scene below to start animating your Desktop.")
+                    .font(.system(size: 11, weight: .regular))
+                    .foregroundStyle(.white.opacity(0.62))
+            }
+
+            Spacer(minLength: 10)
+
+            Button("Import Video", action: beginVideoImport)
+                .buttonStyle(.plain)
+                .font(.system(size: 12, weight: .medium))
+                .padding(.horizontal, 12)
+                .frame(height: 32)
+                .glassEffect(.regular.interactive(true), in: Capsule())
+
+            Button("Generate") {
+                promptFocused = true
+            }
+            .buttonStyle(.plain)
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(.white.opacity(0.72))
+        }
+        .padding(12)
+        .frame(maxWidth: 760)
+        .glassEffect(.regular.tint(.black.opacity(0.08)), in: RoundedRectangle(cornerRadius: 18))
     }
 
     private var nativeLockSetupCard: some View {
@@ -640,6 +731,7 @@ struct PaperwallShellView: View {
         .task {
             while !nativeLockSetupComplete && !Task.isCancelled {
                 if NativeWallpaperExtensionBridge.isNativeWallpaperActivated {
+                    nativeLockActivated = true
                     withAnimation(.smooth(duration: 0.25)) {
                         nativeLockSetupComplete = true
                     }
@@ -670,16 +762,7 @@ struct PaperwallShellView: View {
                     .frame(width: 1, height: 18)
                     .padding(.horizontal, 10)
 
-                Button {
-                    chooseVideo { progress in
-                        videoImportProgress = progress
-                        refreshWorkQueue()
-                        if case .completed = progress {
-                            discoveryLibrary.synchronize()
-                            backgroundImage = StaticShellAssets.loadBackgroundImage()
-                        }
-                    }
-                } label: {
+                Button(action: beginVideoImport) {
                     Label("Use your own", systemImage: "film")
                         .font(.system(size: 13, weight: .regular))
                         .frame(height: 34)
@@ -1138,6 +1221,18 @@ struct PaperwallShellView: View {
         )
     }
 
+    private func beginVideoImport() {
+        chooseVideo { progress in
+            videoImportProgress = progress
+            refreshWorkQueue()
+            if case .completed = progress {
+                hasActiveWallpaper = true
+                discoveryLibrary.synchronize()
+                backgroundImage = StaticShellAssets.loadBackgroundImage()
+            }
+        }
+    }
+
     private func chooseReferenceImage() {
         let panel = NSOpenPanel()
         panel.message = "Choose an optional reference image"
@@ -1236,6 +1331,7 @@ struct PaperwallShellView: View {
         upscaleVideo(videoURL) { result in
             switch result {
             case .success:
+                hasActiveWallpaper = true
                 pipelineStage = .ready
                 pipelineStatus = "4K wallpaper ready"
                 pipelineError = nil
@@ -1254,11 +1350,23 @@ struct PaperwallShellView: View {
     private var bottomPanel: some View {
         GlassEffectContainer(spacing: 14) {
             HStack(spacing: 12) {
-                statusItem(symbol: "desktopcomputer", title: "Desktop", value: "Active")
+                statusItem(
+                    symbol: "desktopcomputer",
+                    title: "Desktop",
+                    value: hasActiveWallpaper ? "Active" : "No wallpaper"
+                )
                 divider
-                statusItem(symbol: "lock.display", title: "Lock Screen", value: "Ready")
+                statusItem(
+                    symbol: "lock.display",
+                    title: "Lock Screen",
+                    value: nativeLockActivated ? "Active" : "Setup needed"
+                )
                 divider
-                statusItem(symbol: "wand.and.stars", title: "AI Models", value: "3 available")
+                statusItem(
+                    symbol: "wand.and.stars",
+                    title: "AI Models",
+                    value: "\(GenerationProvider.availableCases.count) available"
+                )
                 Spacer()
                 Button {
                     withAnimation(.smooth(duration: 0.32)) { section = .settings }

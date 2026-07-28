@@ -7,6 +7,8 @@ struct ImmersiveWallpaperPreview: View {
     let url: URL
     let wallpapers: [URL]
     let metadata: WallpaperMetadata?
+    let libraryError: String?
+    let retryLibrary: () -> Void
     let selectPreview: (URL) -> Void
     let isApplyingWallpaper: Bool
     let setWallpaper: () -> Void
@@ -24,13 +26,20 @@ struct ImmersiveWallpaperPreview: View {
     @State private var draftTitle = ""
     @State private var draftDescription = ""
     @State private var draftTags = ""
+    @State private var previewError: String?
+    @State private var previewReloadToken = 0
 
     var body: some View {
         ZStack {
             Color.black
             DiscoveryPlayerPreview(url: url, playbackSpeed: playbackSpeed)
-                .id(url)
+                .id("\(url.path)-\(previewReloadToken)")
                 .transition(.opacity)
+
+            if let previewError {
+                previewFailureOverlay(previewError)
+                    .transition(.opacity)
+            }
 
             LinearGradient(
                 colors: [.clear, .clear, .black.opacity(0.12), .black.opacity(0.42)],
@@ -43,7 +52,10 @@ struct ImmersiveWallpaperPreview: View {
                 previewNavigation
                     .padding(.top, 52)
                 Spacer()
-                VStack(spacing: 18) {
+                VStack(spacing: 12) {
+                    if let libraryError {
+                        libraryErrorBanner(libraryError)
+                    }
                     controlDock
                     if isWallpaperDrawerExpanded {
                         wallpaperDrawer
@@ -88,14 +100,66 @@ struct ImmersiveWallpaperPreview: View {
         }
         .onExitCommand(perform: close)
         .task(id: url) {
-            assetInfo = nil
-            fileSize = nil
-            async let info = try? VideoAssetValidator.validate(url: url)
-            let values = try? url.resourceValues(forKeys: [.fileSizeKey])
-            assetInfo = await info
-            fileSize = values?.fileSize
-            loadMetadataDrafts()
+            await loadPreviewDetails()
         }
+    }
+
+    private func previewFailureOverlay(_ message: String) -> some View {
+        VStack(spacing: 12) {
+            Image(systemName: "film.badge.exclamationmark")
+                .font(.system(size: 34, weight: .ultraLight))
+                .foregroundStyle(.orange.opacity(0.9))
+            Text("Preview unavailable")
+                .font(.system(size: 17, weight: .medium))
+            Text(message)
+                .font(.system(size: 12, weight: .regular))
+                .foregroundStyle(.white.opacity(0.62))
+                .multilineTextAlignment(.center)
+                .lineLimit(3)
+                .frame(maxWidth: 460)
+            Button("Retry") {
+                previewReloadToken += 1
+                Task { await loadPreviewDetails() }
+            }
+            .buttonStyle(.plain)
+            .font(.system(size: 12, weight: .medium))
+            .padding(.horizontal, 14)
+            .frame(height: 34)
+            .glassEffect(.regular.interactive(true), in: Capsule())
+        }
+        .padding(24)
+        .glassEffect(.regular.tint(.black.opacity(0.28)), in: RoundedRectangle(cornerRadius: 24))
+    }
+
+    private func libraryErrorBanner(_ message: String) -> some View {
+        HStack(spacing: 9) {
+            Image(systemName: "exclamationmark.triangle")
+                .foregroundStyle(.orange)
+            Text(message)
+                .font(.system(size: 11, weight: .regular))
+                .lineLimit(2)
+            Spacer()
+            Button("Retry", action: retryLibrary)
+                .buttonStyle(.plain)
+                .font(.system(size: 11, weight: .medium))
+        }
+        .padding(.horizontal, 13)
+        .frame(maxWidth: 750, minHeight: 38)
+        .glassEffect(.regular.tint(.orange.opacity(0.1)), in: RoundedRectangle(cornerRadius: 15))
+    }
+
+    @MainActor
+    private func loadPreviewDetails() async {
+        assetInfo = nil
+        fileSize = nil
+        previewError = nil
+        do {
+            assetInfo = try await VideoAssetValidator.validate(url: url)
+            fileSize = try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize
+        } catch {
+            previewError = error.localizedDescription
+        }
+        loadMetadataDrafts()
     }
 
     private var previewNavigation: some View {
