@@ -2,14 +2,32 @@ import Foundation
 
 public enum LaunchAtLoginManager {
     public static let label = "com.paperwall.app"
+    private static let explicitlyDisabledKey = "launchAtLoginExplicitlyDisabled"
 
     public static var plistURL: URL {
         FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library/LaunchAgents/\(label).plist")
     }
 
+    /// The persisted user preference. This intentionally performs no process work,
+    /// so SwiftUI can read it safely during view construction.
     public static var isEnabled: Bool {
-        (try? runLaunchctl(["print", "gui/\(getuid())/\(label)"])) != nil
+        FileManager.default.fileExists(atPath: plistURL.path)
+    }
+
+    public static func enableByDefaultIfNeeded(appURL: URL) throws {
+        guard !UserDefaults.standard.bool(forKey: explicitlyDisabledKey) else { return }
+        try enable(appURL: appURL)
+    }
+
+    public static func setEnabledByUser(_ enabled: Bool, appURL: URL) throws {
+        if enabled {
+            try enable(appURL: appURL)
+            UserDefaults.standard.set(false, forKey: explicitlyDisabledKey)
+        } else {
+            try disable()
+            UserDefaults.standard.set(true, forKey: explicitlyDisabledKey)
+        }
     }
 
     public static func enable(appURL: URL) throws {
@@ -46,9 +64,9 @@ public enum LaunchAtLoginManager {
             withIntermediateDirectories: true
         )
         let previousData = try? Data(contentsOf: plistURL)
-        let wasEnabled = isEnabled
-        if wasEnabled, previousData == data { return }
-        if wasEnabled {
+        let wasLoaded = isLoaded
+        if wasLoaded, previousData == data { return }
+        if wasLoaded {
             try runLaunchctl(["bootout", "gui/\(getuid())/\(label)"])
         }
         do {
@@ -62,12 +80,12 @@ public enum LaunchAtLoginManager {
                 }
                 if let previousData {
                     try previousData.write(to: plistURL, options: [.atomic])
-                } else if wasEnabled {
+                } else if wasLoaded {
                     throw LaunchAtLoginError.missingPreviousConfiguration
                 }
-                if wasEnabled {
+                if wasLoaded {
                     try runLaunchctl(["bootstrap", "gui/\(getuid())", plistURL.path])
-                    guard isEnabled else { throw LaunchAtLoginError.restoreDidNotLoad }
+                    guard isLoaded else { throw LaunchAtLoginError.restoreDidNotLoad }
                 }
             } catch {
                 throw LaunchAtLoginError.restoreFailed(
@@ -80,12 +98,16 @@ public enum LaunchAtLoginManager {
     }
 
     public static func disable() throws {
-        if isEnabled {
+        if isLoaded {
             try runLaunchctl(["bootout", "gui/\(getuid())/\(label)"])
         }
         if FileManager.default.fileExists(atPath: plistURL.path) {
             try FileManager.default.removeItem(at: plistURL)
         }
+    }
+
+    private static var isLoaded: Bool {
+        (try? runLaunchctl(["print", "gui/\(getuid())/\(label)"])) != nil
     }
 
     @discardableResult

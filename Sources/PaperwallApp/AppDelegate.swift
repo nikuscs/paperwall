@@ -20,6 +20,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             NSApp.applicationIconImage = icon
         }
         NSApp.setActivationPolicy(.regular)
+        do {
+            try LaunchAtLoginManager.enableByDefaultIfNeeded(appURL: Bundle.main.bundleURL)
+        } catch {
+            NSLog("Paperwall: could not configure launch at login: %@", error.localizedDescription)
+        }
         installMainMenu()
         installStatusItem()
         do {
@@ -585,11 +590,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func toggleLaunchAtLogin() {
         do {
-            if LaunchAtLoginManager.isEnabled {
-                try LaunchAtLoginManager.disable()
-            } else {
-                try LaunchAtLoginManager.enable(appURL: Bundle.main.bundleURL)
-            }
+            try LaunchAtLoginManager.setEnabledByUser(
+                !LaunchAtLoginManager.isEnabled,
+                appURL: Bundle.main.bundleURL
+            )
             launchAtLoginItem?.state = LaunchAtLoginManager.isEnabled ? .on : .off
         } catch {
             presentError(error.localizedDescription)
