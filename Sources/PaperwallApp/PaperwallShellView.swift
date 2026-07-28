@@ -46,6 +46,7 @@ struct PaperwallShellView: View {
     @State private var generationError: String?
     @State private var videoImportProgress: VideoImportProgress = .idle
     @State private var playbackSpeed = PlaybackPreferences.playbackSpeed
+    @State private var launchAtLoginEnabled = LaunchAtLoginManager.isEnabled
     @State private var showingProviderOptions = false
     @State private var showingDurationOptions = false
     @State private var showingWorkQueue = false
@@ -67,8 +68,12 @@ struct PaperwallShellView: View {
     let chooseVideo: (@escaping (VideoImportProgress) -> Void) -> Void
     let selectWallspace: (URL, @escaping (Result<Void, Error>) -> Void) -> Void
     let setPlaybackSpeed: (PlaybackSpeed) -> Void
+    let startPlayback: () -> Void
+    let stopPlayback: () -> Void
+    let toggleLaunchAtLogin: () -> Void
     let configureToken: () -> Void
     let openSettings: () -> Void
+    let restartNativeWallpaperServices: () -> Void
 
     @State private var backgroundImage = StaticShellAssets.loadBackgroundImage()
     private let brandLogo: NSImage? = {
@@ -911,6 +916,19 @@ struct PaperwallShellView: View {
 
             VStack(spacing: 0) {
                 settingsRow(
+                    symbol: "play.circle",
+                    title: "Desktop playback",
+                    detail: "Start or stop animated wallpaper windows"
+                ) {
+                    HStack(spacing: 8) {
+                        settingsButton("Start", action: startPlayback)
+                        settingsButton("Stop", action: stopPlayback)
+                    }
+                }
+
+                settingsDivider
+
+                settingsRow(
                     symbol: "speedometer",
                     title: "Playback speed",
                     detail: "Applies to the desktop and screen saver"
@@ -943,11 +961,39 @@ struct PaperwallShellView: View {
                 settingsDivider
 
                 settingsRow(
+                    symbol: "power",
+                    title: "Launch at login",
+                    detail: "Start Paperwall automatically after signing in"
+                ) {
+                    Toggle("", isOn: Binding(
+                        get: { launchAtLoginEnabled },
+                        set: { _ in
+                            toggleLaunchAtLogin()
+                            launchAtLoginEnabled = LaunchAtLoginManager.isEnabled
+                        }
+                    ))
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                }
+
+                settingsDivider
+
+                settingsRow(
                     symbol: "lock.display",
                     title: "Native Lock Screen",
                     detail: "One-time setup: select Paperwall in Wallpaper settings"
                 ) {
                     settingsButton("Choose Paperwall", action: openSettings)
+                }
+
+                settingsDivider
+
+                settingsRow(
+                    symbol: "arrow.clockwise.circle",
+                    title: "Native wallpaper service",
+                    detail: "Restart if the Lock Screen is black after an app update"
+                ) {
+                    settingsButton("Restart Service", action: restartNativeWallpaperServices)
                 }
 
                 settingsDivider
@@ -969,6 +1015,18 @@ struct PaperwallShellView: View {
                 ) {
                     settingsButton("Open Folder") {
                         NSWorkspace.shared.open(PaperwallConfiguration.sharedDataDirectory)
+                    }
+                }
+
+                settingsDivider
+
+                settingsRow(
+                    symbol: "internaldrive",
+                    title: "Local runtime storage",
+                    detail: "Active wallpaper, queue state, logs, and catalog"
+                ) {
+                    settingsButton("Open Folder") {
+                        NSWorkspace.shared.open(PaperwallConfiguration.applicationSupportDirectory)
                     }
                 }
             }

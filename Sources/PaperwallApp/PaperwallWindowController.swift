@@ -15,8 +15,12 @@ final class PaperwallWindowController: NSWindowController, NSWindowDelegate {
         chooseVideo: @escaping (@escaping (VideoImportProgress) -> Void) -> Void,
         selectWallspace: @escaping (URL, @escaping (Result<Void, Error>) -> Void) -> Void,
         setPlaybackSpeed: @escaping (PlaybackSpeed) -> Void,
+        startPlayback: @escaping () -> Void,
+        stopPlayback: @escaping () -> Void,
+        toggleLaunchAtLogin: @escaping () -> Void,
         configureToken: @escaping () -> Void,
         openSettings: @escaping () -> Void,
+        restartNativeWallpaperServices: @escaping () -> Void,
         hasActiveWork: @escaping () -> Bool,
         activationChanged: @escaping () -> Void
     ) {
@@ -30,8 +34,12 @@ final class PaperwallWindowController: NSWindowController, NSWindowDelegate {
             chooseVideo: chooseVideo,
             selectWallspace: selectWallspace,
             setPlaybackSpeed: setPlaybackSpeed,
+            startPlayback: startPlayback,
+            stopPlayback: stopPlayback,
+            toggleLaunchAtLogin: toggleLaunchAtLogin,
             configureToken: configureToken,
-            openSettings: openSettings
+            openSettings: openSettings,
+            restartNativeWallpaperServices: restartNativeWallpaperServices
         )
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 1060, height: 660),
