@@ -226,6 +226,7 @@ public enum PaperwallUpscaleService {
 
             let process = Process()
             process.executableURL = uv
+            process.environment = childProcessEnvironment()
             process.arguments = [
                 "tool", "install",
                 "git+https://github.com/TomPenguin/venhance.git@\(pinnedVEnhanceRevision)",
@@ -261,6 +262,7 @@ public enum PaperwallUpscaleService {
 
             let process = Process()
             process.executableURL = executable
+            process.environment = childProcessEnvironment()
             process.arguments = [
                 "upscale", input.path,
                 "--scale", "2",
@@ -276,6 +278,17 @@ public enum PaperwallUpscaleService {
             process.waitUntilExit()
             return process.terminationStatus
         }.value
+    }
+
+    private static func childProcessEnvironment() -> [String: String] {
+        ProcessInfo.processInfo.environment.filter { key, _ in
+            let key = key.uppercased()
+            return !key.contains("TOKEN")
+                && !key.contains("PASSWORD")
+                && !key.contains("SECRET")
+                && !key.hasSuffix("_KEY")
+                && !key.contains("PRIVATE_KEY")
+        }
     }
 
     private static func save(_ job: Job, to url: URL) throws {

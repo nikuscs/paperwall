@@ -37,6 +37,10 @@ targets:
       - path: Assets/AppIcon.icon
       - path: Assets/Brand/PaperwallLogo.svg
         buildPhase: resources
+      - path: LICENSE.md
+        buildPhase: resources
+      - path: PRIVACY.md
+        buildPhase: resources
       - path: THIRD_PARTY_NOTICES.md
         buildPhase: resources
     dependencies:

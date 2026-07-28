@@ -1,8 +1,13 @@
 # Paperwall
 
-Native macOS animated wallpapers for the desktop and Lock Screen, with AI generation through Replicate.
+Native macOS animated wallpapers for the desktop and Lock Screen, with optional AI generation through Replicate.
+
+> [!WARNING]
+> Paperwall targets macOS 27 and uses private, unsupported WallpaperExtensionKit APIs. Compatibility may break after macOS updates, and Paperwall is not eligible for Mac App Store distribution.
 
 ## Install
+
+Download `Paperwall.dmg` from the repository's Releases page.
 
 1. Open `Paperwall.dmg`.
 2. Drag **Paperwall** to **Applications**.
@@ -10,7 +15,7 @@ Native macOS animated wallpapers for the desktop and Lock Screen, with AI genera
 
 On first launch, the app installs its CLI and deploys the active video to its embedded native wallpaper extension. Select **Paperwall** once under System Settings → Wallpaper and enable **Show as Screen Saver** when offered. After that one-time setup, applying a wallpaper in Paperwall updates the native Desktop and animated Lock Screen together. A legacy `Paperwall.saver` is also installed as a fallback.
 
-The native integration uses macOS's private `WallpaperExtensionKit` runtime, following Phosphene's MIT-licensed approach. It is validated on macOS 26/27 but may require compatibility updates after major macOS releases.
+The native integration uses macOS's private `WallpaperExtensionKit` runtime, following Phosphene's MIT-licensed approach. It is validated on macOS 27 but may require compatibility updates after major macOS releases.
 
 If your shell does not include `~/.local/bin`, add it to `PATH`.
 
@@ -48,6 +53,10 @@ paperwall asset
 
 Run `paperwall help` for the full concise syntax.
 
+## Developer setup
+
+Development requires macOS 27, Xcode 27, XcodeGen, and `uv` for distribution builds.
+
 ## Developer commands
 
 ```bash
@@ -60,10 +69,29 @@ make test
 make dmg
 ```
 
-`make dmg` creates `dist/Paperwall.dmg`. Without signing credentials it is an ad-hoc development build. Public distribution requires:
+`make dmg` creates `dist/Paperwall.dmg`. Without signing credentials it is an ad-hoc development build. Public distribution requires a Developer ID Application certificate and a `notarytool` Keychain profile:
 
 ```bash
-PAPERWALL_SIGN_IDENTITY="Developer ID Application: …" \
-PAPERWALL_NOTARY_PROFILE="notary-profile" \
+xcrun notarytool store-credentials paperwall-notary \
+  --apple-id "APPLE_ID" \
+  --team-id "TEAM_ID" \
+  --password "APP_SPECIFIC_PASSWORD"
+
+PAPERWALL_SIGN_IDENTITY="Developer ID Application: Name (TEAM_ID)" \
+PAPERWALL_NOTARY_PROFILE="paperwall-notary" \
 make dmg
 ```
+
+The build signs the app, nested executables, extension, screen saver, and DMG with hardened runtime and secure timestamps. When a notary profile is supplied, it submits the DMG, waits for acceptance, staples the ticket, and validates the staple.
+
+## Security and privacy
+
+See [SECURITY.md](SECURITY.md) and [PRIVACY.md](PRIVACY.md). Never report live API tokens or private media in public issues.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+Paperwall is source-available under a non-commercial, attribution, share-alike license matching Browser Clutch. See [LICENSE.md](LICENSE.md). Third-party components retain their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
