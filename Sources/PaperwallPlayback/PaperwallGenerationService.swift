@@ -38,6 +38,17 @@ public enum PaperwallGenerationService {
         generationDirectory.appendingPathComponent("submission-intent.json")
     }
 
+    public static func pendingRequest() -> GenerationRequest? {
+        guard let job = try? latestPendingJob() else { return nil }
+        return GenerationRequest(
+            provider: job.provider,
+            prompt: job.prompt,
+            imageURL: job.referenceImageURL,
+            duration: job.duration,
+            seed: job.seed
+        )
+    }
+
     public static func quote(for request: GenerationRequest) throws -> GenerationQuote {
         try validate(request)
         return GenerationQuote(

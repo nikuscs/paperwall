@@ -64,6 +64,7 @@
 		87B5431B22F7D863EC4DFF9A /* PaperwallGenerationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A1ABEFA5A3A6E3ED22C525 /* PaperwallGenerationService.swift */; };
 		8807F600E76D09C3E7390F12 /* PaperwallCLI in Resources */ = {isa = PBXBuildFile; fileRef = BD8931CDC4DA78E8505924AA /* PaperwallCLI */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		901F225EB1A019952F793951 /* PaperwallPlaybackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99D754AAA228E05D834532E /* PaperwallPlaybackTests.swift */; };
+		953A9E08D7F5FC1DFF456A79 /* PaperwallWorkQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A181A58F4DA433BD479D2272 /* PaperwallWorkQueue.swift */; };
 		9574202D50F8446D7012F93D /* PaperwallPlayback.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A284945522D04165D00A0A41 /* PaperwallPlayback.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9C0F33FE4F5CF0DC510A8D93 /* invalid-video.mov in Resources */ = {isa = PBXBuildFile; fileRef = F5AE20752A5B9D56C7B913D7 /* invalid-video.mov */; };
 		9F6748A1A63483D4378EF44A /* PaperwallPlayback.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C88BC29E2AF6FB109DF306 /* PaperwallPlayback.swift */; };
@@ -229,6 +230,7 @@
 		9C4AA1179C7FB712667FF954 /* VideoAssetValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoAssetValidator.swift; sourceTree = "<group>"; };
 		9F984B12829C68BD53A8E378 /* PaperwallScreenSaverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallScreenSaverView.swift; sourceTree = "<group>"; };
 		A124684FEA07AE6BCF75DD9F /* PhospheneExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhospheneExtension.swift; sourceTree = "<group>"; };
+		A181A58F4DA433BD479D2272 /* PaperwallWorkQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallWorkQueue.swift; sourceTree = "<group>"; };
 		A284945522D04165D00A0A41 /* PaperwallPlayback.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PaperwallPlayback.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2883723653F0C8D35E89B70 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A2D51716918BA010FCA06618 /* BMPCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BMPCache.swift; sourceTree = "<group>"; };
@@ -467,6 +469,7 @@
 				86AAD7159FFB84DAB9F45DAA /* PaperwallService.swift */,
 				789F1FDE4C4BC8377D29FB6E /* PaperwallStorageMigrator.swift */,
 				E59ECA958EA31A2A6316FD86 /* PaperwallUpscaleService.swift */,
+				A181A58F4DA433BD479D2272 /* PaperwallWorkQueue.swift */,
 				4CDAC27A8FA36F6158E04707 /* PlaybackPreferences.swift */,
 				CDFBE4227F068CCC3F69DD35 /* PlayerView.swift */,
 				68517334A8A49B4436313D06 /* ReplicateClient.swift */,
@@ -800,6 +803,7 @@
 				49CC3EE12BF9038FA3121535 /* PaperwallService.swift in Sources */,
 				213CD10BFF97C29006304456 /* PaperwallStorageMigrator.swift in Sources */,
 				19FFE966925D795B50244FCD /* PaperwallUpscaleService.swift in Sources */,
+				953A9E08D7F5FC1DFF456A79 /* PaperwallWorkQueue.swift in Sources */,
 				131E45B3488D75B613069952 /* PlaybackPreferences.swift in Sources */,
 				681DD9DAB07E667412DCB6D4 /* PlayerView.swift in Sources */,
 				2E7F621B6E98C349E87699CD /* ReplicateClient.swift in Sources */,

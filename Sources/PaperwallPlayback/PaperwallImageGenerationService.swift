@@ -39,6 +39,10 @@ public enum PaperwallImageGenerationService {
         generationDirectory.appendingPathComponent("image-submission-intent.json")
     }
 
+    public static func pendingPrompt() -> String? {
+        try? latestPendingJob()?.prompt
+    }
+
     public static func quote(prompt: String) throws -> ImageGenerationQuote {
         guard !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw GenerationError.missingInput

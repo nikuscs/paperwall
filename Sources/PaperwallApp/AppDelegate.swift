@@ -19,6 +19,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             NSApp.applicationIconImage = icon
         }
         NSApp.setActivationPolicy(.regular)
+        installMainMenu()
         installStatusItem()
         do {
             try BundledComponentInstaller.installIfNeeded()
@@ -28,6 +29,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         installMainWindow()
         windowController?.show()
         wallspaceLibrary.synchronize()
+        Task {
+            await resumePendingWorkIfNeeded()
+        }
         Task {
             do {
                 try await PaperwallUpscaleService.ensureToolInstalled()
@@ -48,6 +52,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard generationInProgress else { return .terminateNow }
+        let alert = NSAlert()
+        alert.alertStyle = .critical
+        alert.messageText = "Wallpaper processing is still running"
+        alert.informativeText = "Quitting now interrupts local processing. The saved job remains resumable when Paperwall opens again."
+        alert.addButton(withTitle: "Keep Running")
+        alert.addButton(withTitle: "Quit Anyway")
+        return alert.runModal() == .alertSecondButtonReturn ? .terminateNow : .terminateCancel
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         wallpaperController.stop()
     }
@@ -58,6 +73,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     ) -> Bool {
         windowController?.show()
         return true
+    }
+
+    private func installMainMenu() {
+        let mainMenu = NSMenu()
+        let applicationItem = NSMenuItem()
+        let applicationMenu = NSMenu()
+        applicationMenu.addItem(withTitle: "Quit Paperwall", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        applicationItem.submenu = applicationMenu
+        mainMenu.addItem(applicationItem)
+
+        let editItem = NSMenuItem()
+        let editMenu = NSMenu(title: "Edit")
+        editMenu.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        editMenu.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        editMenu.addItem(withTitle: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        editMenu.addItem(withTitle: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        editItem.submenu = editMenu
+        mainMenu.addItem(editItem)
+        NSApp.mainMenu = mainMenu
     }
 
     private func installStatusItem() {
@@ -143,6 +177,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             setPlaybackSpeed: { [weak self] speed in self?.setPlaybackSpeed(speed) },
             configureToken: { [weak self] in self?.configureReplicateToken() },
             openSettings: { [weak self] in self?.openScreenSaverSettings() },
+            hasActiveWork: { [weak self] in self?.generationInProgress == true },
             activationChanged: { [weak self] in self?.restoreStatusItemVisibility() }
         )
     }
@@ -388,7 +423,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         videoURL: URL,
         completion: @escaping (Result<URL, Error>) -> Void
     ) {
+        guard !generationInProgress else {
+            completion(.failure(GenerationError.generationAlreadyRunning))
+            return
+        }
+        generationInProgress = true
         Task {
+            defer { generationInProgress = false }
             do {
                 let result = try await PaperwallUpscaleService.upscaleTo4K(videoURL: videoURL)
                 _ = try await PaperwallService.selectWallpaper(from: result.upscaledVideoURL)
@@ -399,6 +440,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 presentError(error.localizedDescription)
                 completion(.failure(error))
             }
+        }
+    }
+
+    private func resumePendingWorkIfNeeded() async {
+        guard !generationInProgress,
+              let token = try? ReplicateCredentialStore.resolvedToken()
+        else { return }
+
+        generationInProgress = true
+        defer { generationInProgress = false }
+        do {
+            if let prompt = PaperwallImageGenerationService.pendingPrompt() {
+                _ = try await PaperwallImageGenerationService.generate(prompt: prompt, token: token)
+            }
+            if let request = PaperwallGenerationService.pendingRequest() {
+                let generated = try await PaperwallGenerationService.generateAndSelect(
+                    request: request,
+                    token: token,
+                    approve: { _ in false }
+                )
+                let upscaled = try await PaperwallUpscaleService.upscaleTo4K(
+                    videoURL: generated.generatedVideoURL
+                )
+                _ = try await PaperwallService.selectWallpaper(from: upscaled.upscaledVideoURL)
+                wallpaperController.stop()
+                await wallpaperController.start()
+            }
+        } catch {
+            NSLog("Paperwall: pending work remains resumable: %@", error.localizedDescription)
         }
     }
 
@@ -422,6 +492,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         alert.messageText = "Replicate API Token"
         alert.informativeText = "The token is stored in your macOS Keychain and is never written to Paperwall metadata."
         alert.accessoryView = field
+        alert.window.initialFirstResponder = field
         alert.addButton(withTitle: "Save in Keychain")
         alert.addButton(withTitle: "Cancel")
         guard alert.runModal() == .alertFirstButtonReturn else { return nil }
