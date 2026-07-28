@@ -92,8 +92,8 @@ struct PaperwallShellView: View {
 
                 if previewURL == nil {
                     mainInterface(size: geometry.size)
-                        .frame(width: geometry.size.width - 72, height: geometry.size.height - 88)
-                        .position(x: geometry.size.width / 2, y: geometry.size.height / 2 + 18)
+                        .frame(width: geometry.size.width - 72, height: geometry.size.height)
+                        .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
                         .transition(.opacity)
                 }
 
@@ -207,18 +207,20 @@ struct PaperwallShellView: View {
     }
 
     private func mainInterface(size: CGSize) -> some View {
-        let viewportHeight = max(0, size.height - 88)
+        let viewportHeight = max(0, size.height)
         return ScrollViewReader { proxy in
             ScrollView(.vertical) {
                 VStack(spacing: 0) {
                     Color.clear
-                        .frame(height: 1)
+                        .frame(height: 44)
                         .id("main-top")
                     topBar
                     content
                         .padding(.vertical, 28)
                     Spacer(minLength: 18)
                     bottomPanel
+                    Color.clear
+                        .frame(height: 44)
                         .id("main-bottom")
                 }
                 .frame(minHeight: viewportHeight)
