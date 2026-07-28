@@ -77,9 +77,8 @@ struct PaperwallShellView: View {
                 if previewURL == nil {
                     VStack(spacing: 0) {
                         topBar
-                        Spacer(minLength: 48)
                         content
-                        Spacer(minLength: 30)
+                            .padding(.vertical, 18)
                         bottomPanel
                     }
                     .frame(width: geometry.size.width - 72, height: geometry.size.height - 88)
@@ -361,22 +360,32 @@ struct PaperwallShellView: View {
     }
 
     private var content: some View {
-        ZStack(alignment: .leading) {
-            if section == .home {
-                homeContent
-                    .transition(pageTransition)
+        GeometryReader { geometry in
+            ScrollView(.vertical) {
+                ZStack(alignment: .leading) {
+                    if section == .home {
+                        homeContent
+                            .transition(pageTransition)
+                    }
+                    if section == .library {
+                        libraryLoadingContent
+                            .transition(pageTransition)
+                    }
+                    if section == .settings {
+                        settingsContent
+                            .transition(pageTransition)
+                    }
+                }
+                .frame(
+                    maxWidth: .infinity,
+                    minHeight: geometry.size.height,
+                    alignment: .leading
+                )
+                .padding(.vertical, 8)
             }
-            if section == .library {
-                libraryLoadingContent
-                    .transition(pageTransition)
-            }
-            if section == .settings {
-                settingsContent
-                    .transition(pageTransition)
-            }
+            .scrollIndicators(.visible)
+            .scrollBounceBehavior(.basedOnSize)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .clipped()
         .animation(.smooth(duration: 0.32), value: section)
     }
 
