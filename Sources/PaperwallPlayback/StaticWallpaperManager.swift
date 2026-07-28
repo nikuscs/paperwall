@@ -14,9 +14,27 @@ enum StaticWallpaperManager {
         let wallpaperURL: URL?
     }
 
+    /// Stable path the system wallpaper always points at. macOS records this URL per
+    /// Space, and `setDesktopImageURL` only rewrites the Space that is active on each
+    /// display, so the path must never change and the file must never be deleted while
+    /// Paperwall is applied — otherwise every other Space resolves a missing file and
+    /// falls back to the wallpaper that was set before Paperwall.
     static var posterURL: URL {
         PaperwallConfiguration.applicationSupportDirectory
             .appendingPathComponent("fallback.jpg")
+    }
+
+    /// Second stable path holding the same image. Setting it immediately before
+    /// `posterURL` forces macOS to drop the desktop image it cached for that URL, which
+    /// is what the old per-refresh UUID filenames were working around.
+    private static var cacheBustURL: URL {
+        PaperwallConfiguration.applicationSupportDirectory
+            .appendingPathComponent("fallback-refresh.jpg")
+    }
+
+    private static var stagingPosterURL: URL {
+        PaperwallConfiguration.applicationSupportDirectory
+            .appendingPathComponent("fallback-staging.jpg")
     }
 
     static var snapshotURL: URL {
@@ -34,21 +52,16 @@ enum StaticWallpaperManager {
             at: PaperwallConfiguration.applicationSupportDirectory,
             withIntermediateDirectories: true
         )
-        let presentationURL = PaperwallConfiguration.applicationSupportDirectory
-            .appendingPathComponent("native-fallback-\(UUID().uuidString).jpg")
-        do {
-            try await generatePoster(for: videoURL, to: presentationURL)
-            try Data(contentsOf: presentationURL).write(to: posterURL, options: .atomic)
-            try applyPoster(at: presentationURL)
-            removeSupersededPresentationPosters(keeping: presentationURL)
-        } catch {
-            try? FileManager.default.removeItem(at: presentationURL)
-            throw error
-        }
+        defer { try? FileManager.default.removeItem(at: stagingPosterURL) }
+        try await generatePoster(for: videoURL, to: stagingPosterURL)
+        let poster = try Data(contentsOf: stagingPosterURL)
+        try poster.write(to: cacheBustURL, options: .atomic)
+        try poster.write(to: posterURL, options: .atomic)
+        try applyPoster(at: posterURL)
     }
 
     static func applyPoster() throws {
-        try applyPoster(at: currentPresentationPosterURL())
+        try applyPoster(at: posterURL)
     }
 
     private static func applyPoster(at appliedPosterURL: URL) throws {
@@ -74,13 +87,15 @@ enum StaticWallpaperManager {
         let immediateWallpapers = screens.map { screen in
             (screen, workspace.desktopImageURL(for: screen))
         }
+        let shouldBustCache = appliedPosterURL == posterURL
+            && FileManager.default.fileExists(atPath: cacheBustURL.path)
         do {
             for screen in screens {
-                try workspace.setDesktopImageURL(
-                    appliedPosterURL,
-                    for: screen,
-                    options: workspace.desktopImageOptions(for: screen) ?? [:]
-                )
+                let options = workspace.desktopImageOptions(for: screen) ?? [:]
+                if shouldBustCache {
+                    try? workspace.setDesktopImageURL(cacheBustURL, for: screen, options: options)
+                }
+                try workspace.setDesktopImageURL(appliedPosterURL, for: screen, options: options)
             }
         } catch {
             for (screen, url) in immediateWallpapers {
@@ -97,7 +112,14 @@ enum StaticWallpaperManager {
 
     static func restore() throws {
         guard let snapshot = try loadSnapshot() else {
-            if FileManager.default.fileExists(atPath: posterURL.path) {
+            // The poster outlives a restore, so its mere presence no longer means
+            // Paperwall owns the desktop — only a display still showing it does.
+            let posters: Set<URL> = [posterURL.standardizedFileURL, cacheBustURL.standardizedFileURL]
+            let stillApplied = NSScreen.screens.contains { screen in
+                guard let current = NSWorkspace.shared.desktopImageURL(for: screen) else { return false }
+                return posters.contains(current.standardizedFileURL)
+            }
+            if stillApplied {
                 throw StaticWallpaperError.missingSnapshot
             }
             return
@@ -131,38 +153,11 @@ enum StaticWallpaperManager {
             }
             throw error
         }
-        if FileManager.default.fileExists(atPath: posterURL.path) {
-            try FileManager.default.removeItem(at: posterURL)
-        }
-        removeSupersededPresentationPosters(keeping: nil)
+        // The poster files are deliberately left on disk: Spaces other than the ones
+        // just restored still reference them, and a dangling reference makes macOS fall
+        // back to an arbitrary older wallpaper. Removing the snapshot is what clears
+        // `isApplied`.
         try FileManager.default.removeItem(at: snapshotURL)
-    }
-
-    private static func currentPresentationPosterURL() -> URL {
-        let candidates = presentationPosterURLs()
-        return candidates.max { lhs, rhs in
-            let left = (try? lhs.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
-            let right = (try? rhs.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
-            return left < right
-        } ?? posterURL
-    }
-
-    private static func presentationPosterURLs() -> [URL] {
-        let contents = (try? FileManager.default.contentsOfDirectory(
-            at: PaperwallConfiguration.applicationSupportDirectory,
-            includingPropertiesForKeys: [.contentModificationDateKey],
-            options: [.skipsHiddenFiles]
-        )) ?? []
-        return contents.filter {
-            $0.lastPathComponent.hasPrefix("native-fallback-")
-                && $0.pathExtension.lowercased() == "jpg"
-        }
-    }
-
-    private static func removeSupersededPresentationPosters(keeping retainedURL: URL?) {
-        for url in presentationPosterURLs() where url != retainedURL {
-            try? FileManager.default.removeItem(at: url)
-        }
     }
 
     static func generatePoster(for videoURL: URL, to destination: URL) async throws {
