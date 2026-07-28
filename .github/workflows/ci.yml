@@ -35,5 +35,22 @@ jobs:
             bash -n "$script"
           done
 
-      - name: Test
-        run: make test
+      - name: Test playback core
+        run: |
+          xcodegen generate
+          xcodebuild test \
+            -project Paperwall.xcodeproj \
+            -scheme PaperwallPlayback \
+            -destination 'platform=macOS' \
+            -derivedDataPath build/DerivedData \
+            MACOSX_DEPLOYMENT_TARGET=26.0
+
+      - name: Build app
+        run: |
+          xcodebuild build \
+            -project Paperwall.xcodeproj \
+            -scheme PaperwallApp \
+            -configuration Release \
+            -destination 'platform=macOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO
