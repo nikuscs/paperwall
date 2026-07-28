@@ -56,14 +56,23 @@ codesign --verify --deep --strict "$APP"
 rm -rf "$STAGING"
 mkdir -p "$STAGING" "$DIST"
 ditto "$APP" "$STAGING/Paperwall.app"
+cp "$ROOT/LICENSE.md" "$STAGING/LICENSE.md"
+cp "$ROOT/PRIVACY.md" "$STAGING/PRIVACY.md"
+cp "$ROOT/THIRD_PARTY_NOTICES.md" "$STAGING/THIRD_PARTY_NOTICES.md"
 ln -s /Applications "$STAGING/Applications"
 rm -f "$DMG"
 hdiutil create -volname Paperwall -srcfolder "$STAGING" -ov -format UDZO "$DMG"
+
+if [[ "$IDENTITY" != "-" ]]; then
+  codesign --force --timestamp --sign "$IDENTITY" "$DMG"
+  codesign --verify --strict "$DMG"
+fi
 
 if [[ -n "$NOTARY_PROFILE" ]]; then
   [[ "$IDENTITY" != "-" ]] || { echo "error: notarization requires PAPERWALL_SIGN_IDENTITY" >&2; exit 1; }
   xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait
   xcrun stapler staple "$DMG"
+  xcrun stapler validate "$DMG"
 fi
 
 rm -rf "$STAGING"

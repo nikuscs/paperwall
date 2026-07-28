@@ -85,7 +85,7 @@ struct ReplicateClient: Sendable {
         guard let url = URL(string: "https://api.replicate.com/v1/models/\(modelID)/predictions") else {
             throw GenerationError.invalidResponse
         }
-        var request = authorizedRequest(url: url)
+        var request = try authorizedRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONEncoder().encode(["input": JSONValue.object(input)])
@@ -124,7 +124,14 @@ struct ReplicateClient: Sendable {
         }
     }
 
-    private func authorizedRequest(url: URL) -> URLRequest {
+    private func authorizedRequest(url: URL) throws -> URLRequest {
+        guard url.scheme?.lowercased() == "https",
+              url.host?.lowercased() == "api.replicate.com",
+              url.user == nil,
+              url.password == nil,
+              url.port == nil else {
+            throw GenerationError.invalidResponse
+        }
         var request = URLRequest(url: url, timeoutInterval: 60)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("paperwall/1", forHTTPHeaderField: "User-Agent")

@@ -5,18 +5,34 @@ build/
 xcuserdata/
 *.xccheckout
 *.moved-aside
+*.dSYM
+*.dSYM.zip
+*.xcarchive
+*.app
 
 # macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Trash-*
 
 # Local agent artifacts
 .pi/
 
-# Secrets
+# Secrets and signing material
 .env
 .env.*
 !.env.example
 *API_TOKEN*
+*.p8
+*.p12
+*.pem
+*.key
+*.cer
+*.crt
+*.mobileprovision
+*.provisionprofile
 
 # Generated motion candidates (keep sidecar metadata and selected final asset)
 Assets/Generated/*.mp4
@@ -26,6 +42,7 @@ Assets/Generated/*.mkv
 Assets/Generated/*.png
 Assets/Generated/*.jpg
 Assets/Generated/*.jpeg
+Assets/Generated/*.json
 
 # Local video-processing intermediates
 Assets/Final/*.tmp.*
@@ -33,3 +50,8 @@ Assets/Final/*-intermediate.*
 
 # Local Xcode build cache
 .build/
+.swiftpm/
+
+# Distribution artifacts belong in GitHub Releases
+*.dmg
+*.pkg
