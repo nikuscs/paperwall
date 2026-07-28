@@ -10,6 +10,7 @@
 		02A348BF8F45AB8E2427FCF5 /* ColorDiag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7962C5E656C9F797B3490E44 /* ColorDiag.swift */; };
 		080DDBAD77715C638A5B5838 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 462EB9108A129B219CDDDDD7 /* libsqlite3.tbd */; };
 		0DD4B8EC7F3F3E77C35FFDAE /* CodableShims.swift in Sources */ = {isa = PBXBuildFile; fileRef = E01E5A128181B8C421486C88 /* CodableShims.swift */; };
+		126A8239DE9A5C29F6503451 /* LICENSE.md in Resources */ = {isa = PBXBuildFile; fileRef = D07191D79541827077AC64B9 /* LICENSE.md */; };
 		131E45B3488D75B613069952 /* PlaybackPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CDAC27A8FA36F6158E04707 /* PlaybackPreferences.swift */; };
 		1541471D1DA4ADA27FDAE56C /* PaperwallImageGenerationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5166438E0003549B074D1064 /* PaperwallImageGenerationService.swift */; };
 		16A95858DB4DC5EB63C134B0 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA146E3254EB214361106E52 /* Security.framework */; };
@@ -65,6 +66,7 @@
 		87B5431B22F7D863EC4DFF9A /* PaperwallGenerationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A1ABEFA5A3A6E3ED22C525 /* PaperwallGenerationService.swift */; };
 		8807F600E76D09C3E7390F12 /* PaperwallCLI in Resources */ = {isa = PBXBuildFile; fileRef = BD8931CDC4DA78E8505924AA /* PaperwallCLI */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		901F225EB1A019952F793951 /* PaperwallPlaybackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99D754AAA228E05D834532E /* PaperwallPlaybackTests.swift */; };
+		91374DD2AFDD5C0E24F6EA95 /* PRIVACY.md in Resources */ = {isa = PBXBuildFile; fileRef = 5AD84B9BE34F4EAAA2EA791C /* PRIVACY.md */; };
 		953A9E08D7F5FC1DFF456A79 /* PaperwallWorkQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A181A58F4DA433BD479D2272 /* PaperwallWorkQueue.swift */; };
 		9574202D50F8446D7012F93D /* PaperwallPlayback.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A284945522D04165D00A0A41 /* PaperwallPlayback.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9C0F33FE4F5CF0DC510A8D93 /* invalid-video.mov in Resources */ = {isa = PBXBuildFile; fileRef = F5AE20752A5B9D56C7B913D7 /* invalid-video.mov */; };
@@ -210,6 +212,7 @@
 		4CDAC27A8FA36F6158E04707 /* PlaybackPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackPreferences.swift; sourceTree = "<group>"; };
 		5166438E0003549B074D1064 /* PaperwallImageGenerationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallImageGenerationService.swift; sourceTree = "<group>"; };
 		55C8839FDA6A5A3821927F63 /* PaperwallWallpaperExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = PaperwallWallpaperExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		5AD84B9BE34F4EAAA2EA791C /* PRIVACY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PRIVACY.md; sourceTree = "<group>"; };
 		5CA0749CC3542B868AB12A37 /* Main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Main.swift; sourceTree = "<group>"; };
 		5DA59E4D54D25635C2700086 /* WallpaperIDProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperIDProbe.swift; sourceTree = "<group>"; };
 		68517334A8A49B4436313D06 /* ReplicateClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplicateClient.swift; sourceTree = "<group>"; };
@@ -247,6 +250,7 @@
 		C610D3CF91277BF03A193014 /* WallpaperPrefs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperPrefs.swift; sourceTree = "<group>"; };
 		CB59DE3C43D20E6C5DD9A6DE /* SettingsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsProvider.swift; sourceTree = "<group>"; };
 		CDFBE4227F068CCC3F69DD35 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
+		D07191D79541827077AC64B9 /* LICENSE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = LICENSE.md; sourceTree = "<group>"; };
 		D4A16491673589FCD202F802 /* SnapshotCreation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotCreation.swift; sourceTree = "<group>"; };
 		D6128687229856AE8C697300 /* PaperwallScreenSaver.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PaperwallScreenSaver.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9C88BC29E2AF6FB109DF306 /* PaperwallPlayback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallPlayback.swift; sourceTree = "<group>"; };
@@ -314,6 +318,8 @@
 		1C389BFA526D03BE47974CCC = {
 			isa = PBXGroup;
 			children = (
+				D07191D79541827077AC64B9 /* LICENSE.md */,
+				5AD84B9BE34F4EAAA2EA791C /* PRIVACY.md */,
 				180C7A7AEFFE9124BA4D7AF6 /* THIRD_PARTY_NOTICES.md */,
 				B972CE61DEE1252B3E010996 /* Assets */,
 				9E73AF86F262C9C64FFBF0F9 /* Sources */,
@@ -684,6 +690,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				78EB8F8747D88F43446E6C89 /* AppIcon.icon in Resources */,
+				126A8239DE9A5C29F6503451 /* LICENSE.md in Resources */,
+				91374DD2AFDD5C0E24F6EA95 /* PRIVACY.md in Resources */,
 				28F2751FF60441166F0F472E /* PaperwallLogo.svg in Resources */,
 				AC92A9EE91FAAC9B81E5C674 /* THIRD_PARTY_NOTICES.md in Resources */,
 				8807F600E76D09C3E7390F12 /* PaperwallCLI in Resources */,

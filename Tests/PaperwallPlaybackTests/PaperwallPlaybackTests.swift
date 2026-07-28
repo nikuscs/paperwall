@@ -169,6 +169,26 @@ private func fixtureURL(_ name: String, extension ext: String) throws -> URL {
     #expect(await transport.calls() == 3)
 }
 
+@Test func predictionStatusRejectsUntrustedCredentialDestination() async {
+    let transport = MockGenerationTransport([])
+    let client = ReplicateClient(
+        token: "test-token",
+        transport: transport,
+        retryDelaysNanoseconds: []
+    )
+    do {
+        _ = try await client.fetchPrediction(
+            url: URL(string: "https://example.com/steal-token")!
+        )
+        Issue.record("Expected an untrusted prediction URL to be rejected")
+    } catch let error as GenerationError {
+        #expect(error == .invalidResponse)
+    } catch {
+        Issue.record("Unexpected error: \(error)")
+    }
+    #expect(await transport.calls() == 0)
+}
+
 @Test func defaultAssetLocation() {
     let configuration = PaperwallConfiguration()
     #expect(configuration.assetURL.path.hasSuffix(

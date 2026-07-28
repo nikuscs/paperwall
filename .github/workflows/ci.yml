@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test
+    runs-on: xcode-27
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install tools
+        run: brew install gitleaks xcodegen
+
+      - name: Scan repository history for secrets
+        run: gitleaks git . --redact --no-banner
+
+      - name: Validate shell scripts
+        run: |
+          for script in Scripts/*.sh; do
+            bash -n "$script"
+          done
+
+      - name: Test
+        run: make test

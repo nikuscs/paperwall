@@ -1,0 +1,7 @@
+# Security-sensitive project and release surfaces require maintainer review.
+/.github/ @nikuscs
+/Config/ @nikuscs
+/Scripts/ @nikuscs
+/Sources/PaperwallPlayback/ReplicateClient.swift @nikuscs
+/Sources/PaperwallPlayback/ReplicateCredentialStore.swift @nikuscs
+/Sources/PaperwallWallpaperExtension/ @nikuscs
