@@ -212,9 +212,8 @@ struct PaperwallShellView: View {
             ScrollView(.vertical) {
                 VStack(spacing: 0) {
                     Color.clear
-                        .frame(height: 44)
+                        .frame(height: 116)
                         .id("main-top")
-                    topBar
                     content
                         .padding(.vertical, 28)
                     Spacer(minLength: 18)
@@ -235,6 +234,31 @@ struct PaperwallShellView: View {
                 )
             } action: { _, metrics in
                 mainScrollMetrics = metrics
+            }
+            .overlay(alignment: .top) {
+                ZStack(alignment: .top) {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .mask {
+                            LinearGradient(
+                                colors: [.black, .black.opacity(0.82), .clear],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        }
+                        .allowsHitTesting(false)
+
+                    LinearGradient(
+                        colors: [.black.opacity(0.24), .black.opacity(0.08), .clear],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .allowsHitTesting(false)
+
+                    topBar
+                        .padding(.top, 44)
+                }
+                .frame(height: 132, alignment: .top)
             }
             .overlay(alignment: .bottom) {
                 if mainScrollMetrics.hasMoreBelow {
