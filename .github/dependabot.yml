@@ -4,5 +4,22 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: monday
+      time: "08:30"
+      timezone: Europe/Lisbon
+    open-pull-requests-limit: 3
+    groups:
+      github-actions-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: ci
