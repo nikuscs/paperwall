@@ -34,6 +34,12 @@
 - **Native controls everywhere** — menu-bar app, Settings, Swift CLI, and legacy screen saver fallback
 - **Persistent work queue** — generation and upscale jobs survive restarts and resume without duplicate paid requests
 
+## Screenshot
+
+<p align="center">
+  <img src=".github/assets/paperwall-home.jpg" width="920" alt="Paperwall Home with animated wallpaper creation controls">
+</p>
+
 ## Installation
 
 1. Download the latest DMG from [**Releases**](../../releases/latest).
