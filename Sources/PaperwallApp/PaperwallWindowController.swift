@@ -12,7 +12,7 @@ final class PaperwallWindowController: NSWindowController, NSWindowDelegate {
         generateImage: @escaping (String, @escaping (Result<URL, Error>) -> Void) -> Void,
         generate: @escaping (GenerationRequest, @escaping (Result<GenerationResult, Error>) -> Void) -> Void,
         upscaleVideo: @escaping (URL, @escaping (Result<URL, Error>) -> Void) -> Void,
-        chooseVideo: @escaping () -> Void,
+        chooseVideo: @escaping (@escaping (VideoImportProgress) -> Void) -> Void,
         selectDiscovery: @escaping (URL, @escaping (Result<Void, Error>) -> Void) -> Void,
         setPlaybackSpeed: @escaping (PlaybackSpeed) -> Void,
         configureToken: @escaping () -> Void,

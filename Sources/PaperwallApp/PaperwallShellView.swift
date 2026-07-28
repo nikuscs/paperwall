@@ -28,6 +28,7 @@ struct PaperwallShellView: View {
     @State private var duration = 4
     @State private var referenceImageURL: URL?
     @State private var generationError: String?
+    @State private var videoImportProgress: VideoImportProgress = .idle
     @State private var playbackSpeed = PlaybackPreferences.playbackSpeed
     @State private var showingProviderOptions = false
     @State private var showingDurationOptions = false
@@ -47,7 +48,7 @@ struct PaperwallShellView: View {
     let generateImage: (String, @escaping (Result<URL, Error>) -> Void) -> Void
     let generate: (GenerationRequest, @escaping (Result<GenerationResult, Error>) -> Void) -> Void
     let upscaleVideo: (URL, @escaping (Result<URL, Error>) -> Void) -> Void
-    let chooseVideo: () -> Void
+    let chooseVideo: (@escaping (VideoImportProgress) -> Void) -> Void
     let selectDiscovery: (URL, @escaping (Result<Void, Error>) -> Void) -> Void
     let setPlaybackSpeed: (PlaybackSpeed) -> Void
     let configureToken: () -> Void
@@ -530,13 +531,23 @@ struct PaperwallShellView: View {
                     .frame(width: 1, height: 18)
                     .padding(.horizontal, 10)
 
-                Button(action: chooseVideo) {
+                Button {
+                    chooseVideo { progress in
+                        videoImportProgress = progress
+                        refreshWorkQueue()
+                        if case .completed = progress {
+                            discoveryLibrary.synchronize()
+                            backgroundImage = StaticShellAssets.loadBackgroundImage()
+                        }
+                    }
+                } label: {
                     Label("Use your own", systemImage: "film")
                         .font(.system(size: 13, weight: .regular))
                         .frame(height: 34)
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.white.opacity(0.72))
+                .disabled(videoImportProgress.isRunning)
 
                 Spacer()
 
@@ -662,6 +673,22 @@ struct PaperwallShellView: View {
                 .foregroundStyle(.black.opacity(0.86))
                 .background(.white.opacity(0.94), in: Capsule())
                 .disabled(isPipelineRunning)
+            }
+
+            if let importStatus = videoImportProgress.statusText {
+                HStack(spacing: 8) {
+                    if videoImportProgress.isRunning {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Image(systemName: importProgressSymbol)
+                            .foregroundStyle(importProgressColor)
+                    }
+                    Text(importStatus)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(videoImportProgress.isRunning ? .white.opacity(0.68) : importProgressColor)
+                        .lineLimit(2)
+                }
             }
 
             if isPipelineRunning {
@@ -890,6 +917,16 @@ struct PaperwallShellView: View {
 
     private var isPipelineRunning: Bool {
         [.generatingImage, .generatingVideo, .upscaling].contains(pipelineStage)
+    }
+
+    private var importProgressSymbol: String {
+        if case .failed = videoImportProgress { return "exclamationmark.triangle.fill" }
+        return "checkmark.circle.fill"
+    }
+
+    private var importProgressColor: Color {
+        if case .failed = videoImportProgress { return .orange }
+        return .green
     }
 
     private var imageGenerationCost: String {

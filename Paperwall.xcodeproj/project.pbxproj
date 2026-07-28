@@ -18,6 +18,7 @@
 		17DD93DD76322F98ED02C9AB /* WallpaperCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2049EA2EE3D714286DB9B5 /* WallpaperCatalog.swift */; };
 		17FD84C7CC00491F75BC6205 /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C2AD42B081F9D65E33624B6 /* Logging.swift */; };
 		182D635A4E1F1BD6B63273CF /* PaperwallWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEB6ECB880AE750D63A6D475 /* PaperwallWindowController.swift */; };
+		18486F214569777FC0F9036A /* VideoImportProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B71E85EF32AEF67D878349F /* VideoImportProgress.swift */; };
 		19FFE966925D795B50244FCD /* PaperwallUpscaleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59ECA958EA31A2A6316FD86 /* PaperwallUpscaleService.swift */; };
 		1B813AE51A5A875C9B81D9FC /* PlaybackPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DD80F0D0FCA174AB930EEA /* PlaybackPolicy.swift */; };
 		213CD10BFF97C29006304456 /* PaperwallStorageMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 789F1FDE4C4BC8377D29FB6E /* PaperwallStorageMigrator.swift */; };
@@ -221,6 +222,7 @@
 		789F1FDE4C4BC8377D29FB6E /* PaperwallStorageMigrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallStorageMigrator.swift; sourceTree = "<group>"; };
 		7962C5E656C9F797B3490E44 /* ColorDiag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorDiag.swift; sourceTree = "<group>"; };
 		7AFF625C1778CBF88EF54AFB /* WallpaperState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperState.swift; sourceTree = "<group>"; };
+		7B71E85EF32AEF67D878349F /* VideoImportProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoImportProgress.swift; sourceTree = "<group>"; };
 		7C2AD42B081F9D65E33624B6 /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
 		86AAD7159FFB84DAB9F45DAA /* PaperwallService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperwallService.swift; sourceTree = "<group>"; };
 		8CB366E144E6D4B12136C48C /* WallpaperExtensionConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperExtensionConfig.swift; sourceTree = "<group>"; };
@@ -330,6 +332,7 @@
 				5CA0749CC3542B868AB12A37 /* Main.swift */,
 				023DEB2E9A9E37CD40868593 /* PaperwallShellView.swift */,
 				BEB6ECB880AE750D63A6D475 /* PaperwallWindowController.swift */,
+				7B71E85EF32AEF67D878349F /* VideoImportProgress.swift */,
 				BADAE08FCD05A41BB7993C3C /* WallpaperController.swift */,
 				0E0605D4472F56A6E5803806 /* WallpaperPreviewSupport.swift */,
 				33E431DC75D784C9C9CDB301 /* DiscoveryLibraryModel.swift */,
@@ -752,6 +755,7 @@
 				84EFD6B5FEEA0B3DB0F2D465 /* Main.swift in Sources */,
 				DAF4B351FAB9A35E296CBE07 /* PaperwallShellView.swift in Sources */,
 				182D635A4E1F1BD6B63273CF /* PaperwallWindowController.swift in Sources */,
+				18486F214569777FC0F9036A /* VideoImportProgress.swift in Sources */,
 				7B6879FFFB31DF31ED6EA1FC /* WallpaperController.swift in Sources */,
 				21AE54A8159DBF1F11261332 /* WallpaperPreviewSupport.swift in Sources */,
 				56656AE70FE90002A31A1523 /* DiscoveryLibraryModel.swift in Sources */,
