@@ -8,12 +8,12 @@ final class PaperwallWindowController: NSWindowController, NSWindowDelegate {
     private let hasActiveWork: () -> Bool
 
     init(
-        discoveryLibrary: DiscoveryLibraryModel,
+        wallpaperLibrary: WallpaperLibraryModel,
         generateImage: @escaping (String, @escaping (Result<URL, Error>) -> Void) -> Void,
         generate: @escaping (GenerationRequest, @escaping (Result<GenerationResult, Error>) -> Void) -> Void,
         upscaleVideo: @escaping (URL, @escaping (Result<URL, Error>) -> Void) -> Void,
         chooseVideo: @escaping (@escaping (VideoImportProgress) -> Void) -> Void,
-        selectDiscovery: @escaping (URL, @escaping (Result<Void, Error>) -> Void) -> Void,
+        selectWallpaper: @escaping (URL, @escaping (Result<Void, Error>) -> Void) -> Void,
         setPlaybackSpeed: @escaping (PlaybackSpeed) -> Void,
         startPlayback: @escaping () -> Void,
         stopPlayback: @escaping () -> Void,
@@ -27,12 +27,12 @@ final class PaperwallWindowController: NSWindowController, NSWindowDelegate {
         self.activationChanged = activationChanged
         self.hasActiveWork = hasActiveWork
         let rootView = PaperwallShellView(
-            discoveryLibrary: discoveryLibrary,
+            wallpaperLibrary: wallpaperLibrary,
             generateImage: generateImage,
             generate: generate,
             upscaleVideo: upscaleVideo,
             chooseVideo: chooseVideo,
-            selectDiscovery: selectDiscovery,
+            selectWallpaper: selectWallpaper,
             setPlaybackSpeed: setPlaybackSpeed,
             startPlayback: startPlayback,
             stopPlayback: stopPlayback,

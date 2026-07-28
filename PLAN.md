@@ -41,5 +41,5 @@ Before any paid POST, Paperwall shows the maximum estimated cost and requires ex
 - CLI and UI use the same core generation/import APIs.
 - Generated output is validated before activation.
 - Desktop, saver, static fallback, and login persistence use Paperwall-owned files only.
-- Source images, imported sources, Discovery cache files, and generated history are preserved non-destructively.
+- Source images, discovered cache files, imported sources, and generated history are preserved non-destructively.
 - Install and uninstall remain user-scoped and transactional.

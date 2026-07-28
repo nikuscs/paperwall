@@ -32,7 +32,7 @@ struct ImmersiveWallpaperPreview: View {
     var body: some View {
         ZStack {
             Color.black
-            DiscoveryPlayerPreview(url: url, playbackSpeed: playbackSpeed)
+            WallpaperPlayerPreview(url: url, playbackSpeed: playbackSpeed)
                 .id("\(url.path)-\(previewReloadToken)")
                 .transition(.opacity)
 

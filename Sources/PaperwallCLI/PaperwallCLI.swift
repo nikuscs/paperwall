@@ -22,15 +22,8 @@ enum PaperwallCLI {
         case "set":
             guard arguments.count == 2 else { throw CLIError.usage }
             try await select(URL(fileURLWithPath: arguments[1]))
-        case "discovery-list":
-            try await listDiscovery()
-        case "discovery-set":
-            guard arguments.count == 2,
-                  arguments[1].allSatisfy(\.isNumber) else { throw CLIError.usage }
-            let url = AssetLibrary.discoveryDirectory
-                .appendingPathComponent(arguments[1])
-                .appendingPathExtension("mp4")
-            try await select(url)
+        case "discover":
+            try await discover(Array(arguments.dropFirst()))
         case "generate":
             try await generate(Array(arguments.dropFirst()))
         case "start":
@@ -165,22 +158,32 @@ enum PaperwallCLI {
         print("Estimated maximum spend: \(quote.formattedCost) USD")
     }
 
-    private static func listDiscovery() async throws {
-        let urls = AssetLibrary.discoveryVideos()
-        if urls.isEmpty {
-            print("No Discovery videos found at \(AssetLibrary.discoveryDirectory.path)")
-            return
-        }
-        print("ID\tDIMENSIONS\tDURATION\tSIZE")
-        for url in urls {
-            do {
-                let info = try await VideoAssetValidator.validate(url: url)
-                let values = try url.resourceValues(forKeys: [.fileSizeKey])
-                let megabytes = Double(values.fileSize ?? 0) / 1_048_576
-                print("\(url.deletingPathExtension().lastPathComponent)\t\(info.width)x\(info.height)\t\(String(format: "%.2fs", info.duration))\t\(String(format: "%.1fMB", megabytes))")
-            } catch {
-                print("\(url.lastPathComponent)\tinvalid: \(error.localizedDescription)")
+    private static func discover(_ arguments: [String]) async throws {
+        guard let action = arguments.first else { throw CLIError.usage }
+        let wallpapers = await AssetLibrary.discoverCachedWallpapers()
+        switch action {
+        case "list":
+            guard arguments.count == 1 else { throw CLIError.usage }
+            if wallpapers.isEmpty {
+                print("No discoverable 4K wallpapers found")
+                return
             }
+            print("ID\tTITLE\tDIMENSIONS\tDURATION\tSIZE")
+            for wallpaper in wallpapers {
+                let info = try await VideoAssetValidator.validate(url: wallpaper.url)
+                let values = try wallpaper.url.resourceValues(forKeys: [.fileSizeKey])
+                let megabytes = Double(values.fileSize ?? 0) / 1_048_576
+                print("\(wallpaper.id)\t\(wallpaper.title)\t\(info.width)x\(info.height)\t\(String(format: "%.2fs", info.duration))\t\(String(format: "%.1fMB", megabytes))")
+            }
+        case "set":
+            guard arguments.count == 2,
+                  let wallpaper = wallpapers.first(where: { $0.id == arguments[1] }) else {
+                throw CLIError.discoveredWallpaperNotFound
+            }
+            let importedURL = try await AssetLibrary.importLocalVideo(wallpaper.url)
+            try await select(importedURL)
+        default:
+            throw CLIError.usage
         }
     }
 
@@ -288,8 +291,8 @@ enum PaperwallCLI {
           generate [options]    Generate, install, and play an AI wallpaper
             --provider seedance-1.5|seedance-2.0
             --image IMAGE and/or --prompt TEXT [--duration N] [--seed N] [--dry-run]
-          discovery-list        List cached Discovery videos
-          discovery-set ID      Select a cached Discovery video
+          discover list         List discoverable cached 4K wallpapers
+          discover set ID       Import and select a discovered wallpaper
           start | stop | status Control and inspect desktop playback
           enable | disable      Toggle launch at login
           saver status|settings
@@ -304,6 +307,7 @@ private enum CLIError: Error, LocalizedError {
     case couldNotStart
     case couldNotStop
     case couldNotOpenSettings
+    case discoveredWallpaperNotFound
 
     var errorDescription: String? {
         switch self {
@@ -312,6 +316,7 @@ private enum CLIError: Error, LocalizedError {
         case .couldNotStart: "Could not start Paperwall.app"
         case .couldNotStop: "Could not stop Paperwall.app"
         case .couldNotOpenSettings: "Could not open Screen Saver settings"
+        case .discoveredWallpaperNotFound: "Discovered wallpaper ID was not found; run 'paperwall discover list' again"
         }
     }
 }

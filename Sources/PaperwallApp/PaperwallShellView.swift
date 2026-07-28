@@ -31,7 +31,7 @@ struct PaperwallShellView: View {
         case failed
     }
 
-    @ObservedObject var discoveryLibrary: DiscoveryLibraryModel
+    @ObservedObject var wallpaperLibrary: WallpaperLibraryModel
 
     @State private var section: Section = .home
     @State private var mainScrollMetrics = MainScrollMetrics(
@@ -71,7 +71,7 @@ struct PaperwallShellView: View {
     let generate: (GenerationRequest, @escaping (Result<GenerationResult, Error>) -> Void) -> Void
     let upscaleVideo: (URL, @escaping (Result<URL, Error>) -> Void) -> Void
     let chooseVideo: (@escaping (VideoImportProgress) -> Void) -> Void
-    let selectDiscovery: (URL, @escaping (Result<Void, Error>) -> Void) -> Void
+    let selectWallpaper: (URL, @escaping (Result<Void, Error>) -> Void) -> Void
     let setPlaybackSpeed: (PlaybackSpeed) -> Void
     let startPlayback: () -> Void
     let stopPlayback: () -> Void
@@ -110,10 +110,10 @@ struct PaperwallShellView: View {
                 if let previewURL {
                     ImmersiveWallpaperPreview(
                         url: previewURL,
-                        wallpapers: discoveryLibrary.videos,
-                        metadata: discoveryLibrary.metadataByURL[previewURL.standardizedFileURL],
-                        libraryError: discoveryLibrary.errorMessage,
-                        retryLibrary: discoveryLibrary.synchronize,
+                        wallpapers: wallpaperLibrary.videos,
+                        metadata: wallpaperLibrary.metadataByURL[previewURL.standardizedFileURL],
+                        libraryError: wallpaperLibrary.errorMessage,
+                        retryLibrary: wallpaperLibrary.synchronize,
                         selectPreview: { url in
                             withAnimation(.easeInOut(duration: 0.2)) { self.previewURL = url }
                         },
@@ -121,7 +121,7 @@ struct PaperwallShellView: View {
                         setWallpaper: {
                             guard !isApplyingWallpaper else { return }
                             isApplyingWallpaper = true
-                            selectDiscovery(previewURL) { result in
+                            selectWallpaper(previewURL) { result in
                                 isApplyingWallpaper = false
                                 guard case .success = result else { return }
                                 hasActiveWallpaper = true
@@ -137,7 +137,7 @@ struct PaperwallShellView: View {
                             setPlaybackSpeed(speed)
                         },
                         saveMetadata: { title, description, tags in
-                            discoveryLibrary.updateMetadata(
+                            wallpaperLibrary.updateMetadata(
                                 for: previewURL,
                                 title: title,
                                 description: description,
@@ -198,7 +198,7 @@ struct PaperwallShellView: View {
                 try? await Task.sleep(for: .seconds(2))
             }
         }
-        .onChange(of: discoveryLibrary.videos) { _, videos in
+        .onChange(of: wallpaperLibrary.videos) { _, videos in
             if section == .library, previewURL == nil, let first = videos.first {
                 withAnimation(.smooth(duration: 0.3)) { previewURL = first }
             }
@@ -543,13 +543,13 @@ struct PaperwallShellView: View {
 
     private var libraryLoadingContent: some View {
         VStack(spacing: 12) {
-            if discoveryLibrary.isLoading {
+            if wallpaperLibrary.isLoading {
                 ProgressView()
                     .controlSize(.small)
                 Text("Loading shared wallpapers")
                     .font(.system(size: 14, weight: .regular))
                     .foregroundStyle(.white.opacity(0.68))
-            } else if let errorMessage = discoveryLibrary.errorMessage {
+            } else if let errorMessage = wallpaperLibrary.errorMessage {
                 Image(systemName: "exclamationmark.triangle")
                     .font(.system(size: 28, weight: .ultraLight))
                     .foregroundStyle(.orange.opacity(0.86))
@@ -562,7 +562,7 @@ struct PaperwallShellView: View {
                     .lineLimit(3)
                     .frame(maxWidth: 440)
                 HStack(spacing: 10) {
-                    libraryActionButton("Retry", symbol: "arrow.clockwise", action: discoveryLibrary.synchronize)
+                    libraryActionButton("Retry", symbol: "arrow.clockwise", action: wallpaperLibrary.synchronize)
                     libraryActionButton("Import Video", symbol: "square.and.arrow.down", action: beginVideoImport)
                 }
             } else {
@@ -577,7 +577,7 @@ struct PaperwallShellView: View {
                 HStack(spacing: 10) {
                     libraryActionButton("Import Video", symbol: "square.and.arrow.down", action: beginVideoImport)
                     libraryActionButton("Generate", symbol: "sparkles", action: openGenerationComposer)
-                    libraryActionButton("Refresh", symbol: "arrow.clockwise", action: discoveryLibrary.synchronize)
+                    libraryActionButton("Refresh", symbol: "arrow.clockwise", action: wallpaperLibrary.synchronize)
                 }
             }
         }
@@ -603,13 +603,13 @@ struct PaperwallShellView: View {
     private func openLibraryPreview() {
         withAnimation(.smooth(duration: 0.3)) {
             section = .library
-            previewURL = discoveryLibrary.videos.first
+            previewURL = wallpaperLibrary.videos.first
         }
-        if discoveryLibrary.videos.isEmpty { discoveryLibrary.synchronize() }
+        if wallpaperLibrary.videos.isEmpty { wallpaperLibrary.synchronize() }
     }
 
     private func movePreview(by offset: Int) {
-        let videos = discoveryLibrary.videos
+        let videos = wallpaperLibrary.videos
         guard !videos.isEmpty else { return }
         let current = previewURL.flatMap { videos.firstIndex(of: $0) } ?? 0
         let next = (current + offset + videos.count) % videos.count
@@ -1227,7 +1227,7 @@ struct PaperwallShellView: View {
             refreshWorkQueue()
             if case .completed = progress {
                 hasActiveWallpaper = true
-                discoveryLibrary.synchronize()
+                wallpaperLibrary.synchronize()
                 backgroundImage = StaticShellAssets.loadBackgroundImage()
             }
         }

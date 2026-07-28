@@ -198,8 +198,8 @@ private func fixtureURL(_ name: String, extension ext: String) throws -> URL {
 
 @Test func sharedMediaLocation() {
     #expect(PaperwallConfiguration.sharedDataDirectory.path.hasSuffix("/.config/paperwall"))
-    #expect(PaperwallConfiguration.sharedLibraryDirectory.path.hasSuffix(
-        "/.config/paperwall/Library/Discovery"
+    #expect(PaperwallConfiguration.sharedImportsDirectory.path.hasSuffix(
+        "/.config/paperwall/Library/Imports"
     ))
     #expect(PaperwallConfiguration.generationStateDirectory.path.contains(
         "/Library/Application Support/Paperwall/Generation"
@@ -209,12 +209,12 @@ private func fixtureURL(_ name: String, extension ext: String) throws -> URL {
 @Test func wallpaperMetadataRoundTrips() throws {
     let metadata = WallpaperMetadata(
         id: "abc123",
-        mediaRelativePath: "Library/Discovery/forest.mp4",
+        mediaRelativePath: "Library/Imports/forest.mp4",
         mediaKind: .video,
         title: "Quiet Forest",
         description: "Slow mist and subtle foliage movement.",
         tags: ["forest", "calm"],
-        provenance: .discovery,
+        provenance: .imported,
         width: 3840,
         height: 2160,
         duration: 8,
@@ -226,6 +226,66 @@ private func fixtureURL(_ name: String, extension ext: String) throws -> URL {
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
     #expect(try decoder.decode(WallpaperMetadata.self, from: encoder.encode(metadata)) == metadata)
+}
+
+@Test func discoveryFindsOnlyImmediateWallpaperDirectoriesAndValidVideos() async throws {
+    let root = FileManager.default.temporaryDirectory
+        .appendingPathComponent(UUID().uuidString, isDirectory: true)
+    defer { try? FileManager.default.removeItem(at: root) }
+    let sourceDirectory = root
+        .appendingPathComponent("UnrelatedCache", isDirectory: true)
+        .appendingPathComponent("Wallpapers", isDirectory: true)
+    let ignoredDirectory = root
+        .appendingPathComponent("OtherCache", isDirectory: true)
+        .appendingPathComponent("Previews", isDirectory: true)
+    try FileManager.default.createDirectory(at: sourceDirectory, withIntermediateDirectories: true)
+    try FileManager.default.createDirectory(at: ignoredDirectory, withIntermediateDirectories: true)
+    let source = try fixtureURL("tiny-video", extension: "mp4")
+    let discoveredURL = sourceDirectory.appendingPathComponent("quiet-scene.mp4")
+    let ignoredURL = ignoredDirectory.appendingPathComponent("preview.mp4")
+    try FileManager.default.copyItem(at: source, to: discoveredURL)
+    try FileManager.default.copyItem(at: source, to: ignoredURL)
+
+    let defaultDiscovery = await AssetLibrary.discoverCachedWallpapers(in: root)
+    #expect(defaultDiscovery.isEmpty)
+    let discovered = await AssetLibrary.discoverCachedWallpapers(
+        in: root,
+        minimumWidth: 64,
+        minimumHeight: 36
+    )
+
+    #expect(discovered.count == 1)
+    #expect(
+        discovered.first?.url.resolvingSymlinksInPath().standardizedFileURL
+            == discoveredURL.resolvingSymlinksInPath().standardizedFileURL
+    )
+    #expect(discovered.first?.title == "Quiet Scene")
+    #expect(discovered.first?.id.count == 12)
+}
+
+@Test func legacyLibraryMigrationCopiesOnlyMediaNonDestructively() throws {
+    let root = FileManager.default.temporaryDirectory
+        .appendingPathComponent(UUID().uuidString, isDirectory: true)
+    defer { try? FileManager.default.removeItem(at: root) }
+    let legacy = root.appendingPathComponent("Library/Previous", isDirectory: true)
+    let imports = root.appendingPathComponent("Shared/Library/Imports", isDirectory: true)
+    try FileManager.default.createDirectory(at: legacy, withIntermediateDirectories: true)
+    let source = legacy.appendingPathComponent("forest.mp4")
+    try FileManager.default.copyItem(
+        at: try fixtureURL("tiny-video", extension: "mp4"),
+        to: source
+    )
+    try Data("legacy metadata".utf8).write(
+        to: source.appendingPathExtension("paperwall.json")
+    )
+
+    try PaperwallStorageMigrator.migrateLibraryMedia(from: [legacy], to: imports)
+
+    #expect(FileManager.default.fileExists(atPath: source.path))
+    #expect(FileManager.default.fileExists(atPath: imports.appendingPathComponent("forest.mp4").path))
+    #expect(!FileManager.default.fileExists(
+        atPath: imports.appendingPathComponent("forest.mp4.paperwall.json").path
+    ))
 }
 
 @Test func customAssetLocation() {

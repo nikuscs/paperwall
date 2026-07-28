@@ -1,38 +1,25 @@
 import CryptoKit
 import Foundation
 
+public struct DiscoveredWallpaper: Equatable, Identifiable, Sendable {
+    public let id: String
+    public let title: String
+    public let url: URL
+
+    public init(id: String, title: String, url: URL) {
+        self.id = id
+        self.title = title
+        self.url = url
+    }
+}
+
 public enum AssetLibrary {
-    private struct MirrorIndex: Codable {
-        var entries: [String: MirrorEntry] = [:]
-    }
-
-    private struct MirrorEntry: Codable {
-        let fileSize: Int64
-        let modificationTime: TimeInterval
-        let destinationName: String
-    }
-
-    public static var discoveryDirectory: URL {
-        FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Library/Caches/Discovery/Wallpapers", isDirectory: true)
-    }
-
     public static var paperwallLibraryDirectory: URL {
-        PaperwallConfiguration.sharedLibraryDirectory
-    }
-
-    private static var mirrorIndexURL: URL {
-        PaperwallConfiguration.applicationSupportDirectory
-            .appendingPathComponent("Library/Discovery/index.json")
-    }
-
-    public static func discoveryVideos() -> [URL] {
-        videos(in: discoveryDirectory)
+        PaperwallConfiguration.sharedImportsDirectory
     }
 
     public static func paperwallLibraryVideos() -> [URL] {
         let directories = [
-            paperwallLibraryDirectory,
             PaperwallConfiguration.sharedImportsDirectory,
             PaperwallConfiguration.sharedGenerationDirectory
                 .appendingPathComponent("Outputs", isDirectory: true),
@@ -48,75 +35,75 @@ public enum AssetLibrary {
             ) == .orderedAscending }
     }
 
-    public static func synchronizeDiscoveryCache() async throws -> [URL] {
-        try await Task.detached(priority: .utility) {
-            try PaperwallStorageMigrator.migrateSynchronouslyIfNeeded()
-            let fileManager = FileManager.default
-            try fileManager.createDirectory(
-                at: paperwallLibraryDirectory,
-                withIntermediateDirectories: true
-            )
+    public static func discoverCachedWallpapers() async -> [DiscoveredWallpaper] {
+        let cacheDirectory = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Caches", isDirectory: true)
+        return await discoverCachedWallpapers(in: cacheDirectory)
+    }
 
-            try fileManager.createDirectory(
-                at: mirrorIndexURL.deletingLastPathComponent(),
-                withIntermediateDirectories: true
-            )
-            var index = (try? Data(contentsOf: mirrorIndexURL))
-                .flatMap { try? JSONDecoder().decode(MirrorIndex.self, from: $0) }
-                ?? MirrorIndex()
-
-            for source in discoveryVideos() {
-                do {
-                    let values = try source.resourceValues(forKeys: [.fileSizeKey, .contentModificationDateKey])
-                    let fileSize = Int64(values.fileSize ?? 0)
-                    let modificationTime = values.contentModificationDate?.timeIntervalSince1970 ?? 0
-                    if let entry = index.entries[source.path],
-                       entry.fileSize == fileSize,
-                       entry.modificationTime == modificationTime,
-                       fileManager.fileExists(
-                           atPath: paperwallLibraryDirectory
-                               .appendingPathComponent(entry.destinationName).path
-                       ) {
-                        continue
-                    }
-
-                    let digest = try sha256(source)
-                    let hash = digest.map { String(format: "%02x", $0) }.joined()
-                    let destination = paperwallLibraryDirectory
-                        .appendingPathComponent(
-                            "\(source.deletingPathExtension().lastPathComponent)-\(hash.prefix(12))"
-                        )
-                        .appendingPathExtension("mp4")
-
-                    if !fileManager.fileExists(atPath: destination.path) {
-                        let stage = paperwallLibraryDirectory
-                            .appendingPathComponent(".import-\(UUID().uuidString)")
-                            .appendingPathExtension("mp4")
-                        do {
-                            try fileManager.copyItem(at: source, to: stage)
-                            guard try sha256(stage) == digest else {
-                                throw AssetLibraryError.hashMismatch
-                            }
-                            try fileManager.moveItem(at: stage, to: destination)
-                        } catch {
-                            try? fileManager.removeItem(at: stage)
-                            throw error
-                        }
-                    }
-                    index.entries[source.path] = MirrorEntry(
-                        fileSize: fileSize,
-                        modificationTime: modificationTime,
-                        destinationName: destination.lastPathComponent
-                    )
-                } catch {
-                    NSLog("Paperwall: could not mirror %@: %@", source.lastPathComponent, error.localizedDescription)
+    static func discoverCachedWallpapers(
+        in cacheDirectory: URL,
+        minimumWidth: Int = 3_840,
+        minimumHeight: Int = 2_160
+    ) async -> [DiscoveredWallpaper] {
+        let fileManager = FileManager.default
+        let containers = (try? fileManager.contentsOfDirectory(
+            at: cacheDirectory,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: [.skipsHiddenFiles]
+        )) ?? []
+        let sourceDirectories = containers.compactMap { container -> URL? in
+            guard (try? container.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true,
+                  let children = try? fileManager.contentsOfDirectory(
+                      at: container,
+                      includingPropertiesForKeys: [.isDirectoryKey],
+                      options: [.skipsHiddenFiles]
+                  ),
+                  let directory = children.first(where: {
+                      $0.lastPathComponent.caseInsensitiveCompare("Wallpapers") == .orderedSame
+                          && (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true
+                  }) else { return nil }
+            return directory
+        }
+        let candidates = sourceDirectories.flatMap { videos(in: $0) }
+        return await withTaskGroup(of: DiscoveredWallpaper?.self) { group in
+            for url in candidates {
+                group.addTask {
+                    guard let info = try? await VideoAssetValidator.validate(url: url),
+                          max(info.width, info.height) >= minimumWidth,
+                          min(info.width, info.height) >= minimumHeight else { return nil }
+                    let digest = SHA256.hash(data: Data(url.standardizedFileURL.path.utf8))
+                    let id = digest.prefix(6).map { String(format: "%02x", $0) }.joined()
+                    let title = url.deletingPathExtension().lastPathComponent
+                        .replacingOccurrences(of: "[_-]+", with: " ", options: .regularExpression)
+                        .capitalized
+                    return DiscoveredWallpaper(id: id, title: title, url: url)
                 }
             }
-            let encoder = JSONEncoder()
-            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-            try encoder.encode(index).write(to: mirrorIndexURL, options: .atomic)
-            return paperwallLibraryVideos()
-        }.value
+            var discovered: [DiscoveredWallpaper] = []
+            for await candidate in group {
+                if let candidate { discovered.append(candidate) }
+            }
+            return discovered.sorted {
+                if $0.title == $1.title { return $0.id < $1.id }
+                return $0.title.localizedStandardCompare($1.title) == .orderedAscending
+            }
+        }
+    }
+
+    public static func synchronizeDiscoveredWallpapers(
+        _ discovered: [DiscoveredWallpaper]? = nil
+    ) async throws -> [URL] {
+        try await PaperwallStorageMigrator.migrateLegacySharedAssetsIfNeeded()
+        let candidates = if let discovered { discovered } else { await discoverCachedWallpapers() }
+        for candidate in candidates {
+            do {
+                _ = try await importLocalVideo(candidate.url)
+            } catch {
+                NSLog("Paperwall: could not import discovered wallpaper %@: %@", candidate.id, error.localizedDescription)
+            }
+        }
+        return paperwallLibraryVideos()
     }
 
     public static func importLocalVideo(_ sourceURL: URL) async throws -> URL {

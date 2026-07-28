@@ -66,8 +66,6 @@ Set `REPLICATE_API_TOKEN` in your shell or choose **Configure Replicate Token…
 
 ```bash
 paperwall set video.mp4
-paperwall discovery-list
-paperwall discovery-set ID
 paperwall start
 paperwall stop
 paperwall status

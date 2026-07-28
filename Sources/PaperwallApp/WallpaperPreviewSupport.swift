@@ -52,7 +52,7 @@ struct LibraryKeyboardMonitor: NSViewRepresentable {
 }
 
 @MainActor
-struct DiscoveryPlayerPreview: NSViewRepresentable {
+struct WallpaperPlayerPreview: NSViewRepresentable {
     let url: URL
     var playbackSpeed: PlaybackSpeed = PlaybackPreferences.playbackSpeed
 

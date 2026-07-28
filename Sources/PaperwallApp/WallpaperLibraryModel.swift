@@ -3,8 +3,9 @@ import Foundation
 import PaperwallPlayback
 
 @MainActor
-final class DiscoveryLibraryModel: ObservableObject {
+final class WallpaperLibraryModel: ObservableObject {
     @Published private(set) var videos: [URL] = AssetLibrary.paperwallLibraryVideos()
+    @Published private(set) var discoveredWallpapers: [DiscoveredWallpaper] = []
     @Published private(set) var metadataByURL: [URL: WallpaperMetadata] = [:]
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
@@ -36,7 +37,9 @@ final class DiscoveryLibraryModel: ObservableObject {
         errorMessage = nil
         Task {
             do {
-                _ = try await AssetLibrary.synchronizeDiscoveryCache()
+                let discovered = await AssetLibrary.discoverCachedWallpapers()
+                discoveredWallpapers = discovered
+                _ = try await AssetLibrary.synchronizeDiscoveredWallpapers(discovered)
                 let catalog = try await WallpaperCatalog.shared.refresh()
                 videos = AssetLibrary.paperwallLibraryVideos()
                 metadataByURL = Dictionary(uniqueKeysWithValues: catalog.map {

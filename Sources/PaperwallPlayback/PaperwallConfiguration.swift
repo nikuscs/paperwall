@@ -23,10 +23,6 @@ public struct PaperwallConfiguration: Equatable, Sendable {
             .appendingPathComponent(".config/paperwall", isDirectory: true)
     }
 
-    public static var sharedLibraryDirectory: URL {
-        sharedDataDirectory.appendingPathComponent("Library/Discovery", isDirectory: true)
-    }
-
     public static var sharedImportsDirectory: URL {
         sharedDataDirectory.appendingPathComponent("Library/Imports", isDirectory: true)
     }

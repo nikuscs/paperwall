@@ -5,7 +5,7 @@ import UniformTypeIdentifiers
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let wallpaperController = WallpaperController()
-    private let discoveryLibrary = DiscoveryLibraryModel()
+    private let wallpaperLibrary = WallpaperLibraryModel()
     private var windowController: PaperwallWindowController?
     private var statusItem: NSStatusItem?
     private var launchAtLoginItem: NSMenuItem?
@@ -17,7 +17,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var lastAutomaticNativeRecovery = Date.distantPast
     private var workspaceRecoveryObservers: [NSObjectProtocol] = []
     private var distributedRecoveryObservers: [NSObjectProtocol] = []
-    private let discoveryMenu = NSMenu(title: "Import from Discovery Cache")
+    private let discoveryMenu = NSMenu(title: "Discovered Wallpapers")
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         if let iconURL = Bundle.main.url(forResource: "AppIcon", withExtension: "icns"),
@@ -40,7 +40,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         installMainWindow()
         windowController?.show()
-        discoveryLibrary.synchronize()
+        wallpaperLibrary.synchronize()
         Task {
             await resumePendingWorkIfNeeded()
         }
@@ -139,7 +139,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(withTitle: "Stop", action: #selector(stopPlayback), keyEquivalent: "")
         menu.addItem(.separator())
         menu.addItem(withTitle: "Select Video…", action: #selector(selectVideoFromMenu), keyEquivalent: "")
-        let discoveryItem = NSMenuItem(title: "Import from Discovery Cache", action: nil, keyEquivalent: "")
+        let discoveryItem = NSMenuItem(title: "Discovered Wallpapers", action: nil, keyEquivalent: "")
         discoveryItem.submenu = discoveryMenu
         menu.addItem(discoveryItem)
         menu.addItem(
@@ -188,7 +188,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func installMainWindow() {
         windowController = PaperwallWindowController(
-            discoveryLibrary: discoveryLibrary,
+            wallpaperLibrary: wallpaperLibrary,
             generateImage: { [weak self] prompt, completion in
                 self?.submitImageGeneration(prompt: prompt, completion: completion)
             },
@@ -199,7 +199,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 self?.upscaleAndInstall(videoURL: url, completion: completion)
             },
             chooseVideo: { [weak self] progress in self?.selectVideo(progress: progress) },
-            selectDiscovery: { [weak self] url, completion in
+            selectWallpaper: { [weak self] url, completion in
                 self?.selectAsset(url, completion: completion)
             },
             setPlaybackSpeed: { [weak self] speed in self?.setPlaybackSpeed(speed) },
@@ -236,21 +236,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func rebuildDiscoveryMenu() {
         discoveryMenu.removeAllItems()
-        let videos = AssetLibrary.discoveryVideos()
-        if videos.isEmpty {
-            let empty = NSMenuItem(title: "No Cached Videos", action: nil, keyEquivalent: "")
+        let wallpapers = wallpaperLibrary.discoveredWallpapers
+        if wallpapers.isEmpty {
+            let empty = NSMenuItem(title: "No Discoverable 4K Wallpapers", action: nil, keyEquivalent: "")
             empty.isEnabled = false
             discoveryMenu.addItem(empty)
             return
         }
-        for url in videos {
+        for wallpaper in wallpapers {
             let item = NSMenuItem(
-                title: url.deletingPathExtension().lastPathComponent,
-                action: #selector(selectDiscoveryVideo(_:)),
+                title: wallpaper.title,
+                action: #selector(selectDiscoveredWallpaper(_:)),
                 keyEquivalent: ""
             )
             item.target = self
-            item.representedObject = url
+            item.representedObject = wallpaper.url
             discoveryMenu.addItem(item)
         }
     }
@@ -280,7 +280,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         importAndInstall(videoURL: url, progress: progress)
     }
 
-    @objc private func selectDiscoveryVideo(_ sender: NSMenuItem) {
+    @objc private func selectDiscoveredWallpaper(_ sender: NSMenuItem) {
         guard let url = sender.representedObject as? URL else { return }
         selectAsset(url)
     }
@@ -487,7 +487,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 _ = try await PaperwallService.selectWallpaper(from: preparedURL)
                 wallpaperController.stop()
                 await wallpaperController.start()
-                discoveryLibrary.synchronize()
+                wallpaperLibrary.synchronize()
                 progress(.completed(preparedURL, wasUpscaled: needsUpscale))
             } catch {
                 progress(.failed(error.localizedDescription))
