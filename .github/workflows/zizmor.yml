@@ -23,7 +23,6 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read # checkout workflow files to audit
-      security-events: write # upload SARIF findings to code scanning
       actions: read # resolve workflow references
     steps:
       - name: Checkout
@@ -31,12 +30,17 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Run Zizmor
-        uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
-        with:
-          advanced-security: false
-          persona: regular
-          min-severity: low
-          min-confidence: medium
+      - name: Run strict pedantic Zizmor
+        run: |
+          docker run --rm \
+            --env GH_TOKEN \
+            --volume "${GITHUB_WORKSPACE}:/workspace:ro" \
+            --workdir /workspace \
+            ghcr.io/zizmorcore/zizmor:1.25.2@sha256:14ea7f5cc7c67933394a35b5a38a277397818d232602635edb2010b313afb110 \
+            --pedantic \
+            --strict-collection \
+            --color never \
+            --render-links never \
+            .
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
