@@ -10,6 +10,7 @@ BACKUP="$DESTINATION_DIR/.Paperwall.app.rollback-$$"
 USER_APP="$HOME/Applications/Paperwall.app"
 USER_BACKUP="$HOME/Applications/.Paperwall.app.rollback-$$"
 LOGIN_WAS_ENABLED=false
+NATIVE_EXTENSION_WAS_RUNNING=false
 INSTALL_COMPLETE=false
 MOUNT=""
 PLIST="$(mktemp)"
@@ -59,6 +60,9 @@ codesign --verify --deep --strict "$STAGE"
 if launchctl print "gui/$UID/com.paperwall.app" >/dev/null 2>&1; then
   LOGIN_WAS_ENABLED=true
 fi
+if pgrep -f '^/Applications/Paperwall\.app/Contents/(PlugIns|Extensions)/PaperwallWallpaperExtension\.appex/Contents/MacOS/PaperwallWallpaperExtension ' >/dev/null 2>&1; then
+  NATIVE_EXTENSION_WAS_RUNNING=true
+fi
 "$STAGE/Contents/Resources/Installer/paperwall" stop >/dev/null
 if [[ -e "$DESTINATION" || -L "$DESTINATION" ]]; then mv "$DESTINATION" "$BACKUP"; fi
 mv "$STAGE" "$DESTINATION"
@@ -67,6 +71,10 @@ if $LOGIN_WAS_ENABLED; then
 fi
 if [[ "$DESTINATION" == "/Applications/Paperwall.app" && -e "$USER_APP" ]]; then
   mv "$USER_APP" "$USER_BACKUP"
+fi
+if $NATIVE_EXTENSION_WAS_RUNNING; then
+  pkill -TERM -f '^/Applications/Paperwall\.app/Contents/(PlugIns|Extensions)/PaperwallWallpaperExtension\.appex/Contents/MacOS/PaperwallWallpaperExtension ' >/dev/null 2>&1 || true
+  pkill -TERM -x WallpaperAgent >/dev/null 2>&1 || true
 fi
 open "$DESTINATION"
 INSTALL_COMPLETE=true

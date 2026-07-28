@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var launchAtLoginItem: NSMenuItem?
     private var saverStatusItem: NSMenuItem?
     private var generationInProgress = false
+    private var wallpaperServiceRestartInProgress = false
     private let wallspaceMenu = NSMenu(title: "Import from Wallspace Cache")
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -150,6 +151,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             action: #selector(openScreenSaverSettings),
             keyEquivalent: ""
         )
+        menu.addItem(
+            withTitle: "Restart Native Wallpaper Service",
+            action: #selector(restartNativeWallpaperServices),
+            keyEquivalent: ""
+        )
         menu.addItem(.separator())
         menu.addItem(withTitle: "Quit Paperwall", action: #selector(quit), keyEquivalent: "q")
         for menuItem in menu.items where menuItem.action != nil { menuItem.target = self }
@@ -175,8 +181,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 self?.selectAsset(url, completion: completion)
             },
             setPlaybackSpeed: { [weak self] speed in self?.setPlaybackSpeed(speed) },
+            startPlayback: { [weak self] in self?.startPlayback() },
+            stopPlayback: { [weak self] in self?.stopPlayback() },
+            toggleLaunchAtLogin: { [weak self] in self?.toggleLaunchAtLogin() },
             configureToken: { [weak self] in self?.configureReplicateToken() },
             openSettings: { [weak self] in self?.openScreenSaverSettings() },
+            restartNativeWallpaperServices: { [weak self] in self?.restartNativeWallpaperServices() },
             hasActiveWork: { [weak self] in self?.generationInProgress == true },
             activationChanged: { [weak self] in self?.restoreStatusItemVisibility() }
         )
@@ -599,6 +609,40 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         ]
         for link in links {
             if let url = URL(string: link), NSWorkspace.shared.open(url) { return }
+        }
+    }
+
+    @objc private func restartNativeWallpaperServices() {
+        guard !wallpaperServiceRestartInProgress else { return }
+        wallpaperServiceRestartInProgress = true
+
+        let targets = NSWorkspace.shared.runningApplications.filter { application in
+            if application.bundleIdentifier == "com.paperwall.app.wallpaper-extension" {
+                return true
+            }
+            return application.executableURL?.lastPathComponent == "WallpaperAgent"
+        }
+        for application in targets {
+            _ = application.terminate()
+        }
+
+        Task {
+            defer { wallpaperServiceRestartInProgress = false }
+            do {
+                try await Task.sleep(for: .seconds(1))
+                let active = PaperwallConfiguration.defaultAssetURL
+                if FileManager.default.fileExists(atPath: active.path) {
+                    try await NativeWallpaperExtensionBridge.deployActiveWallpaper(from: active)
+                }
+                try await Task.sleep(for: .seconds(1))
+                let complete = NSAlert()
+                complete.messageText = "Native Wallpaper Service Restarted"
+                complete.informativeText = "Paperwall refreshed the active video and macOS will relaunch the current wallpaper extension automatically."
+                complete.addButton(withTitle: "Done")
+                complete.runModal()
+            } catch {
+                presentError("Could not restart the native wallpaper service: \(error.localizedDescription)")
+            }
         }
     }
 
