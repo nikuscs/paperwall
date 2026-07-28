@@ -37,6 +37,7 @@ public enum UpscaleError: Error, LocalizedError {
 public enum PaperwallUpscaleService {
     private static let toolInstaller = UpscalerToolInstaller()
     private static let pinnedVEnhanceRevision = "2fe41cad6bc32e7d7168689f242282b3b9d4e819"
+    private static let dependencyCutoff = "2026-07-28T00:00:00Z"
 
     private struct Job: Codable {
         let sourceVideoURL: URL
@@ -230,6 +231,11 @@ public enum PaperwallUpscaleService {
             process.arguments = [
                 "tool", "install",
                 "git+https://github.com/TomPenguin/venhance.git@\(pinnedVEnhanceRevision)",
+                "--with", "numpy==2.5.1",
+                "--with", "rich==15.0.0",
+                "--with", "torch==2.13.0",
+                "--with", "typer==0.27.0",
+                "--exclude-newer", dependencyCutoff,
                 "--force",
             ]
             process.standardOutput = log
