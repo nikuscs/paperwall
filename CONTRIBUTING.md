@@ -29,7 +29,7 @@ make dmg
 4. Explain user-visible behavior and private-API compatibility implications.
 5. Do not weaken paid-request safeguards: paid submissions require explicit approval and are never automatically retried.
 
-Changes to `.github/`, signing, notarization, credential handling, the WallpaperExtensionKit bridge, installers, or update behavior require maintainer review.
+Changes to `.github/`, signing, notarization, credential handling, release-tool pins, the WallpaperExtensionKit bridge, installers, or update behavior require maintainer review. Release jobs must remain cache-free and must not install packages while signing, notarization, OIDC, or publication credentials are available. Update `Config/release-tools.env` only after verifying upstream release-asset digests for every supported architecture.
 
 ## License
 

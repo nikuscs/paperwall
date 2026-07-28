@@ -1,0 +1,216 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    name: Verify release context
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Require public tagged release
+        env:
+          REPOSITORY_VISIBILITY: ${{ github.event.repository.visibility }}
+        run: |
+          [[ "$REPOSITORY_VISIBILITY" == "public" ]] || {
+            echo "::error::Cloud signing remains disabled until the repository is public"
+            exit 1
+          }
+          [[ "$GITHUB_REF" == refs/tags/v* ]] || {
+            echo "::error::Release must run from a v* tag"
+            exit 1
+          }
+
+  build:
+    name: Build without credentials
+    needs: guard
+    runs-on: xcode-27
+    permissions:
+      contents: read # checkout the exact tagged source
+    outputs:
+      artifact_sha256: ${{ steps.digest.outputs.sha256 }}
+    steps:
+      - name: Checkout tagged source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify tag resolves to the workflow SHA
+        run: |
+          [[ "$(git rev-list -n 1 "$GITHUB_REF_NAME")" == "$GITHUB_SHA" ]] || {
+            echo "::error::Tag does not resolve to the workflow SHA"
+            exit 1
+          }
+
+      - name: Build unsigned artifact with verified tools
+        run: ./Scripts/build_unsigned_release.sh dist/Paperwall-unsigned.zip
+
+      - name: Record unsigned artifact digest
+        id: digest
+        run: |
+          SHA256="$(shasum -a 256 dist/Paperwall-unsigned.zip | awk '{print $1}')"
+          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+
+      - name: Upload unsigned artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: paperwall-unsigned-${{ github.sha }}
+          path: |
+            dist/Paperwall-unsigned.zip
+            dist/Paperwall-unsigned.zip.sha256
+          if-no-files-found: error
+          retention-days: 1
+
+  sign:
+    name: Sign and notarize on a fresh runner
+    needs: build
+    runs-on: xcode-27
+    environment: release
+    permissions:
+      contents: read # checkout audited signing scripts and entitlements
+    outputs:
+      dmg_sha256: ${{ steps.digest.outputs.sha256 }}
+    steps:
+      - name: Checkout tagged signing policy
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Download unsigned artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: paperwall-unsigned-${{ github.sha }}
+          path: build/release-input
+
+      - name: Verify, sign, and notarize
+        env:
+          EXPECTED_SHA256: ${{ needs.build.outputs.artifact_sha256 }}
+          APPLE_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_NOTARY_KEY_BASE64: ${{ secrets.APPLE_NOTARY_KEY_BASE64 }}
+          APPLE_NOTARY_KEY_ID: ${{ secrets.APPLE_NOTARY_KEY_ID }}
+          APPLE_NOTARY_ISSUER_ID: ${{ secrets.APPLE_NOTARY_ISSUER_ID }}
+        run: |
+          for name in \
+            APPLE_CERTIFICATE_BASE64 \
+            APPLE_CERTIFICATE_PASSWORD \
+            APPLE_SIGNING_IDENTITY \
+            APPLE_TEAM_ID \
+            APPLE_NOTARY_KEY_BASE64 \
+            APPLE_NOTARY_KEY_ID \
+            APPLE_NOTARY_ISSUER_ID; do
+            [[ -n "${!name:-}" ]] || { echo "::error::Missing release environment secret: $name"; exit 1; }
+          done
+          [[ "$APPLE_SIGNING_IDENTITY" == *"($APPLE_TEAM_ID)"* ]] || {
+            echo "::error::Signing identity does not match APPLE_TEAM_ID"
+            exit 1
+          }
+
+          KEYCHAIN_PATH="$RUNNER_TEMP/paperwall-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -base64 32)"
+          CERTIFICATE_PATH="$RUNNER_TEMP/paperwall-certificate.p12"
+          NOTARY_KEY_PATH="$RUNNER_TEMP/AuthKey_$APPLE_NOTARY_KEY_ID.p8"
+          cleanup() {
+            rm -f "$CERTIFICATE_PATH" "$NOTARY_KEY_PATH"
+            security delete-keychain "$KEYCHAIN_PATH" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          echo "::add-mask::$KEYCHAIN_PASSWORD"
+          printf '%s' "$APPLE_CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+          printf '%s' "$APPLE_NOTARY_KEY_BASE64" | base64 --decode > "$NOTARY_KEY_PATH"
+          chmod 600 "$CERTIFICATE_PATH" "$NOTARY_KEY_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" \
+            -P "$APPLE_CERTIFICATE_PASSWORD" \
+            -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list \
+            -S apple-tool:,apple: \
+            -k "$KEYCHAIN_PASSWORD" \
+            "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH" | grep -F "$APPLE_SIGNING_IDENTITY" >/dev/null
+
+          export PAPERWALL_SIGN_IDENTITY="$APPLE_SIGNING_IDENTITY"
+          export PAPERWALL_NOTARY_KEY_PATH="$NOTARY_KEY_PATH"
+          export PAPERWALL_NOTARY_KEY_ID="$APPLE_NOTARY_KEY_ID"
+          export PAPERWALL_NOTARY_ISSUER_ID="$APPLE_NOTARY_ISSUER_ID"
+          ./Scripts/sign_release_artifact.sh \
+            build/release-input/Paperwall-unsigned.zip \
+            "$EXPECTED_SHA256" \
+            dist/Paperwall.dmg
+
+      - name: Record signed artifact digest
+        id: digest
+        run: |
+          SHA256="$(shasum -a 256 dist/Paperwall.dmg | awk '{print $1}')"
+          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+
+      - name: Upload signed artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: paperwall-signed-${{ github.sha }}
+          path: |
+            dist/Paperwall.dmg
+            dist/Paperwall.dmg.sha256
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Attest and publish immutable candidate
+    needs: sign
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write # create the GitHub Release for the existing tag
+      id-token: write # sign the artifact provenance attestation
+      attestations: write # store the provenance attestation
+    steps:
+      - name: Download signed artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: paperwall-signed-${{ github.sha }}
+          path: dist
+
+      - name: Verify signed artifact digest
+        env:
+          EXPECTED_SHA256: ${{ needs.sign.outputs.dmg_sha256 }}
+        run: |
+          ACTUAL_SHA256="$(shasum -a 256 dist/Paperwall.dmg | awk '{print $1}')"
+          [[ "$ACTUAL_SHA256" == "$EXPECTED_SHA256" ]] || {
+            echo "::error::Signed artifact digest mismatch"
+            exit 1
+          }
+
+      - name: Attest signed DMG provenance
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        with:
+          subject-path: dist/Paperwall.dmg
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "Paperwall $GITHUB_REF_NAME" \
+            --generate-notes \
+            dist/Paperwall.dmg \
+            dist/Paperwall.dmg.sha256

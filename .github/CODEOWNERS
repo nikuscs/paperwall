@@ -1,7 +1,12 @@
 # Security-sensitive project and release surfaces require maintainer review.
 /.github/ @nikuscs
+/.github/workflows/release.yml @nikuscs
 /Config/ @nikuscs
+/Config/release-tools.env @nikuscs
 /Scripts/ @nikuscs
+/Scripts/bootstrap_release_tools.sh @nikuscs
+/Scripts/build_unsigned_release.sh @nikuscs
+/Scripts/sign_release_artifact.sh @nikuscs
 /Sources/PaperwallPlayback/ReplicateClient.swift @nikuscs
 /Sources/PaperwallPlayback/ReplicateCredentialStore.swift @nikuscs
 /Sources/PaperwallWallpaperExtension/ @nikuscs

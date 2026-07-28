@@ -718,7 +718,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -euo pipefail\nDESTINATION=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Installer\"\nrm -rf \"$DESTINATION\"\nmkdir -p \"$DESTINATION\"\ncp \"$BUILT_PRODUCTS_DIR/paperwall\" \"$DESTINATION/paperwall\"\nchmod 755 \"$DESTINATION/paperwall\"\n/usr/bin/ditto \"$BUILT_PRODUCTS_DIR/Paperwall.saver\" \"$DESTINATION/Paperwall.saver\"\nUV_SOURCE=\"$(command -v uv || true)\"\nif [[ -z \"$UV_SOURCE\" ]]; then\n  echo \"error: uv is required to package Paperwall's automatic 4K upscaler setup\" >&2\n  exit 1\nfi\nTOOLS_DESTINATION=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Tools\"\nrm -rf \"$TOOLS_DESTINATION\"\nmkdir -p \"$TOOLS_DESTINATION\"\ncp -L \"$UV_SOURCE\" \"$TOOLS_DESTINATION/uv\"\nchmod 755 \"$TOOLS_DESTINATION/uv\"\n";
+			shellScript = "set -euo pipefail\nDESTINATION=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Installer\"\nrm -rf \"$DESTINATION\"\nmkdir -p \"$DESTINATION\"\ncp \"$BUILT_PRODUCTS_DIR/paperwall\" \"$DESTINATION/paperwall\"\nchmod 755 \"$DESTINATION/paperwall\"\n/usr/bin/ditto \"$BUILT_PRODUCTS_DIR/Paperwall.saver\" \"$DESTINATION/Paperwall.saver\"\nUV_SOURCE=\"${PAPERWALL_UV_BINARY:-$(command -v uv || true)}\"\nif [[ -z \"$UV_SOURCE\" || ! -x \"$UV_SOURCE\" ]]; then\n  echo \"error: verified uv is required to package Paperwall's automatic 4K upscaler setup\" >&2\n  exit 1\nfi\nTOOLS_DESTINATION=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Tools\"\nrm -rf \"$TOOLS_DESTINATION\"\nmkdir -p \"$TOOLS_DESTINATION\"\ncp -L \"$UV_SOURCE\" \"$TOOLS_DESTINATION/uv\"\nchmod 755 \"$TOOLS_DESTINATION/uv\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

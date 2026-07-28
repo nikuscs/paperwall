@@ -10,13 +10,16 @@ APP="$DERIVED_DATA/Build/Products/Release/Paperwall.app"
 DMG="$DIST/Paperwall.dmg"
 IDENTITY="${PAPERWALL_SIGN_IDENTITY:--}"
 NOTARY_PROFILE="${PAPERWALL_NOTARY_PROFILE:-}"
+TOOLS_DIR="${PAPERWALL_RELEASE_TOOLS_DIR:-$ROOT/build/release-tools/bin}"
 
-command -v xcodegen >/dev/null || { echo "error: xcodegen is required" >&2; exit 1; }
 command -v xcodebuild >/dev/null || { echo "error: Xcode is required" >&2; exit 1; }
 command -v hdiutil >/dev/null || { echo "error: hdiutil is required" >&2; exit 1; }
+"$ROOT/Scripts/bootstrap_release_tools.sh" "$TOOLS_DIR"
+XCODEGEN="$TOOLS_DIR/xcodegen"
+export PAPERWALL_UV_BINARY="$TOOLS_DIR/uv"
 
 cd "$ROOT"
-xcodegen generate
+"$XCODEGEN" generate
 xcodebuild build \
   -project "$PROJECT" \
   -scheme PaperwallApp \

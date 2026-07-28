@@ -17,6 +17,15 @@ Do not open a public issue for suspected vulnerabilities involving credentials, 
 - Paid POST requests are never automatically retried.
 - Interrupted jobs resume from persisted prediction IDs without creating another paid submission.
 
+## Release security guarantees
+
+- CI and release tools are downloaded at committed versions and verified against committed SHA-256 digests before execution or embedding.
+- Pull-request workflows receive no signing or notarization credentials and cannot invoke the release environment.
+- Cloud releases remain disabled while the repository is private.
+- Unsigned builds run without secrets or OIDC; signing/notarization and publication run on separate fresh, cache-free runners behind the `release` environment.
+- Signing and notarization credentials are environment-scoped and are never repository secrets.
+- Signed artifacts are digest-verified before provenance attestation and publication.
+
 ## Private API notice
 
 The native animated Lock Screen integration uses undocumented macOS APIs. This is a compatibility and stability risk, not a claim of Apple endorsement. Paperwall is not suitable for Mac App Store distribution.

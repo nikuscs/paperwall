@@ -59,9 +59,9 @@ targets:
           cp "$BUILT_PRODUCTS_DIR/paperwall" "$DESTINATION/paperwall"
           chmod 755 "$DESTINATION/paperwall"
           /usr/bin/ditto "$BUILT_PRODUCTS_DIR/Paperwall.saver" "$DESTINATION/Paperwall.saver"
-          UV_SOURCE="$(command -v uv || true)"
-          if [[ -z "$UV_SOURCE" ]]; then
-            echo "error: uv is required to package Paperwall's automatic 4K upscaler setup" >&2
+          UV_SOURCE="${PAPERWALL_UV_BINARY:-$(command -v uv || true)}"
+          if [[ -z "$UV_SOURCE" || ! -x "$UV_SOURCE" ]]; then
+            echo "error: verified uv is required to package Paperwall's automatic 4K upscaler setup" >&2
             exit 1
           fi
           TOOLS_DESTINATION="$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Tools"

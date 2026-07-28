@@ -55,7 +55,7 @@ Run `paperwall help` for the full concise syntax.
 
 ## Developer setup
 
-Development requires macOS 27, Xcode 27, XcodeGen, and `uv` for distribution builds.
+Development requires macOS 27 and Xcode 27. Distribution and CI download pinned XcodeGen, `uv`, and Gitleaks archives and verify their committed SHA-256 digests before use.
 
 ## Developer commands
 
@@ -82,7 +82,9 @@ PAPERWALL_NOTARY_PROFILE="paperwall-notary" \
 make dmg
 ```
 
-The build signs the app, nested executables, extension, screen saver, and DMG with hardened runtime and secure timestamps. When a notary profile is supplied, it submits the DMG, waits for acceptance, staples the ticket, and validates the staple.
+The local build signs the app, nested executables, extension, screen saver, and DMG with hardened runtime and secure timestamps. When a notary profile is supplied, it submits the DMG, waits for acceptance, staples the ticket, and validates the staple.
+
+The guarded GitHub release workflow activates only for `v*` tags after the repository becomes public. It builds without credentials, signs/notarizes on a fresh cache-free runner behind the `release` environment, then attests and publishes from another runner without signing secrets. See [`docs/GITHUB.md`](docs/GITHUB.md).
 
 ## Security and privacy
 

@@ -25,11 +25,14 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install tools
-        run: brew install gitleaks uv xcodegen
+      - name: Prepare checksum-verified tools
+        run: |
+          ./Scripts/bootstrap_release_tools.sh build/release-tools/bin
+          echo "$GITHUB_WORKSPACE/build/release-tools/bin" >> "$GITHUB_PATH"
+          echo "PAPERWALL_UV_BINARY=$GITHUB_WORKSPACE/build/release-tools/bin/uv" >> "$GITHUB_ENV"
 
       - name: Scan repository history for secrets
-        run: gitleaks git . --redact --no-banner
+        run: build/release-tools/bin/gitleaks git . --redact --no-banner
 
       - name: Validate shell scripts
         run: |
