@@ -51,6 +51,7 @@ struct PaperwallShellView: View {
     @State private var showingDurationOptions = false
     @State private var showingWorkQueue = false
     @State private var workItems: [PaperwallWorkItem] = []
+    @State private var workQueueError: String?
     @State private var generatedImageURL: URL?
     @State private var pipelineStage: PipelineStage = .idle
     @State private var pipelineStatus = ""
@@ -406,10 +407,31 @@ struct PaperwallShellView: View {
             HStack {
                 Text("Work Queue")
                     .font(.system(size: 15, weight: .medium))
-                Spacer()
                 Text("\(workItems.count) jobs")
                     .font(.system(size: 11, weight: .regular))
                     .foregroundStyle(.secondary)
+                Spacer()
+                Button("Clear Completed") {
+                    do {
+                        _ = try PaperwallWorkQueue.clearCompleted()
+                        workQueueError = nil
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            refreshWorkQueue()
+                        }
+                    } catch {
+                        workQueueError = error.localizedDescription
+                    }
+                }
+                .buttonStyle(.plain)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(.secondary)
+                .disabled(!workItems.contains(where: \.isCompleted))
+            }
+
+            if let workQueueError {
+                Label(workQueueError, systemImage: "exclamationmark.triangle")
+                    .font(.system(size: 10, weight: .regular))
+                    .foregroundStyle(.orange)
             }
 
             if workItems.isEmpty {
