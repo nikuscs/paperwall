@@ -1,6 +1,8 @@
-# Paperwall
+# 🎞️ Paperwall
 
-Native macOS animated wallpapers for the desktop and Lock Screen, with optional AI generation through Replicate.
+**Native animated wallpapers for the macOS desktop and Lock Screen, built with Swift.**
+
+Create, import, upscale, organize, and synchronize cinematic wallpapers, with optional AI image and video generation through Replicate.
 
 > [!WARNING]
 > Paperwall targets macOS 27 and uses private, unsupported WallpaperExtensionKit APIs. Compatibility may break after macOS updates, and Paperwall is not eligible for Mac App Store distribution.
