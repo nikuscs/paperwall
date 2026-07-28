@@ -21,6 +21,10 @@ public struct PaperwallWorkItem: Identifiable, Sendable, Equatable {
     public var isFailed: Bool {
         ["failed", "canceled"].contains(status.lowercased())
     }
+
+    public var isCompleted: Bool {
+        ["ready", "installed", "completed"].contains(status.lowercased())
+    }
 }
 
 public enum PaperwallWorkQueue {
@@ -43,6 +47,32 @@ public enum PaperwallWorkQueue {
 
     public static var hasActiveItems: Bool {
         items().contains(where: \.isActive)
+    }
+
+    @discardableResult
+    public static func clearCompleted() throws -> Int {
+        let root = PaperwallConfiguration.generationStateDirectory
+        let directories = ["ImageJobs", "Jobs", "UpscaleJobs"].map {
+            root.appendingPathComponent($0, isDirectory: true)
+        }
+        var removed = 0
+        for directory in directories {
+            let urls = (try? FileManager.default.contentsOfDirectory(
+                at: directory,
+                includingPropertiesForKeys: nil,
+                options: [.skipsHiddenFiles]
+            )) ?? []
+            for url in urls where url.pathExtension == "json" {
+                guard let data = try? Data(contentsOf: url),
+                      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let status = json["status"] as? String,
+                      ["ready", "installed", "completed"].contains(status.lowercased())
+                else { continue }
+                try FileManager.default.removeItem(at: url)
+                removed += 1
+            }
+        }
+        return removed
     }
 
     private static func loadJobs(in directory: URL, kind: PaperwallWorkItem.Kind) -> [PaperwallWorkItem] {
