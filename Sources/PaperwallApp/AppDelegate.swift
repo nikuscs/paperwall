@@ -238,7 +238,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         panel.canChooseDirectories = false
         NSApp.activate(ignoringOtherApps: true)
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        selectAsset(url)
+        upscaleAndInstall(videoURL: url) { _ in }
     }
 
     @objc private func selectDiscoveryVideo(_ sender: NSMenuItem) {
