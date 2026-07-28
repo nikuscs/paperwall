@@ -46,7 +46,7 @@ struct PaperwallShellView: View {
     @State private var generationError: String?
     @State private var videoImportProgress: VideoImportProgress = .idle
     @State private var playbackSpeed = PlaybackPreferences.playbackSpeed
-    @State private var launchAtLoginEnabled = LaunchAtLoginManager.isEnabled
+    @State private var launchAtLoginEnabled = false
     @State private var showingProviderOptions = false
     @State private var showingDurationOptions = false
     @State private var showingWorkQueue = false
@@ -169,6 +169,7 @@ struct PaperwallShellView: View {
             if NativeWallpaperExtensionBridge.isNativeWallpaperActivated {
                 nativeLockSetupComplete = true
             }
+            launchAtLoginEnabled = LaunchAtLoginManager.isEnabled
             refreshWorkQueue()
             if let resumable = PaperwallUpscaleService.latestResumableVideoURL() {
                 lastGeneratedVideoURL = resumable
