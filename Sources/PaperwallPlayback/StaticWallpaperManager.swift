@@ -1,5 +1,4 @@
 import AppKit
-import AVFoundation
 import CoreGraphics
 import Foundation
 
@@ -14,20 +13,23 @@ enum StaticWallpaperManager {
         let wallpaperURL: URL?
     }
 
-    /// Stable path the system wallpaper always points at. macOS records this URL per
-    /// Space, and `setDesktopImageURL` only rewrites the Space that is active on each
-    /// display, so the path must never change and the file must never be deleted while
-    /// Paperwall is applied — otherwise every other Space resolves a missing file and
-    /// falls back to the wallpaper that was set before Paperwall.
+    /// Primary of the two stable paths the system wallpaper points at. macOS records
+    /// the URL per Space, and `setDesktopImageURL` only rewrites the Space that is
+    /// active on each display, so neither path may ever change and neither file may be
+    /// deleted while Paperwall is applied — otherwise every other Space resolves a
+    /// missing file and falls back to the wallpaper that was set before Paperwall.
     static var posterURL: URL {
         PaperwallConfiguration.applicationSupportDirectory
             .appendingPathComponent("fallback.jpg")
     }
 
-    /// Second stable path holding the same image. Setting it immediately before
-    /// `posterURL` forces macOS to drop the desktop image it cached for that URL, which
-    /// is what the old per-refresh UUID filenames were working around.
-    private static var cacheBustURL: URL {
+    /// Second stable path holding the same image. Each apply sets whichever of the two
+    /// poster paths a screen is NOT currently on — a single set call with a genuine URL
+    /// change, which forces macOS to reload without the old set-twice-in-a-row trick.
+    /// Setting two URLs back to back raced inside WallpaperAgent and could persist the
+    /// transient URL mid-transition, leaving Spaces gray after a reboot.
+    /// (Keeps the historical "fallback-refresh.jpg" name: existing Spaces reference it.)
+    static var alternatePosterURL: URL {
         PaperwallConfiguration.applicationSupportDirectory
             .appendingPathComponent("fallback-refresh.jpg")
     }
@@ -55,31 +57,37 @@ enum StaticWallpaperManager {
         defer { try? FileManager.default.removeItem(at: stagingPosterURL) }
         try await generatePoster(for: videoURL, to: stagingPosterURL)
         let poster = try Data(contentsOf: stagingPosterURL)
-        try poster.write(to: cacheBustURL, options: .atomic)
+        try poster.write(to: alternatePosterURL, options: .atomic)
         try poster.write(to: posterURL, options: .atomic)
-        try applyPoster(at: posterURL)
+        try applyPoster()
     }
 
     static func applyPoster() throws {
-        try applyPoster(at: posterURL)
-    }
-
-    private static func applyPoster(at appliedPosterURL: URL) throws {
-        guard FileManager.default.fileExists(atPath: appliedPosterURL.path) else {
+        guard FileManager.default.fileExists(atPath: posterURL.path) else {
             throw StaticWallpaperError.missingPoster
+        }
+        // Both poster paths must always exist and hold the same image: any Space may
+        // reference either, and a dangling URL makes macOS fall back to an old wallpaper.
+        if !FileManager.default.fileExists(atPath: alternatePosterURL.path) {
+            try FileManager.default.copyItem(at: posterURL, to: alternatePosterURL)
         }
 
         let workspace = NSWorkspace.shared
         let screens = NSScreen.screens
+        let posterPaths: Set<URL> = [posterURL.standardizedFileURL, alternatePosterURL.standardizedFileURL]
         var snapshot = try loadSnapshot() ?? Snapshot(displays: [])
         let knownDisplays = Set(snapshot.displays.map(\.identifier))
 
         for screen in screens {
             let identifier = screen.paperwallIdentifier
             guard !knownDisplays.contains(identifier) else { continue }
+            // Never record one of our own poster files as the display's "original"
+            // wallpaper — restore would then reinstate Paperwall instead of the user's.
+            let current = workspace.desktopImageURL(for: screen)
+            let original = current.flatMap { posterPaths.contains($0.standardizedFileURL) ? nil : $0 }
             snapshot.displays.append(Display(
                 identifier: identifier,
-                wallpaperURL: workspace.desktopImageURL(for: screen)
+                wallpaperURL: original
             ))
         }
         try save(snapshot)
@@ -87,15 +95,15 @@ enum StaticWallpaperManager {
         let immediateWallpapers = screens.map { screen in
             (screen, workspace.desktopImageURL(for: screen))
         }
-        let shouldBustCache = appliedPosterURL == posterURL
-            && FileManager.default.fileExists(atPath: cacheBustURL.path)
         do {
             for screen in screens {
                 let options = workspace.desktopImageOptions(for: screen) ?? [:]
-                if shouldBustCache {
-                    try? workspace.setDesktopImageURL(cacheBustURL, for: screen, options: options)
-                }
-                try workspace.setDesktopImageURL(appliedPosterURL, for: screen, options: options)
+                // Alternate between the two poster paths so every apply is a single
+                // set with a genuine URL change — macOS reloads the image (same-URL
+                // sets are ignored, and the file is rewritten in place on refresh).
+                let current = workspace.desktopImageURL(for: screen)?.standardizedFileURL
+                let target = current == posterURL.standardizedFileURL ? alternatePosterURL : posterURL
+                try workspace.setDesktopImageURL(target, for: screen, options: options)
             }
         } catch {
             for (screen, url) in immediateWallpapers {
@@ -114,7 +122,7 @@ enum StaticWallpaperManager {
         guard let snapshot = try loadSnapshot() else {
             // The poster outlives a restore, so its mere presence no longer means
             // Paperwall owns the desktop — only a display still showing it does.
-            let posters: Set<URL> = [posterURL.standardizedFileURL, cacheBustURL.standardizedFileURL]
+            let posters: Set<URL> = [posterURL.standardizedFileURL, alternatePosterURL.standardizedFileURL]
             let stillApplied = NSScreen.screens.contains { screen in
                 guard let current = NSWorkspace.shared.desktopImageURL(for: screen) else { return false }
                 return posters.contains(current.standardizedFileURL)
@@ -161,25 +169,26 @@ enum StaticWallpaperManager {
     }
 
     static func generatePoster(for videoURL: URL, to destination: URL) async throws {
-        let asset = AVURLAsset(url: videoURL)
-        let generator = AVAssetImageGenerator(asset: asset)
-        generator.appliesPreferredTrackTransform = true
-        generator.requestedTimeToleranceBefore = .zero
-        generator.requestedTimeToleranceAfter = .zero
-        let (image, _) = try await generator.image(at: .zero)
-        let representation = NSBitmapImageRep(cgImage: image)
-        guard let data = representation.representation(
-            using: .jpeg,
-            properties: [.compressionFactor: 0.92]
-        ) else {
-            throw StaticWallpaperError.couldNotEncodePoster
-        }
-        try data.write(to: destination, options: .atomic)
+        try await FirstFrameExporter.export(
+            videoURL: videoURL,
+            to: destination,
+            quality: 0.92
+        )
     }
 
     private static func loadSnapshot() throws -> Snapshot? {
         guard FileManager.default.fileExists(atPath: snapshotURL.path) else { return nil }
-        return try JSONDecoder().decode(Snapshot.self, from: Data(contentsOf: snapshotURL))
+        var snapshot = try JSONDecoder().decode(Snapshot.self, from: Data(contentsOf: snapshotURL))
+        // Repair snapshots poisoned by older builds that recorded one of our own
+        // poster files as a display's original wallpaper: restoring that would leave
+        // Paperwall applied. Keep the display known, but drop the bogus URL.
+        let posterPaths: Set<URL> = [posterURL.standardizedFileURL, alternatePosterURL.standardizedFileURL]
+        snapshot.displays = snapshot.displays.map { display in
+            guard let url = display.wallpaperURL,
+                  posterPaths.contains(url.standardizedFileURL) else { return display }
+            return Display(identifier: display.identifier, wallpaperURL: nil)
+        }
+        return snapshot
     }
 
     private static func save(_ snapshot: Snapshot) throws {

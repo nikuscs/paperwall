@@ -111,6 +111,7 @@ public enum PaperwallUpscaleService {
         if FileManager.default.fileExists(atPath: outputURL.path),
            let info = try? await VideoAssetValidator.validate(url: outputURL),
            info.width >= 3_840, info.height >= 2_160 {
+            try await FirstFrameExporter.exportLibraryFrameIfNeeded(for: outputURL)
             return UpscaleResult(
                 sourceVideoURL: videoURL,
                 upscaledVideoURL: outputURL,
@@ -163,8 +164,10 @@ public enum PaperwallUpscaleService {
             guard info.width >= 3_840, info.height >= 2_160 else {
                 throw UpscaleError.invalidOutput
             }
+            try? FileManager.default.removeItem(at: FirstFrameExporter.frameURL(for: outputURL))
             try? FileManager.default.removeItem(at: outputURL)
             try FileManager.default.moveItem(at: stageURL, to: outputURL)
+            try await FirstFrameExporter.exportLibraryFrameIfNeeded(for: outputURL)
             let sourceMetadata = try? await WallpaperCatalog.shared.metadata(for: videoURL)
             _ = try? await WallpaperCatalog.shared.enrich(
                 mediaURL: outputURL,

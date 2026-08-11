@@ -151,6 +151,7 @@ public enum PaperwallGenerationService {
         var job = original
         if let local = job.outputLocalURL, FileManager.default.fileExists(atPath: local.path) {
             progress("Installing previously downloaded generation")
+            try await FirstFrameExporter.exportLibraryFrameIfNeeded(for: local)
             _ = try await PaperwallService.selectWallpaper(from: local)
             job.status = "installed"
             job.updatedAt = Date()
@@ -190,6 +191,7 @@ public enum PaperwallGenerationService {
             predictionID: job.predictionID
         )
         _ = try await VideoAssetValidator.validate(url: output)
+        try await FirstFrameExporter.exportLibraryFrameIfNeeded(for: output)
         _ = try? await WallpaperCatalog.shared.enrich(
             mediaURL: output,
             description: job.prompt,
@@ -334,6 +336,9 @@ public enum PaperwallGenerationService {
                 _ = try await VideoAssetValidator.validate(url: destination)
                 return destination
             } catch {
+                try? FileManager.default.removeItem(
+                    at: FirstFrameExporter.frameURL(for: destination)
+                )
                 try FileManager.default.removeItem(at: destination)
             }
         }

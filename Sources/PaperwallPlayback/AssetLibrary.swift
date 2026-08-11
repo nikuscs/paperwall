@@ -126,6 +126,7 @@ public enum AssetLibrary {
                 .appendingPathExtension(fileExtension)
             if fileManager.fileExists(atPath: destination.path) {
                 guard try sha256(destination) == digest else { throw AssetLibraryError.hashMismatch }
+                try await FirstFrameExporter.exportLibraryFrameIfNeeded(for: destination)
                 return destination
             }
 
@@ -136,6 +137,7 @@ public enum AssetLibrary {
                 try fileManager.copyItem(at: source, to: stage)
                 guard try sha256(stage) == digest else { throw AssetLibraryError.hashMismatch }
                 try fileManager.moveItem(at: stage, to: destination)
+                try await FirstFrameExporter.exportLibraryFrameIfNeeded(for: destination)
                 _ = try? await WallpaperCatalog.shared.enrich(
                     mediaURL: destination,
                     description: "Imported into Paperwall.",
@@ -148,6 +150,22 @@ public enum AssetLibrary {
                 throw error
             }
         }.value
+    }
+
+    public static func removeVideo(_ videoURL: URL) throws {
+        let video = videoURL.standardizedFileURL
+        let sharedRoot = PaperwallConfiguration.sharedDataDirectory.standardizedFileURL.path + "/"
+        guard video.path.hasPrefix(sharedRoot) else {
+            throw AssetLibraryError.mediaOutsideSharedStorage(video)
+        }
+        let fileManager = FileManager.default
+        try fileManager.removeItem(at: video)
+        for sidecar in [
+            FirstFrameExporter.frameURL(for: video),
+            video.appendingPathExtension("paperwall.json"),
+        ] where fileManager.fileExists(atPath: sidecar.path) {
+            try fileManager.removeItem(at: sidecar)
+        }
     }
 
     private static func videos(in directory: URL) -> [URL] {
@@ -216,10 +234,14 @@ public enum AssetLibrary {
 
 public enum AssetLibraryError: Error, LocalizedError {
     case hashMismatch
+    case mediaOutsideSharedStorage(URL)
 
     public var errorDescription: String? {
         switch self {
-        case .hashMismatch: "Copied wallpaper failed SHA-256 verification"
+        case .hashMismatch:
+            "Copied wallpaper failed SHA-256 verification"
+        case .mediaOutsideSharedStorage(let url):
+            "Wallpaper is outside Paperwall's shared storage: \(url.path)"
         }
     }
 }

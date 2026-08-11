@@ -42,6 +42,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         windowController?.show()
         wallpaperLibrary.synchronize()
         Task {
+            // Marker-gated storage migration/cleanup: a single stat once migrated,
+            // so it's safe to run on every launch.
+            do {
+                try await PaperwallStorageMigrator.migrateLegacySharedAssetsIfNeeded()
+            } catch {
+                NSLog("Paperwall: storage migration failed: %@", error.localizedDescription)
+            }
+        }
+        Task {
             await resumePendingWorkIfNeeded()
         }
         Task {

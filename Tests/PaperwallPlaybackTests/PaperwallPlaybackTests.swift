@@ -288,6 +288,52 @@ private func fixtureURL(_ name: String, extension ext: String) throws -> URL {
     ))
 }
 
+@Test func legacyLibraryCleanupRescuesOnlyUnsyncedMediaThenDeletes() throws {
+    let root = FileManager.default.temporaryDirectory
+        .appendingPathComponent(UUID().uuidString, isDirectory: true)
+    defer { try? FileManager.default.removeItem(at: root) }
+    let legacy = root.appendingPathComponent("Legacy/Library", isDirectory: true)
+    let shared = root.appendingPathComponent("Shared/Library", isDirectory: true)
+    let imports = shared.appendingPathComponent("Imports", isDirectory: true)
+    try FileManager.default.createDirectory(
+        at: legacy.appendingPathComponent("Wallspace"), withIntermediateDirectories: true
+    )
+    try FileManager.default.createDirectory(
+        at: shared.appendingPathComponent("Wallspace"), withIntermediateDirectories: true
+    )
+
+    // Synced: identical bytes on both sides. Unsynced: exists only in legacy.
+    // Stale name twin: same name as a shared file but different bytes.
+    let video = try fixtureURL("tiny-video", extension: "mp4")
+    for path in ["Legacy/Library/Wallspace/synced.mp4", "Shared/Library/Wallspace/synced.mp4"] {
+        try FileManager.default.copyItem(at: video, to: root.appendingPathComponent(path))
+    }
+    try FileManager.default.copyItem(
+        at: video, to: legacy.appendingPathComponent("Wallspace/unsynced.mp4")
+    )
+    try Data("different bytes".utf8).write(
+        to: legacy.appendingPathComponent("Wallspace/twin.mp4")
+    )
+    try FileManager.default.copyItem(
+        at: video, to: shared.appendingPathComponent("Wallspace/twin.mp4")
+    )
+    try Data("sidecar".utf8).write(
+        to: legacy.appendingPathComponent("Wallspace/synced.mp4.paperwall.json")
+    )
+
+    try PaperwallStorageMigrator.removeLegacyLibrary(
+        at: legacy, sharedLibrary: shared, rescueDestination: imports
+    )
+
+    #expect(!FileManager.default.fileExists(atPath: legacy.path))
+    #expect(FileManager.default.fileExists(atPath: imports.appendingPathComponent("unsynced.mp4").path))
+    #expect(FileManager.default.fileExists(atPath: imports.appendingPathComponent("twin.mp4").path))
+    #expect(!FileManager.default.fileExists(atPath: imports.appendingPathComponent("synced.mp4").path))
+    #expect(FileManager.default.fileExists(
+        atPath: shared.appendingPathComponent("Wallspace/synced.mp4").path
+    ))
+}
+
 @Test func customAssetLocation() {
     let url = URL(fileURLWithPath: "/tmp/custom-paperwall.mov")
     #expect(PaperwallConfiguration(assetURL: url).assetURL == url)
@@ -339,6 +385,76 @@ private func fixtureURL(_ name: String, extension ext: String) throws -> URL {
     let representation = try #require(NSBitmapImageRep(data: Data(contentsOf: poster)))
     #expect(representation.pixelsWide == 64)
     #expect(representation.pixelsHigh == 36)
+}
+
+@Test func libraryFirstFrameIsNativeResolutionJPEG() async throws {
+    let directory = FileManager.default.temporaryDirectory
+        .appendingPathComponent(UUID().uuidString, isDirectory: true)
+    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let video = directory.appendingPathComponent("wallpaper.mp4")
+    try FileManager.default.copyItem(
+        at: fixtureURL("tiny-video", extension: "mp4"),
+        to: video
+    )
+
+    try await FirstFrameExporter.exportLibraryFrameIfNeeded(for: video)
+
+    let frame = FirstFrameExporter.frameURL(for: video)
+    #expect(frame.lastPathComponent == "wallpaper.mp4.frame.jpg")
+    let representation = try #require(NSBitmapImageRep(data: Data(contentsOf: frame)))
+    #expect(representation.pixelsWide == 64)
+    #expect(representation.pixelsHigh == 36)
+}
+
+@Test func frameBackfillSkipsExistingFrames() async throws {
+    let root = FileManager.default.temporaryDirectory
+        .appendingPathComponent(UUID().uuidString, isDirectory: true)
+    defer { try? FileManager.default.removeItem(at: root) }
+    try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+    let pending = root.appendingPathComponent("pending.mp4")
+    try FileManager.default.copyItem(
+        at: fixtureURL("tiny-video", extension: "mp4"),
+        to: pending
+    )
+    let skipped = root.appendingPathComponent("skipped.mp4")
+    try Data("not a video".utf8).write(to: skipped)
+    let existingFrame = FirstFrameExporter.frameURL(for: skipped)
+    let existingData = Data("existing frame".utf8)
+    try existingData.write(to: existingFrame)
+    let marker = root.appendingPathComponent("Markers/frame-backfill-v1.complete")
+
+    let exported = try await PaperwallStorageMigrator.backfillFrames(
+        in: root,
+        markerURL: marker
+    )
+
+    #expect(exported == 1)
+    #expect(FileManager.default.fileExists(
+        atPath: FirstFrameExporter.frameURL(for: pending).path
+    ))
+    #expect(try Data(contentsOf: existingFrame) == existingData)
+    #expect(FileManager.default.fileExists(atPath: marker.path))
+    #expect(try await PaperwallStorageMigrator.backfillFrames(in: root, markerURL: marker) == 0)
+}
+
+@Test func catalogDiscoveryIgnoresFrameSidecars() async throws {
+    let root = FileManager.default.temporaryDirectory
+        .appendingPathComponent(UUID().uuidString, isDirectory: true)
+    defer { try? FileManager.default.removeItem(at: root) }
+    try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+    let video = root.appendingPathComponent("scene.mp4")
+    try FileManager.default.copyItem(
+        at: fixtureURL("tiny-video", extension: "mp4"),
+        to: video
+    )
+    try Data("frame".utf8).write(to: FirstFrameExporter.frameURL(for: video))
+
+    let discovered = await WallpaperCatalog().discoverMedia(in: root)
+
+    #expect(discovered.map { $0.standardizedFileURL.resolvingSymlinksInPath() } == [
+        video.standardizedFileURL.resolvingSymlinksInPath()
+    ])
 }
 
 @Test func nativeWallpaperRecoveryRequiresRecentUnresolvedInvalidation() {

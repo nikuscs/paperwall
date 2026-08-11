@@ -41,10 +41,59 @@ public enum PaperwallStorageMigrator {
             .appendingPathComponent("library-import-migration-v2.complete")
     }
 
+    private static var legacyCleanupMarkerURL: URL {
+        PaperwallConfiguration.applicationSupportDirectory
+            .appendingPathComponent("legacy-library-cleanup-v3.complete")
+    }
+
+    private static var frameBackfillMarkerURL: URL {
+        PaperwallConfiguration.applicationSupportDirectory
+            .appendingPathComponent("frame-backfill-v1.complete")
+    }
+
     public static func migrateLegacySharedAssetsIfNeeded() async throws {
         try await Task.detached(priority: .utility) {
             try migrateSynchronouslyIfNeeded()
         }.value
+        _ = try await backfillFrames(
+            in: PaperwallConfiguration.sharedDataDirectory,
+            markerURL: frameBackfillMarkerURL
+        )
+    }
+
+    @discardableResult
+    static func backfillFrames(in root: URL, markerURL: URL) async throws -> Int {
+        let fileManager = FileManager.default
+        guard !fileManager.fileExists(atPath: markerURL.path) else { return 0 }
+
+        let enumerator = fileManager.enumerator(
+            at: root,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsHiddenFiles]
+        )
+        var exportedCount = 0
+        while let videoURL = enumerator?.nextObject() as? URL {
+            guard videoURL.pathExtension.lowercased() == "mp4",
+                  (try? videoURL.resourceValues(forKeys: [.isRegularFileKey]))?.isRegularFile == true else {
+                continue
+            }
+            let frameURL = FirstFrameExporter.frameURL(for: videoURL)
+            guard !fileManager.fileExists(atPath: frameURL.path) else { continue }
+            try await FirstFrameExporter.export(
+                videoURL: videoURL,
+                to: frameURL,
+                quality: FirstFrameExporter.libraryJPEGQuality
+            )
+            exportedCount += 1
+        }
+
+        try fileManager.createDirectory(
+            at: markerURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try Data("completed \(ISO8601DateFormatter().string(from: Date()))\n".utf8)
+            .write(to: markerURL, options: .atomic)
+        return exportedCount
     }
 
     static func migrateSynchronouslyIfNeeded() throws {
@@ -55,6 +104,7 @@ public enum PaperwallStorageMigrator {
         )
         try writeSyncthingIgnoreFileIfNeeded()
         try migrateLegacyLibraryMediaIfNeeded()
+        try cleanUpLegacyLibraryDirectoryIfNeeded()
         guard !fileManager.fileExists(atPath: markerURL.path) else { return }
 
         for source in migrationSources {
@@ -96,6 +146,75 @@ public enum PaperwallStorageMigrator {
             .write(to: libraryImportMarkerURL, options: .atomic)
     }
 
+    /// One-time removal of the pre-shared-storage library left in Application Support
+    /// after the copy migrations above. Gated on a marker so subsequent launches cost a
+    /// single stat. Media without a byte-identical copy anywhere under the shared
+    /// library is rescued into Imports before the directory is deleted.
+    private static func cleanUpLegacyLibraryDirectoryIfNeeded() throws {
+        let fileManager = FileManager.default
+        guard !fileManager.fileExists(atPath: legacyCleanupMarkerURL.path) else { return }
+        let legacyRoot = PaperwallConfiguration.applicationSupportDirectory
+            .appendingPathComponent("Library", isDirectory: true)
+        if fileManager.fileExists(atPath: legacyRoot.path) {
+            try removeLegacyLibrary(
+                at: legacyRoot,
+                sharedLibrary: PaperwallConfiguration.sharedDataDirectory
+                    .appendingPathComponent("Library", isDirectory: true),
+                rescueDestination: PaperwallConfiguration.sharedImportsDirectory
+            )
+        }
+        try fileManager.createDirectory(
+            at: PaperwallConfiguration.applicationSupportDirectory,
+            withIntermediateDirectories: true
+        )
+        try Data("completed \(ISO8601DateFormatter().string(from: Date()))\n".utf8)
+            .write(to: legacyCleanupMarkerURL, options: .atomic)
+    }
+
+    static func removeLegacyLibrary(
+        at legacyRoot: URL,
+        sharedLibrary: URL,
+        rescueDestination: URL
+    ) throws {
+        let fileManager = FileManager.default
+        let mediaExtensions: Set<String> = ["mp4", "mov", "m4v"]
+
+        var sharedByName: [String: [URL]] = [:]
+        if let enumerator = fileManager.enumerator(
+            at: sharedLibrary,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsHiddenFiles]
+        ) {
+            while let url = enumerator.nextObject() as? URL {
+                guard (try? url.resourceValues(forKeys: [.isRegularFileKey]))?.isRegularFile == true,
+                      mediaExtensions.contains(url.pathExtension.lowercased()) else { continue }
+                sharedByName[url.lastPathComponent, default: []].append(url)
+            }
+        }
+
+        let enumerator = fileManager.enumerator(
+            at: legacyRoot,
+            includingPropertiesForKeys: [.isRegularFileKey, .fileSizeKey],
+            options: [.skipsHiddenFiles]
+        )
+        while let source = enumerator?.nextObject() as? URL {
+            let values = try source.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
+            guard values.isRegularFile == true,
+                  mediaExtensions.contains(source.pathExtension.lowercased()) else { continue }
+
+            // Same name + size first (cheap), hash only to confirm.
+            let alreadyShared = try (sharedByName[source.lastPathComponent] ?? []).contains { candidate in
+                let size = try candidate.resourceValues(forKeys: [.fileSizeKey]).fileSize
+                guard size == values.fileSize else { return false }
+                return try sha256(candidate) == sha256(source)
+            }
+            guard !alreadyShared else { continue }
+            try copyMediaFile(source, to: rescueDestination)
+        }
+
+        try fileManager.removeItem(at: legacyRoot)
+    }
+
     static func migrateLibraryMedia(from roots: [URL], to destination: URL) throws {
         for root in roots {
             try copyMedia(
@@ -133,33 +252,39 @@ public enum PaperwallStorageMigrator {
             let values = try source.resourceValues(forKeys: [.isRegularFileKey])
             guard values.isRegularFile == true,
                   allowedExtensions.contains(source.pathExtension.lowercased()) else { continue }
+            try copyMediaFile(source, to: destinationDirectory)
+        }
+    }
 
-            var destination = destinationDirectory.appendingPathComponent(source.lastPathComponent)
-            if fileManager.fileExists(atPath: destination.path) {
-                if try sha256(source) == sha256(destination) { continue }
-                let digest = try sha256(source).map { String(format: "%02x", $0) }.joined()
-                destination = destinationDirectory
-                    .appendingPathComponent(
-                        "\(source.deletingPathExtension().lastPathComponent)-\(digest.prefix(12))"
-                    )
-                    .appendingPathExtension(source.pathExtension)
-                if fileManager.fileExists(atPath: destination.path),
-                   try sha256(source) == sha256(destination) { continue }
-            }
+    private static func copyMediaFile(_ source: URL, to destinationDirectory: URL) throws {
+        let fileManager = FileManager.default
+        try fileManager.createDirectory(at: destinationDirectory, withIntermediateDirectories: true)
 
-            let stage = destinationDirectory
-                .appendingPathComponent(".migration-\(UUID().uuidString)")
+        var destination = destinationDirectory.appendingPathComponent(source.lastPathComponent)
+        if fileManager.fileExists(atPath: destination.path) {
+            if try sha256(source) == sha256(destination) { return }
+            let digest = try sha256(source).map { String(format: "%02x", $0) }.joined()
+            destination = destinationDirectory
+                .appendingPathComponent(
+                    "\(source.deletingPathExtension().lastPathComponent)-\(digest.prefix(12))"
+                )
                 .appendingPathExtension(source.pathExtension)
-            do {
-                try fileManager.copyItem(at: source, to: stage)
-                guard try sha256(source) == sha256(stage) else {
-                    throw AssetLibraryError.hashMismatch
-                }
-                try fileManager.moveItem(at: stage, to: destination)
-            } catch {
-                try? fileManager.removeItem(at: stage)
-                throw error
+            if fileManager.fileExists(atPath: destination.path),
+               try sha256(source) == sha256(destination) { return }
+        }
+
+        let stage = destinationDirectory
+            .appendingPathComponent(".migration-\(UUID().uuidString)")
+            .appendingPathExtension(source.pathExtension)
+        do {
+            try fileManager.copyItem(at: source, to: stage)
+            guard try sha256(source) == sha256(stage) else {
+                throw AssetLibraryError.hashMismatch
             }
+            try fileManager.moveItem(at: stage, to: destination)
+        } catch {
+            try? fileManager.removeItem(at: stage)
+            throw error
         }
     }
 

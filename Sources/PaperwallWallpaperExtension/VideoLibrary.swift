@@ -231,6 +231,11 @@ final class VideoLibrary: Sendable {
             extensionLog("[VideoLibrary] Refusing to remove unsafe id: \(id)")
             return
         }
+        if let entry = entry(for: id) {
+            try? FileManager.default.removeItem(
+                at: videoURL(for: entry).appendingPathExtension("frame.jpg")
+            )
+        }
         try? FileManager.default.removeItem(at: dir)
         lock.withLock { entries in
             entries.removeAll { $0.id == id }

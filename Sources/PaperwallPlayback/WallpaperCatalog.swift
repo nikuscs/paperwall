@@ -106,7 +106,7 @@ public actor WallpaperCatalog {
     public func refresh() async throws -> [WallpaperMetadata] {
         try await PaperwallStorageMigrator.migrateLegacySharedAssetsIfNeeded()
         try openDatabaseIfNeeded()
-        let mediaURLs = discoverMedia()
+        let mediaURLs = discoverMedia(in: PaperwallConfiguration.sharedDataDirectory)
         var records: [WallpaperMetadata] = []
         records.reserveCapacity(mediaURLs.count)
         for mediaURL in mediaURLs {
@@ -170,8 +170,25 @@ public actor WallpaperCatalog {
         return metadata
     }
 
-    private func discoverMedia() -> [URL] {
-        let root = PaperwallConfiguration.sharedDataDirectory
+    public func remove(mediaURL: URL) throws {
+        let relativePath = try relativePath(for: mediaURL)
+        if fileManager.fileExists(atPath: mediaURL.path) {
+            try fileManager.removeItem(at: mediaURL)
+        }
+        for sidecar in [
+            FirstFrameExporter.frameURL(for: mediaURL),
+            sidecarURL(for: mediaURL),
+        ] where fileManager.fileExists(atPath: sidecar.path) {
+            try fileManager.removeItem(at: sidecar)
+        }
+        try openDatabaseIfNeeded()
+        let statement = try prepare("DELETE FROM wallpapers WHERE relative_path = ?;")
+        defer { sqlite3_finalize(statement) }
+        bind(relativePath, to: 1, in: statement)
+        guard sqlite3_step(statement) == SQLITE_DONE else { throw databaseError() }
+    }
+
+    func discoverMedia(in root: URL) -> [URL] {
         let allowed = Set(["mp4", "mov", "m4v", "png", "jpg", "jpeg", "webp", "heic"])
         let enumerator = fileManager.enumerator(
             at: root,
@@ -181,6 +198,7 @@ public actor WallpaperCatalog {
         var urls: [URL] = []
         while let url = enumerator?.nextObject() as? URL {
             guard allowed.contains(url.pathExtension.lowercased()),
+                  !url.lastPathComponent.lowercased().hasSuffix(".frame.jpg"),
                   (try? url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true else {
                 continue
             }

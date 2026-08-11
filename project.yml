@@ -122,6 +122,7 @@ targets:
       - Sources/PaperwallPlayback/AssetLibrary.swift
       - Sources/PaperwallPlayback/LaunchAtLoginManager.swift
       - Sources/PaperwallPlayback/StaticWallpaperManager.swift
+      - Sources/PaperwallPlayback/FirstFrameExporter.swift
       - Sources/PaperwallPlayback/PaperwallService.swift
       - Sources/PaperwallPlayback/GenerationModels.swift
       - Sources/PaperwallPlayback/ReplicateClient.swift
