@@ -1,13 +1,13 @@
 version: 2
 updates:
   - package-ecosystem: github-actions
+    open-pull-requests-limit: 0
     directory: /
     schedule:
       interval: weekly
       day: monday
       time: "08:30"
       timezone: Europe/Lisbon
-    open-pull-requests-limit: 3
     groups:
       github-actions-minor-patch:
         patterns:
